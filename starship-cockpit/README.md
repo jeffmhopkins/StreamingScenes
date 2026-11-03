@@ -189,8 +189,14 @@ How the JStream version differs from the Chromium demo:
   `Outside` in `ship.js` applies, and the flash and hyperspace frames then match the demo.
 - **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
   run on real time. At real speed `build_cockpit.py` uses item transitions instead.
-- **No jolt when taking fire,** and **no audio**: the record output carries the daemon's
-  silent mix.
+- **The monitors and holograms sway and jolt through MCP.** In the demo they sit inside
+  the swaying page. Here they are native items, so `drive.py` computes the same sway and
+  the taking-fire knock as `ship.js` and `rec.js`, and sends each frame's placement with
+  `item.set_geometry` ([#1058](https://github.com/jeffmhopkins/JStream/issues/1058) would
+  make that native).
+- **The glass cracks are clipped to the window.** `hit.html` masks its cracked canopy with
+  `m-window.png` under the same sway, so the cracks never cross the frame.
+- **No audio**: the record output carries the daemon's silent mix.
 - **Pages load over http from a hostname.** On Linux, a browser source refuses a local
   `http://127.0.0.1` URL ([#1069](https://github.com/jeffmhopkins/JStream/issues/1069)), and from `file` the pages can't read their own images.
 
