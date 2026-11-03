@@ -20,8 +20,11 @@ a laser flash, the orange of an explosion.
 
 [`media/cockpit-demo.mp4`](media/cockpit-demo.mp4) runs through every effect in under a
 minute. It was rendered in Chromium, from these same pages stacked as the JStream scene
-stacks them and switched on the hotkey timeline. JStream draws browser sources only on
-Windows, so the scene hasn't been seen inside JStream yet.
+stacks them and switched on the hotkey timeline.
+
+[`media/cockpit-jstream.mp4`](media/cockpit-jstream.mp4) is the same timeline running in
+JStream itself on Linux, recorded with JStream's own `record` output. See
+[In JStream](#in-jstream) for how it was built and how it differs.
 
 The camera monitors show stills from Jeff's January stream. The hologram caller is a still
 from his May stream, and the Bitwig hologram is a crop of the January stream's Bitwig
@@ -97,7 +100,8 @@ the cockpit; everything else draws over it.
 | 11 | Transmission | `transmission.html` | yes | |
 | 12 | Bitwig frame | `bitwig.html` | yes | |
 
-The pages read their images from beside them, so load them with `file`, not `html`. The
+The pages read their images from beside them with `getImageData`, so serve `pages/` over
+http and load them with `url`; from `file` their canvases are tainted. The
 art is in `pages/`:
 
 - `cockpit.png`, Jeff's green-screen cockpit plate with the green keyed out;
@@ -135,6 +139,61 @@ location is easier than one hotkey per variant.
   - The `cam*.png`, `caller_holo.png` and `daw_holo.png` stand-ins sit beside it.
   - To record, serve `pages/` with `python3 -m http.server 8767`, then run
     `node tools/rec.js` from `pages/`. It writes frames to `f/`.
+
+## In JStream
+
+`jstream/` builds the scene in a running JStream daemon over MCP and plays the timeline:
+
+- `build_cockpit.py` creates the sources, groups, filters and the 11 keyframe variants
+  that `tools/rec.js` steps through, plus an `hq` encoder profile (VBR 20 Mbps).
+- `drive.py` switches variants on the timeline, as the hotkeys would, sets the key label,
+  and records to an mp4.
+- `mcp.py` is the small MCP client they share. `collection-state.json` is a `state.get`
+  export of the built collection.
+- `slowserve.py` serves `pages/` with an optional slowed clock (below).
+
+Run the daemon, serve `pages/` with `python3 slowserve.py <pages>` on port 8767 under a
+hostname (the scripts use `cockpit.test`, mapped to 127.0.0.1 in `/etc/hosts`), and run
+`build_cockpit.py`, then `drive.py`. `JS_TOKEN` names the daemon's token file.
+
+![Arriving at the Kestrel Nebula, composited by JStream](media/jstream-nebula.jpg)
+
+The reflections are fully native, as the notes above suggest:
+
+- **Console:** for each of the ledge, the sills and the seat bolsters, a group holds the
+  outside as a `scene` source, flipped with `flip_v` and squashed so its mirror line lands
+  on the surface's top edge. It has a `blur` on the item, and an `image_mask` with that
+  surface's mask on the group's source. It's placed with an `additive` blend.
+- **Edge:** the outside again, unflipped, more blurred, masked with `m-edge`, additive.
+- **Glass:** the monitors, holograms and overlays mirrored about the window's lower edge,
+  masked with `m-glass`, additive at 8%.
+
+How the JStream version differs from the Chromium demo:
+
+- **It was captured in slow motion.** The test machine had no GPU, so JStream composited
+  on the lavapipe software rasterizer, at about 0.4 frames a second with every blur and
+  mask on. So `slowserve.py` slows the pages' clock 110 times (`Date.now`,
+  `performance.now` and the animation-frame time), `drive.py` stretches the timeline to
+  match, and the recording was retimed to 30 fps with
+  `ffmpeg -vf "setpts=(PTS-STARTPTS)/110,fps=30"`. Every frame is a real JStream composite;
+  on a machine with a GPU the scene runs at real speed with `SLOW` unset.
+- **The masks don't sway.** In the demo `refl.js` moves each gloss mask with the cockpit's
+  sway. A native `image_mask` is fixed, so the reflections slide a few pixels against the
+  surfaces they sit on.
+- **The reflections are a little weaker.** `refl.js` adds some of them more than once (a
+  gain up to 3.2); an additive item tops out at full opacity.
+- **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
+  run on real time. At real speed `build_cockpit.py` uses item transitions instead.
+- **No jolt when taking fire,** and **no audio**: the record output carries the daemon's
+  silent mix.
+- **Pages load over http from a hostname.** On Linux, a browser source refuses a local
+  `http://127.0.0.1` URL ([#1069](https://github.com/jeffmhopkins/JStream/issues/1069)), and from `file` the pages can't read their own images.
+
+The gaps it found are JStream issues [#1069](https://github.com/jeffmhopkins/JStream/issues/1069) to
+[#1073](https://github.com/jeffmhopkins/JStream/issues/1073): local URLs refused on Linux, software
+compositing too slow for nested scenes with blur and masks, hidden browser sources that
+keep painting, a recording path that can't be changed or overwrite a file, and no hint to
+install a Vulkan driver when there's no adapter.
 
 ## What this scene taught us about JStream
 
