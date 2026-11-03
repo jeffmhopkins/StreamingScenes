@@ -13,6 +13,9 @@ for(const h of HITS){h.s=[];for(let i=0;i<h.n;i++){const a=-Math.PI*(.05+.9*hr()
 const CR={x:1225,y:255},cracks=[];
 for(let i=0;i<13;i++){let a=i/13*Math.PI*2+hr()*.3,px=0,py=0;const pts=[[0,0]];const L=60+hr()*230;for(let s=0;s<L;s+=8+hr()*14){a+=(hr()-.5)*.35;px+=Math.cos(a)*12;py+=Math.sin(a)*12;pts.push([px,py])}cracks.push(pts)}
 const rings=[];for(let r of [26,55,95]){let a0=hr()*6;for(let k=0;k<5;k++){const a=a0+k*1.25,b=a+.5+hr()*.5;rings.push([r+hr()*8,a,b])}}
+const CC=document.createElement('canvas');CC.width=W;CC.height=H;let WIN=null;
+loadImg('m-window.png').then(i=>{const c=document.createElement('canvas');c.width=W;c.height=H;const m=c.getContext('2d');m.drawImage(i,0,0,W,H);
+ const d=m.getImageData(0,0,W,H);for(let p=0;p<d.data.length;p+=4){d.data[p+3]=d.data[p];d.data[p]=d.data[p+1]=d.data[p+2]=255}m.putImageData(d,0,0);WIN=c});
 function frame(t){
  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);applySway(x,NOW());
  // light from the explosions outside, washing in through the canopy
@@ -36,13 +39,16 @@ function frame(t){
    x.fillStyle=`rgba(0,0,0,${.5*k*r2()})`;x.fillRect(sx,sy,sw,sh);
    for(let i=0;i<10;i++){const y=sy+r2()*sh,hh=1+r2()*10;x.fillStyle=`rgba(255,255,255,${.35*k*r2()})`;x.fillRect(sx,y,sw,hh)}
    const ty=sy+((t*.6)%sh);x.fillStyle=`rgba(255,255,255,${.12*k})`;x.fillRect(sx,ty,sw,16);x.restore()}}
- // the cracked canopy
- if(t>40){const g=Math.min(1,(t-40)/160);x.save();x.translate(CR.x,CR.y);
-  const fr=x.createRadialGradient(0,0,0,0,0,30);fr.addColorStop(0,'rgba(230,240,255,.55)');fr.addColorStop(1,'rgba(230,240,255,0)');x.fillStyle=fr;x.beginPath();x.arc(0,0,30,0,7);x.fill();
-  for(const [lw,col] of [[2.2,'rgba(0,0,0,.35)'],[1,'rgba(225,238,255,.55)']]){x.lineWidth=lw;x.strokeStyle=col;
-   for(const pts of cracks){const n=Math.max(2,Math.floor(pts.length*g));x.beginPath();x.moveTo(0,0);for(let i=1;i<n;i++)x.lineTo(pts[i][0],pts[i][1]);x.stroke()}
-   if(g>=1)for(const [r,a,b] of rings){x.beginPath();x.arc(0,0,r,a,b);x.stroke()}}
-  x.restore()}
+ // the cracked canopy, drawn apart and clipped to the windows, so the frame and pillars
+ // around them stay whole
+ if(t>40&&WIN){const g=Math.min(1,(t-40)/160),c=CC.getContext('2d');c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';c.clearRect(0,0,W,H);
+  c.save();applySway(c,NOW());c.translate(CR.x,CR.y);
+  const fr=c.createRadialGradient(0,0,0,0,0,30);fr.addColorStop(0,'rgba(230,240,255,.55)');fr.addColorStop(1,'rgba(230,240,255,0)');c.fillStyle=fr;c.beginPath();c.arc(0,0,30,0,7);c.fill();
+  for(const [lw,col] of [[2.2,'rgba(0,0,0,.35)'],[1,'rgba(225,238,255,.55)']]){c.lineWidth=lw;c.strokeStyle=col;
+   for(const pts of cracks){const n=Math.max(2,Math.floor(pts.length*g));c.beginPath();c.moveTo(0,0);for(let i=1;i<n;i++)c.lineTo(pts[i][0],pts[i][1]);c.stroke()}
+   if(g>=1)for(const [r,a,b] of rings){c.beginPath();c.arc(0,0,r,a,b);c.stroke()}}
+  c.restore();c.globalCompositeOperation='destination-in';c.save();applySway(c,NOW());c.drawImage(WIN,0,0);c.restore();
+  x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-over';x.drawImage(CC,0,0);x.restore()}
  // sparks and arcing from the consoles
  x.globalCompositeOperation='lighter';x.lineCap='round';
  for(const h of HITS){const d0=t-h.t-40;if(d0<0)continue;

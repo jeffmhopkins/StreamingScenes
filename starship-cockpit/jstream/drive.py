@@ -5,12 +5,84 @@ fades and the key label are stepped from here. With SLOW=F the pages' clock runs
 slower (slowserve.py) and every time here is stretched by F, so a machine that composites
 under real time still records every moment; the recording is then retimed by 1/F.
 """
-import os, sys, time, json
+import math, os, sys, time, json
 from mcp import *
 
 F = float(os.environ.get("SLOW", "1"))
 END = float(os.environ.get("END", "55500"))
 OUT = os.path.abspath(os.environ.get("OUT", "cockpit-slow.mp4"))
+
+# The pages' clock: the wall clock, or with SLOW=F the slowed one slowserve.py gives
+# them, EPOCH (ms) being the moment it started from.
+EPOCH = float(os.environ.get("EPOCH", "0"))
+
+
+def page_now():
+    ms = time.time() * 1000
+    return (EPOCH + (ms - EPOCH) / F if F != 1 else ms) / 1000
+
+
+# ---- the cockpit's motion, as pages/ship.js and tools/rec.js have it ----
+BEAT = 60 / 118
+
+
+def _hash(n):
+    n = math.sin(n * 127.1 + 311.7) * 43758.5453
+    return n - math.floor(n)
+
+
+def _vnoise(t):
+    i = math.floor(t)
+    f = t - i
+    u = f * f * (3 - 2 * f)
+    return (_hash(i) * (1 - u) + _hash(i + 1) * u) * 2 - 1
+
+
+def _kick(s):
+    b = s / BEAT
+    bar = math.floor(math.floor(b) / 4)
+    return 0 if bar % 16 >= 12 else math.exp(-(b % 1) * 8)
+
+
+def sway(s):
+    """The plate's sway at page time s: pixels and radians about the canvas centre."""
+    return (2.6 * math.sin(s * 2 * math.pi / 7.3) + 1.4 * _vnoise(s * .6) + .5 * _vnoise(s * 2.1 + 4),
+            2.0 * math.sin(s * 2 * math.pi / 5.9 + .7) + 1.1 * _vnoise(s * .5 + 9)
+            + .4 * _vnoise(s * 2.3 + 3) + .7 * _kick(s),
+            .0018 * math.sin(s * 2 * math.pi / 11.3) + .0008 * _vnoise(s * .4 + 5))
+
+
+def jolt(t):
+    """The knock of a hit (F4) or the weapons' blast (F8 + 3.3 s) at scene time t, in ms."""
+    kv = 0
+    for j in (17000 + 3300, 25000):
+        u = (t - j) / 700
+        if 0 <= u < 2:
+            kv += math.exp(-4 * u) * math.sin(3 * math.pi * u)
+    return kv
+
+
+# Everything attached to the cockpit takes the knock. The plate and the pages that draw on
+# it sway themselves; the monitors and holograms are placed, so they take the sway here too.
+KNOCK = ["mons", "cockpit_plate", "outside", "refl_ledge", "refl_sill", "refl_seat",
+         "refl_edge", "refl_glass", "holo", "fx"]
+SWAYED = {"mons", "holo"}
+
+
+def placements(t, s):
+    """Each cockpit item's geometry: full frame, swayed if it's placed on the plate, then
+    knocked about the canvas centre as tools/rec.js knocks #knock."""
+    kv = jolt(t)
+    tx, ty, k = -12 * kv, 8 * kv, 1 + .02 * abs(kv)
+    vx, vy, r = sway(s)
+    out = []
+    for item in KNOCK:
+        dx, dy, rot = (vx, vy, r) if item in SWAYED else (0, 0, 0)
+        out.append({"type": "item.set_geometry", "item_id": item, "geometry": {
+            "center": {"x": W / 2 + tx + k * dx, "y": H / 2 + ty + k * dy},
+            "size": {"width": W * k, "height": H * k}, "rotation_deg": math.degrees(rot)}})
+    return out
+
 
 EV = [
     (0, "F1", "Cruise: deep space", "cruise_deep"),
@@ -93,6 +165,7 @@ while True:
         d = s - switched["bitwig_planet"]
         opacity("bitwig_planet", "caller", 0.75 * cl(1 - d / 250))
         opacity("bitwig_planet", "daw", 0.85 * cl((d - 1100) / 500))
+    batch(placements(s, page_now()), "motion")
     time.sleep(min(0.5, max(0.02, F * 0.01)))
 op({"type": "output.stop", "output_id": "rec"})
 json.dump({"F": F, "events": log, "real_s": time.time() - t0}, open(OUT + ".json", "w"))
