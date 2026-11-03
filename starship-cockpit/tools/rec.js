@@ -46,6 +46,7 @@ for(let i=0,t=0;t<=END;i++,t=i*1000/FPS){
     for(const [id,v] of Object.entries(fv))document.getElementById(id).style.opacity=v;const e=document.getElementById('key'),a=+(e.dataset.at||-1e9),d=t-a;
     e.style.opacity=d<0?0:d<150?d/150:d<1800?1:Math.max(0,1-(d-1800)/300)},[kv,fv,t]);
   for(const f of p.frames()) await f.evaluate(t=>window.__step&&__step(t),t).catch(()=>{});
+  await p.evaluate(()=>window.__refl&&__refl());
   if(t>=START&&i%(+process.env.EVERY||1)==0)await p.screenshot({path:`${OUT}/${String(i).padStart(4,"0")}.jpg`,type:"jpeg",quality:92});
   if(i%150==0)console.log('frame',i);
 }

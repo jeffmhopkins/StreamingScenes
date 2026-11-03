@@ -1,7 +1,7 @@
 // Weapons: an asteroid closes in, the canopy HUD locks on, twin lasers fire four volleys,
 // and it blows apart: a flash, a fireball that cools to smoke, a shockwave, burning
 // debris and sparks. Plays from the start each time it's shown, then clears.
-const O=new Outside(document.getElementById('c'),{reflect:1.6,reflectSky:true});
+const O=new Outside(document.getElementById('c'),{reflect:0});
 const T={x:1150,y:265};       // where the target ends up, on the canopy
 const GUNS=[[260,600],[1660,600]];
 const VOLLEYS=[1500,1950,2400,2850],BOLT=230,BOOM=3300;

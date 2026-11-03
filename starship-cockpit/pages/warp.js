@@ -3,7 +3,7 @@
 // streak is long, the sky stretches with one continuous zoom blur (no repeating
 // tiles), and the hyperspace tunnel turns slowly. Ends identical to the sky page, so
 // the switch underneath is invisible.
-const O=new Outside(document.getElementById('c'),{reflect:1.1,reflectSky:true});
+const O=new Outside(document.getElementById('c'),{reflect:0});
 const N=1100,ST=[];for(let i=0;i<N;i++)ST.push({x:(rnd()-.5)*7,y:(rnd()-.5)*4.4,z:.03+rnd(),w:Math.pow(rnd(),2),c:rnd()});
 const F=380;
 // speed in depth per second, and the shape of the effect over time t (ms)

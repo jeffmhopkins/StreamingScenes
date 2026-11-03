@@ -44,10 +44,30 @@ each other. That clock drives:
 - the simulated music;
 - `Outside`, the compositor every outside layer draws through.
 
-`Outside` masks a layer to the windows, which move with the sway. It mirrors a blurred
-copy of the layer into the cockpit's glossy surfaces as a reflection (`m-gloss.png`), then
-draws the light the layer throws into the cockpit. So any layer that shows something
-outside, from the sky to an explosion, is reflected and lights the cockpit.
+`Outside` masks a layer to the windows, which move with the sway, then draws the light
+the layer throws into the cockpit.
+
+**Reflections** are one layer, not each page's own (`pages/refl.js`, masks from
+`tools/masks2.py`). Round 3 had every outside page reflect itself. So while a warp-out
+still covered the window, the destination sky under it was already reflecting its stars
+on the dash. Now one layer mirrors the composite that actually shows through the glass,
+whatever is stacked there, onto three specific masks. In the still below, a warp-out still covers
+the window, and the dash reflects only the warp:
+
+![Mid warp-out: the dash reflects the warp, not the sky behind it](media/warp-out-reflection.jpg)
+
+
+- `m-console.png`: the ledge under the monitors, the side sills and the seat bolsters.
+  The outside is mirrored and squashed about the dash line, with a fresnel ramp.
+- `m-edge.png`: the window frame bevels. The outside is blurred so it bleeds onto them as
+  rim light, which is what flashes, lasers and explosions catch.
+- `m-glass.png`: the glass itself. It faintly ghosts the lit interior, meaning the
+  monitors and the holograms, mirrored about the window's lower edge.
+
+In the demo, `demo.html` reads the shown pages' canvases to build it. In JStream it maps
+to native parts: a `scene` source of the outside layers placed with `flip_v` and a
+squashed scale, with `blur` and `image_mask` on the source's chain (drawn since #1036),
+and an `additive` blend. A second one does the same for the monitors and holograms.
 
 **Music.** It's simulated for now: 118 BPM, with a kick, snare, hats, bass and pad, and a
 4-bar breakdown every 16 bars. When JStream can give a page audio levels, `audio(s)` in
@@ -122,9 +142,10 @@ These notes feed the review of what should be native and what should stay in HTM
 - **Nothing moves continuously.** The sway, the drift and the pulsing lights had to be
   HTML. A native noise or wiggle on an item's transform, and looping keyframe tracks, would
   cover them.
-- **A page can't see other sources.** So each layer draws its own reflection and its own
-  mask. A source-as-texture input, or a mirrored, blurred and masked copy of a source,
-  would do it natively. The `image_mask` and `scene_mask` filters already exist.
+- **A page can't see other sources.** So per-page reflections went wrong whenever layers
+  stacked (round 3's warp-out bug). Reflections belong native: a `scene` source of what
+  they mirror, with `flip_v`, `blur`, `image_mask` and an `additive` blend, all of which
+  exist now.
 - **Shaders:**
   - The warp, the tunnel, the zoom blur and the fireball belong in a native shader source,
     with multipass, feedback, textures and audio.
