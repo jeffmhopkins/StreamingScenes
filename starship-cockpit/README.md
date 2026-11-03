@@ -183,6 +183,10 @@ How the JStream version differs from the Chromium demo:
   surfaces they sit on.
 - **The reflections are a little weaker.** `refl.js` adds some of them more than once (a
   gain up to 3.2); an additive item tops out at full opacity.
+- **The light spill is a third as strong.** JStream blends pages in linear light, so a
+  page's translucent spill lifts the dark cockpit far more than Chromium's sRGB blend does
+  (sRGB 30 to about 79, against 48). The warp and weapons pages take `?spill=0.33`, which
+  `Outside` in `ship.js` applies, and the flash and hyperspace frames then match the demo.
 - **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
   run on real time. At real speed `build_cockpit.py` uses item transitions instead.
 - **No jolt when taking fire,** and **no audio**: the record output carries the daemon's

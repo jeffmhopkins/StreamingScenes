@@ -14,12 +14,15 @@ PAGES_URL = os.environ.get("PAGES_URL", "http://cockpit.test:8767")
 PAGES_DIR = os.path.abspath(os.environ.get(
     "PAGES_DIR", os.path.join(os.path.dirname(__file__), "..", "pages")))
 FPS = int(os.environ.get("PAGE_FPS", "30"))
+# JStream blends pages in linear light, so a page's translucent light spill lifts the dark
+# cockpit far more than in a browser. The outside pages draw theirs at this strength.
+SPILL = os.environ.get("SPILL", "0.33")
 
 
-def page(sid, name, w=1920, h=1080, restart=False, fps=None):
+def page(sid, name, w=1920, h=1080, restart=False, fps=None, query=""):
     return {"type": "source.create", "source_id": sid, "name": name,
             "kind": {"type": "builtin", "kind": "browser"},
-            "settings": {"url": f"{PAGES_URL}/{name}.html", "width": w, "height": h,
+            "settings": {"url": f"{PAGES_URL}/{name}.html{query}", "width": w, "height": h,
                          "fps": fps or FPS, "restart_on_show": restart}}
 
 
@@ -74,11 +77,12 @@ for sid, (name, _) in SCREENS.items():
 e.append(page("cockpit", "cockpit"))
 for loc in ["deep", "nebula", "planet"]:
     e.append(page(f"sky_{loc}", f"sky-{loc}"))
-e += [page("win_deep", "warp-in-deep", restart=True),
-      page("wout_nebula", "warp-out-nebula", restart=True),
-      page("win_nebula", "warp-in-nebula", restart=True),
-      page("wout_planet", "warp-out-planet", restart=True),
-      page("attack", "attack", restart=True),
+sp = f"?spill={SPILL}"
+e += [page("win_deep", "warp-in-deep", restart=True, query=sp),
+      page("wout_nebula", "warp-out-nebula", restart=True, query=sp),
+      page("win_nebula", "warp-in-nebula", restart=True, query=sp),
+      page("wout_planet", "warp-out-planet", restart=True, query=sp),
+      page("attack", "attack", restart=True, query=sp),
       page("hit", "hit", restart=True),
       page("tx", "transmission", restart=True),
       page("bitwig", "bitwig", restart=True),

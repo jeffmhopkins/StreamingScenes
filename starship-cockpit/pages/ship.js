@@ -3,6 +3,10 @@
 // and the music-driven lights all agree without talking to each other.
 const W=1920,H=1080,CX=960,CY=300,SKY_SCALE=.56;
 const NOW=()=>Date.now()/1000;
+// `?spill=k` scales the light a page throws into the cockpit (default 1). A host that
+// blends pages in linear light, as JStream does, lifts the dark cockpit far more with the
+// same translucent light than a browser blending in sRGB, so it passes about a third.
+const SPILL=(()=>{try{const v=parseFloat(new URLSearchParams(location.search).get('spill'));return isFinite(v)?Math.max(0,v):1}catch(e){return 1}})();
 const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const ss=(a,b,t)=>{t=cl((t-a)/(b-a));return t*t*(3-2*t)};
 function hash(n){n=Math.sin(n*127.1+311.7)*43758.5453;return n-Math.floor(n)}
@@ -81,7 +85,13 @@ class Outside{
    rx.save();rx.scale(.5,.5);rx.filter='blur(5px)';rx.translate(0,1210);rx.scale(1,-1);rx.drawImage(this.reflectSky?this.out:this.lt,0,0);rx.restore();rx.filter='none';
    rx.globalCompositeOperation='destination-in';rx.save();rx.scale(.5,.5);applySway(rx,s);rx.drawImage(this.gloss,0,0);rx.restore();
    x.globalCompositeOperation='lighter';let r=this.reflect*alpha;while(r>0){x.globalAlpha=Math.min(1,r);x.drawImage(this.ref,0,0,W,H);r-=1}x.globalAlpha=1}
-  x.globalCompositeOperation='source-over';if(spill)spill(x)}}
+  x.globalCompositeOperation='source-over';if(!spill||SPILL<=0)return;
+  if(SPILL===1){spill(x);return}
+  // drawn apart, then added at SPILL strength: the spill draws with 'lighter', so this
+  // scales its light without changing how it lands
+  const [sc,sx]=this.sp||(this.sp=(()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return [c,c.getContext('2d')]})());
+  sx.setTransform(1,0,0,1,0,0);sx.globalAlpha=1;sx.globalCompositeOperation='source-over';sx.clearRect(0,0,W,H);spill(sx);
+  x.globalCompositeOperation='lighter';x.globalAlpha=SPILL;x.drawImage(sc,0,0);x.globalAlpha=1;x.globalCompositeOperation='source-over'}}
 // Runs `frame(s, t)` every animation frame: s is the shared clock in seconds, t is ms
 // since this page loaded (for effects that play from the start when shown).
 function run(frame){let t0=null;function f(){const n=performance.now();if(t0===null)t0=n;frame(NOW(),n-t0);requestAnimationFrame(f)}requestAnimationFrame(f)}
