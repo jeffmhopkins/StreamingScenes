@@ -1,0 +1,3052 @@
+{
+ "buses": [
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "muted": false,
+   "name": "Master"
+  }
+ ],
+ "canvas": {
+  "height": 1080,
+  "width": 1920
+ },
+ "encoders": [
+  {
+   "name": "Recording, high quality",
+   "profile": {
+    "audio": {
+     "codec": "aac",
+     "kbps": 128
+    },
+    "video": {
+     "codec": "h264",
+     "hardware": "avoid",
+     "keyframe_interval_s": 10,
+     "rate_control": {
+      "kbps": 20000,
+      "max_kbps": 40000,
+      "type": "vbr"
+     }
+    }
+   },
+   "profile_id": "hq"
+  }
+ ],
+ "hotkeys": [],
+ "outputs": [
+  {
+   "encoder_profile": "hq",
+   "kind": {
+    "container": "mp4",
+    "path": "/home/jsuser/rec/cockpit-slow5.mp4",
+    "type": "record"
+   },
+   "output_id": "rec"
+  }
+ ],
+ "rev": 53,
+ "scenes": [
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "sky_deep",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "sky_deep",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "sky_nebula",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "sky_nebula",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "sky_planet",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "sky_planet",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "win_deep",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "win_deep",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "wout_nebula",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "wout_nebula",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "win_nebula",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "win_nebula",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "wout_planet",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "wout_planet",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "attack",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "attack",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    }
+   ],
+   "name": "Outside",
+   "role": "group",
+   "scene_id": "g_outside"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 654.5,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 345.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "cam1",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "cam1",
+     "transform": {
+      "position": {
+       "x": 482.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 654.5,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 345.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "hud1",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "hud1",
+     "transform": {
+      "position": {
+       "x": 482.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1001.5,
+       "y": 614.5
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 183.0,
+       "width": 333.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "cam2",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "cam2",
+     "transform": {
+      "position": {
+       "x": 835.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1001.5,
+       "y": 614.5
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 183.0,
+       "width": 333.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "hud2",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "hud2",
+     "transform": {
+      "position": {
+       "x": 835.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1345.0,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 342.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "cam3",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "cam3",
+     "transform": {
+      "position": {
+       "x": 1174.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1345.0,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 342.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "hud3",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "hud3",
+     "transform": {
+      "position": {
+       "x": 1174.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 654.5,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 345.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "m1radar",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "m1radar",
+     "transform": {
+      "position": {
+       "x": 482.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 654.5,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 345.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "m1nav",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "m1nav",
+     "transform": {
+      "position": {
+       "x": 482.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1345.0,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 342.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "m3spec",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "m3spec",
+     "transform": {
+      "position": {
+       "x": 1174.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 1345.0,
+       "y": 615.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 184.0,
+       "width": 342.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "m3shield",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "m3shield",
+     "transform": {
+      "position": {
+       "x": 1174.0,
+       "y": 523.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    }
+   ],
+   "name": "Monitors",
+   "role": "group",
+   "scene_id": "g_mons"
+  },
+  {
+   "items": [
+    {
+     "blend": "screen",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 276.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 292.0,
+       "width": 520.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "caller",
+     "opacity": 0.75,
+     "placement": "geometry",
+     "source_id": "caller",
+     "transform": {
+      "position": {
+       "x": 700.0,
+       "y": 130.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "screen",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 286.5
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fill",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 405.0,
+       "width": 720.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "daw",
+     "opacity": 0.8500000238418579,
+     "placement": "geometry",
+     "source_id": "daw",
+     "transform": {
+      "position": {
+       "x": 600.0,
+       "y": 84.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    }
+   ],
+   "name": "Holograms",
+   "role": "group",
+   "scene_id": "g_holo"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "hit",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "hit",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "tx",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "tx",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "bitwig",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "bitwig",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": false
+    }
+   ],
+   "name": "Overlays",
+   "role": "group",
+   "scene_id": "g_fx"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "effects": [
+      {
+       "enabled": true,
+       "filter_id": "blur",
+       "kind": "blur",
+       "settings": {
+        "area": "whole",
+        "area_height": 0.5,
+        "area_width": 0.5,
+        "area_x": 0.25,
+        "area_y": 0.25,
+        "radius": 2
+       }
+      }
+     ],
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 676.4000244140625
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 486.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rledge_outside",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_outside",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 433.4000244140625
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    }
+   ],
+   "name": "Reflection: ledge",
+   "role": "group",
+   "scene_id": "g_refl_ledge"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "effects": [
+      {
+       "enabled": true,
+       "filter_id": "blur",
+       "kind": "blur",
+       "settings": {
+        "area": "whole",
+        "area_height": 0.5,
+        "area_width": 0.5,
+        "area_x": 0.25,
+        "area_y": 0.25,
+        "radius": 3
+       }
+      }
+     ],
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 670.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 540.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rsill_outside",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_outside",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 400.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    }
+   ],
+   "name": "Reflection: sill",
+   "role": "group",
+   "scene_id": "g_refl_sill"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "effects": [
+      {
+       "enabled": true,
+       "filter_id": "blur",
+       "kind": "blur",
+       "settings": {
+        "area": "whole",
+        "area_height": 0.5,
+        "area_width": 0.5,
+        "area_x": 0.25,
+        "area_y": 0.25,
+        "radius": 2
+       }
+      }
+     ],
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 938.7999877929688
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 432.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rseat_outside",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_outside",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 722.7999877929688
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    }
+   ],
+   "name": "Reflection: seat",
+   "role": "group",
+   "scene_id": "g_refl_seat"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "effects": [
+      {
+       "enabled": true,
+       "filter_id": "blur",
+       "kind": "blur",
+       "settings": {
+        "area": "whole",
+        "area_height": 0.5,
+        "area_width": 0.5,
+        "area_x": 0.25,
+        "area_y": 0.25,
+        "radius": 3
+       }
+      }
+     ],
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 453.6000061035156
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 864.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rg_mons",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_mons",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 21.600006103515625
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 453.6000061035156
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 864.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rg_holo",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_holo",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 21.600006103515625
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 453.6000061035156
+      },
+      "depth_px": 0.0,
+      "fit_mode": "stretch",
+      "flip_v": true,
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 864.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "rg_fx",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_fx",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 21.600006103515625
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    }
+   ],
+   "name": "Reflection: glass",
+   "role": "group",
+   "scene_id": "g_refl_glass"
+  },
+  {
+   "items": [
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "black",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "black",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "mons",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_mons",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "cockpit_plate",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "cockpit",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "outside",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_outside",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "additive",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "refl_ledge",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_refl_ledge",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "additive",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "refl_sill",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_refl_sill",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "additive",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "refl_seat",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_refl_seat",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "additive",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "effects": [
+      {
+       "enabled": true,
+       "filter_id": "blur",
+       "kind": "blur",
+       "settings": {
+        "area": "whole",
+        "area_height": 0.5,
+        "area_width": 0.5,
+        "area_x": 0.25,
+        "area_y": 0.25,
+        "radius": 10
+       }
+      },
+      {
+       "enabled": true,
+       "filter_id": "mask",
+       "kind": "image_mask",
+       "settings": {
+        "image": {
+         "path": "/opt/js/pages/m-edge.png",
+         "root": "absolute",
+         "type": "asset"
+        },
+        "invert": false,
+        "mode": "luma"
+       }
+      }
+     ],
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "refl_edge",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_outside",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "additive",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "refl_glass",
+     "opacity": 0.07999999821186066,
+     "placement": "geometry",
+     "source_id": "s_refl_glass",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "holo",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_holo",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 540.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 1080.0,
+       "width": 1920.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "fx",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "s_fx",
+     "transform": {
+      "position": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    },
+    {
+     "blend": "normal",
+     "crop": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+     },
+     "geometry": {
+      "center": {
+       "x": 960.0,
+       "y": 1019.0
+      },
+      "depth_px": 0.0,
+      "fit_mode": "fit",
+      "rotation_deg": 0.0,
+      "size": {
+       "height": 50.0,
+       "width": 900.0
+      },
+      "tilt_deg": 0.0,
+      "turn_deg": 0.0
+     },
+     "item_id": "key",
+     "opacity": 1.0,
+     "placement": "geometry",
+     "source_id": "key",
+     "transform": {
+      "position": {
+       "x": 510.0,
+       "y": 994.0
+      },
+      "rotation_deg": 0.0,
+      "scale": {
+       "x": 1.0,
+       "y": 1.0
+      }
+     },
+     "visible": true
+    }
+   ],
+   "name": "Cockpit",
+   "scene_id": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Cruise: deep space",
+   "overrides": [
+    {
+     "item_id": "sky_deep",
+     "visible": true
+    }
+   ],
+   "scene_id": "cruise_deep",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Monitors: radar and audio",
+   "overrides": [
+    {
+     "item_id": "m1radar",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_deep",
+     "visible": true
+    }
+   ],
+   "scene_id": "scan_deep",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Warp to the Kestrel Nebula",
+   "overrides": [
+    {
+     "item_id": "m1radar",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_deep",
+     "visible": true
+    },
+    {
+     "item_id": "win_deep",
+     "visible": true
+    }
+   ],
+   "scene_id": "warp_deep",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Arrive: Kestrel Nebula",
+   "overrides": [
+    {
+     "item_id": "m1radar",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "wout_nebula",
+     "visible": true
+    }
+   ],
+   "scene_id": "arrive_nebula",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Monitors: navigation",
+   "overrides": [
+    {
+     "item_id": "m1nav",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "wout_nebula",
+     "visible": true
+    }
+   ],
+   "scene_id": "nav_nebula",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Weapons: destroy target",
+   "overrides": [
+    {
+     "item_id": "attack",
+     "visible": true
+    },
+    {
+     "item_id": "m1radar",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "wout_nebula",
+     "visible": true
+    }
+   ],
+   "scene_id": "weapons_nebula",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Taking fire",
+   "overrides": [
+    {
+     "item_id": "hit",
+     "visible": true
+    },
+    {
+     "item_id": "m1radar",
+     "visible": true
+    },
+    {
+     "item_id": "m3shield",
+     "visible": true
+    },
+    {
+     "item_id": "sky_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "wout_nebula",
+     "visible": true
+    }
+   ],
+   "scene_id": "hit_nebula",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Warp to Tyr VII",
+   "overrides": [
+    {
+     "item_id": "m1nav",
+     "visible": true
+    },
+    {
+     "item_id": "m3shield",
+     "visible": true
+    },
+    {
+     "item_id": "sky_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "win_nebula",
+     "visible": true
+    },
+    {
+     "item_id": "wout_nebula",
+     "visible": true
+    }
+   ],
+   "scene_id": "warp_nebula",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Arrive: Tyr VII",
+   "overrides": [
+    {
+     "item_id": "m1nav",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_planet",
+     "visible": true
+    },
+    {
+     "item_id": "wout_planet",
+     "visible": true
+    }
+   ],
+   "scene_id": "arrive_planet",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Incoming transmission",
+   "overrides": [
+    {
+     "item_id": "caller",
+     "opacity": 0.0,
+     "visible": true
+    },
+    {
+     "item_id": "m1nav",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_planet",
+     "visible": true
+    },
+    {
+     "item_id": "tx",
+     "visible": true
+    },
+    {
+     "item_id": "wout_planet",
+     "visible": true
+    }
+   ],
+   "scene_id": "tx_planet",
+   "variant_of": "cockpit"
+  },
+  {
+   "items": [],
+   "name": "Bitwig hologram",
+   "overrides": [
+    {
+     "item_id": "bitwig",
+     "visible": true
+    },
+    {
+     "item_id": "caller",
+     "visible": true
+    },
+    {
+     "item_id": "daw",
+     "opacity": 0.0,
+     "visible": true
+    },
+    {
+     "item_id": "m1nav",
+     "visible": true
+    },
+    {
+     "item_id": "m3spec",
+     "visible": true
+    },
+    {
+     "item_id": "sky_planet",
+     "visible": true
+    },
+    {
+     "item_id": "wout_planet",
+     "visible": true
+    }
+   ],
+   "scene_id": "bitwig_planet",
+   "variant_of": "cockpit"
+  }
+ ],
+ "sends": [
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "attack"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "bitwig"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "cockpit"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "hit"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "hud1"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "hud2"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "hud3"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "m1nav"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "m1radar"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "m3shield"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "m3spec"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "sky_deep"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "sky_nebula"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "sky_planet"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "tx"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "win_deep"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "win_nebula"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "wout_nebula"
+  },
+  {
+   "bus_id": "master",
+   "gain_db": 0.0,
+   "source_id": "wout_planet"
+  }
+ ],
+ "sources": [
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "attack",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/attack.html",
+    "width": 1920
+   },
+   "source_id": "attack"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "bitwig",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/bitwig.html",
+    "width": 1920
+   },
+   "source_id": "bitwig"
+  },
+  {
+   "kind": {
+    "kind": "color",
+    "type": "builtin"
+   },
+   "name": "Black",
+   "settings": {
+    "color": "#000000ff",
+    "height": 1080,
+    "width": 1920
+   },
+   "source_id": "black"
+  },
+  {
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "holo",
+      "kind": "color_correction",
+      "settings": {
+       "brightness": 0.0,
+       "contrast": 0.0,
+       "gamma": 0.0,
+       "hue_shift": 0.0,
+       "multiply": "#78dcff",
+       "opacity": 100.0,
+       "saturation": -1
+      }
+     }
+    ]
+   },
+   "kind": {
+    "kind": "image",
+    "type": "builtin"
+   },
+   "name": "caller",
+   "settings": {
+    "file": {
+     "path": "/opt/js/pages/caller.png",
+     "root": "absolute",
+     "type": "asset"
+    }
+   },
+   "source_id": "caller"
+  },
+  {
+   "kind": {
+    "kind": "image",
+    "type": "builtin"
+   },
+   "name": "cam1",
+   "settings": {
+    "file": {
+     "path": "/opt/js/pages/cam1.png",
+     "root": "absolute",
+     "type": "asset"
+    }
+   },
+   "source_id": "cam1"
+  },
+  {
+   "kind": {
+    "kind": "image",
+    "type": "builtin"
+   },
+   "name": "cam2",
+   "settings": {
+    "file": {
+     "path": "/opt/js/pages/cam2.png",
+     "root": "absolute",
+     "type": "asset"
+    }
+   },
+   "source_id": "cam2"
+  },
+  {
+   "kind": {
+    "kind": "image",
+    "type": "builtin"
+   },
+   "name": "cam3",
+   "settings": {
+    "file": {
+     "path": "/opt/js/pages/cam3.png",
+     "root": "absolute",
+     "type": "asset"
+    }
+   },
+   "source_id": "cam3"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "cockpit",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": false,
+    "url": "http://cockpit.test:8767/cockpit.html",
+    "width": 1920
+   },
+   "source_id": "cockpit"
+  },
+  {
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "holo",
+      "kind": "color_correction",
+      "settings": {
+       "brightness": 0.0,
+       "contrast": 0.0,
+       "gamma": 0.0,
+       "hue_shift": 0.0,
+       "multiply": "#78dcff",
+       "opacity": 100.0,
+       "saturation": -1
+      }
+     }
+    ]
+   },
+   "kind": {
+    "kind": "image",
+    "type": "builtin"
+   },
+   "name": "daw",
+   "settings": {
+    "file": {
+     "path": "/opt/js/pages/daw_holo.png",
+     "root": "absolute",
+     "type": "asset"
+    }
+   },
+   "source_id": "daw"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "hit",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/hit.html",
+    "width": 1920
+   },
+   "source_id": "hit"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-camhud-1",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-camhud-1.html",
+    "width": 690
+   },
+   "source_id": "hud1"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-camhud-2",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-camhud-2.html",
+    "width": 690
+   },
+   "source_id": "hud2"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-camhud-3",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-camhud-3.html",
+    "width": 690
+   },
+   "source_id": "hud3"
+  },
+  {
+   "kind": {
+    "kind": "text",
+    "type": "builtin"
+   },
+   "name": "Key label",
+   "settings": {
+    "align": "left",
+    "background": "#000000c0",
+    "color": "#ffffffff",
+    "face": "bold",
+    "font": null,
+    "letter_spacing": 0.0,
+    "outline_color": "#000000ff",
+    "outline_width": 0,
+    "padding": 12,
+    "shadow_blur": 0.0,
+    "shadow_color": "#00000000",
+    "shadow_x": 0.0,
+    "shadow_y": 0.0,
+    "size": 24,
+    "text": "F1  Cruise: deep space",
+    "wrap_width": 0
+   },
+   "source_id": "key"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-nav",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-nav.html",
+    "width": 690
+   },
+   "source_id": "m1nav"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-radar",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-radar.html",
+    "width": 690
+   },
+   "source_id": "m1radar"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-shields",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-shields.html",
+    "width": 690
+   },
+   "source_id": "m3shield"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "screen-spectrum",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 368,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/screen-spectrum.html",
+    "width": 690
+   },
+   "source_id": "m3spec"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "scene_id": "g_fx",
+    "type": "scene"
+   },
+   "name": "s_fx",
+   "source_id": "s_fx"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "scene_id": "g_holo",
+    "type": "scene"
+   },
+   "name": "s_holo",
+   "source_id": "s_holo"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "scene_id": "g_mons",
+    "type": "scene"
+   },
+   "name": "s_mons",
+   "source_id": "s_mons"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "scene_id": "g_outside",
+    "type": "scene"
+   },
+   "name": "s_outside",
+   "source_id": "s_outside"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "mask",
+      "kind": "image_mask",
+      "settings": {
+       "image": {
+        "path": "/opt/js/pages/m-glass.png",
+        "root": "absolute",
+        "type": "asset"
+       },
+       "invert": false,
+       "mode": "luma"
+      }
+     }
+    ]
+   },
+   "kind": {
+    "scene_id": "g_refl_glass",
+    "type": "scene"
+   },
+   "name": "s_refl_glass",
+   "source_id": "s_refl_glass"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "mask",
+      "kind": "image_mask",
+      "settings": {
+       "image": {
+        "path": "/opt/js/pages/m-ledge.png",
+        "root": "absolute",
+        "type": "asset"
+       },
+       "invert": false,
+       "mode": "luma"
+      }
+     }
+    ]
+   },
+   "kind": {
+    "scene_id": "g_refl_ledge",
+    "type": "scene"
+   },
+   "name": "s_refl_ledge",
+   "source_id": "s_refl_ledge"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "mask",
+      "kind": "image_mask",
+      "settings": {
+       "image": {
+        "path": "/opt/js/pages/m-seat.png",
+        "root": "absolute",
+        "type": "asset"
+       },
+       "invert": false,
+       "mode": "luma"
+      }
+     }
+    ]
+   },
+   "kind": {
+    "scene_id": "g_refl_seat",
+    "type": "scene"
+   },
+   "name": "s_refl_seat",
+   "source_id": "s_refl_seat"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "filters": {
+    "video": [
+     {
+      "enabled": true,
+      "filter_id": "mask",
+      "kind": "image_mask",
+      "settings": {
+       "image": {
+        "path": "/opt/js/pages/m-sill.png",
+        "root": "absolute",
+        "type": "asset"
+       },
+       "invert": false,
+       "mode": "luma"
+      }
+     }
+    ]
+   },
+   "kind": {
+    "scene_id": "g_refl_sill",
+    "type": "scene"
+   },
+   "name": "s_refl_sill",
+   "source_id": "s_refl_sill"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "sky-deep",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": false,
+    "url": "http://cockpit.test:8767/sky-deep.html",
+    "width": 1920
+   },
+   "source_id": "sky_deep"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "sky-nebula",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": false,
+    "url": "http://cockpit.test:8767/sky-nebula.html",
+    "width": 1920
+   },
+   "source_id": "sky_nebula"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "sky-planet",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": false,
+    "url": "http://cockpit.test:8767/sky-planet.html",
+    "width": 1920
+   },
+   "source_id": "sky_planet"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "transmission",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/transmission.html",
+    "width": 1920
+   },
+   "source_id": "tx"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "warp-in-deep",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/warp-in-deep.html",
+    "width": 1920
+   },
+   "source_id": "win_deep"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "warp-in-nebula",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/warp-in-nebula.html",
+    "width": 1920
+   },
+   "source_id": "win_nebula"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "warp-out-nebula",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/warp-out-nebula.html",
+    "width": 1920
+   },
+   "source_id": "wout_nebula"
+  },
+  {
+   "audio": {
+    "enabled": true,
+    "follow": "when_shown",
+    "gain_db": 0.0,
+    "muted": false
+   },
+   "kind": {
+    "kind": "browser",
+    "type": "builtin"
+   },
+   "name": "warp-out-planet",
+   "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "file": null,
+    "fps": 2,
+    "height": 1080,
+    "html": "",
+    "local_network": false,
+    "restart_on_show": true,
+    "url": "http://cockpit.test:8767/warp-out-planet.html",
+    "width": 1920
+   },
+   "source_id": "wout_planet"
+  }
+ ],
+ "transitions": {
+  "default": "cut",
+  "presets": [
+   {
+    "duration_ms": 300,
+    "easing": "ease_in_out",
+    "kind": "cut",
+    "name": "Cut",
+    "preset_id": "cut"
+   }
+  ]
+ },
+ "type": "state.get",
+ "video_mixes": []
+}
