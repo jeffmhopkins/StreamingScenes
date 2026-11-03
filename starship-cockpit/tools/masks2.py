@@ -1,5 +1,5 @@
 # Specific reflection masks (round 4), from the keyed cockpit:
-#  m-console: the few smooth surfaces that face the windows and mirror them (the ledge
+#  m-ledge, m-sill, m-seat: the few smooth surfaces that face the windows and mirror them (the ledge
 #             under the monitors, the side sills, the seat bolsters), with a fresnel ramp
 #  m-edge:    the bevels of the window frames, which catch light bleeding from the glass
 #  m-glass:   the glass itself, which faintly mirrors the lit interior (monitors, holograms)
@@ -16,18 +16,17 @@ smooth=np.clip(1-v/.06,0,1)
 sat=rgb.max(-1)-rgb.min(-1);light=np.clip((lum-.28)/.25,0,1)*np.clip((sat-.15)/.2,0,1)
 def poly(pts,k,blur=6):
   c=Image.new('L',(W,H),0);ImageDraw.Draw(c).polygon(pts,fill=255);return nd.gaussian_filter(np.asarray(c,np.float32)/255,blur)*k
-reg=np.maximum.reduce([
-  poly([(480,698),(1530,698),(1530,722),(480,722)],1.0,3),          # ledge under the monitors
-  poly([(0,700),(470,628),(600,690),(600,720),(0,820)],.45),          # left sill
-  poly([(1920,700),(1450,628),(1320,690),(1320,720),(1920,820)],.45), # right sill
-  poly([(400,990),(600,960),(600,1080),(380,1080)],.7),             # left seat bolster
-  poly([(1320,960),(1520,990),(1540,1080),(1320,1080)],.7),         # right seat bolster
-  poly([(560,722),(1360,722),(1360,800),(560,800)],.35),             # upper console face
-])
-fres=np.clip(1-(yy-690)/420,.35,1)   # grazing surfaces near the glass mirror most
-con=reg*fres*a*(1-light)*(.35+.65*smooth)*np.clip(1.2-lum*2.5,0,1)
-con=nd.gaussian_filter(con,1)
-Image.fromarray((np.clip(con,0,1)*255).astype(np.uint8),'L').save(f'{D}/m-console.png')
+base=a*(1-light)*(.35+.65*smooth)*np.clip(1.2-lum*2.5,0,1)
+def surf(name,parts,top):
+  reg=np.maximum.reduce(parts)
+  fres=np.clip(1-(yy-top)/260,.4,1)  # strongest at the surface's far edge, nearest the glass
+  c=nd.gaussian_filter(reg*fres*base,1)
+  c=np.clip(c/max(np.percentile(c[c>.02],90),1e-3),0,1)   # full strength on the surface itself
+  Image.fromarray((c*255).astype(np.uint8),'L').save(f'{D}/m-{name}.png');return c
+surf('ledge',[poly([(480,698),(1530,698),(1530,722),(480,722)],1.0,3),poly([(560,722),(1360,722),(1360,800),(560,800)],.22)],698)
+surf('sill',[poly([(0,700),(470,628),(600,690),(600,720),(0,820)],.7),poly([(1920,700),(1450,628),(1320,690),(1320,720),(1920,820)],.7)],640)
+con=surf('seat',[poly([(400,990),(600,960),(600,1080),(380,1080)],.8),poly([(1320,960),(1520,990),(1540,1080),(1320,1080)],.8)],960)
+
 # frame bevels: opaque pixels 2-16 px from the glass, brightest right at the edge
 dist=nd.distance_transform_edt(win<.5)
 edge=np.clip(1-(dist-2)/14,0,1)*(dist>1)*a*(1-light)

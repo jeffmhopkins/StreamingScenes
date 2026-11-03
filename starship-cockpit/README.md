@@ -57,8 +57,11 @@ the window, and the dash reflects only the warp:
 ![Mid warp-out: the dash reflects the warp, not the sky behind it](media/warp-out-reflection.jpg)
 
 
-- `m-console.png`: the ledge under the monitors, the side sills and the seat bolsters.
-  The outside is mirrored and squashed about the dash line, with a fresnel ramp.
+- `m-ledge.png`, `m-sill.png` and `m-seat.png`: the ledge under the monitors, the side
+  sills and the seat bolsters. Each mirrors the glass from its own top edge, so the
+  window's lower band lands on the ledge and the side windows on the sills. Each is
+  squashed, with a fresnel ramp. Mirroring everything about one dash line put the
+  monitors, not the glass, onto those surfaces, which left them nearly blank.
 - `m-edge.png`: the window frame bevels. The outside is blurred so it bleeds onto them as
   rim light, which is what flashes, lasers and explosions catch.
 - `m-glass.png`: the glass itself. It faintly ghosts the lit interior, meaning the
