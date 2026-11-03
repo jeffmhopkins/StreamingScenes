@@ -156,6 +156,8 @@ Run the daemon, serve `pages/` with `python3 slowserve.py <pages>` on port 8767 
 hostname (the scripts use `cockpit.test`, mapped to 127.0.0.1 in `/etc/hosts`), and run
 `build_cockpit.py`, then `drive.py`. `JS_TOKEN` names the daemon's token file.
 
+![Arriving at the Kestrel Nebula, composited by JStream](media/jstream-nebula.jpg)
+
 The reflections are fully native, as the notes above suggest:
 
 - **Console:** for each of the ledge, the sills and the seat bolsters, a group holds the
