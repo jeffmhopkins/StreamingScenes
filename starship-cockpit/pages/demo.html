@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000}
+iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;background:transparent}
+.mon{position:absolute;overflow:hidden}
+.mon img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mon iframe{width:690px;height:368px;transform:scale(.5);transform-origin:0 0}
+.hide{visibility:hidden}
+.holo{position:absolute;mix-blend-mode:screen;opacity:0;object-fit:cover}
+#key{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;font:700 22px/1 Inter,sans-serif;color:#fff;
+ background:#000c;border:1px solid #ffffff40;border-radius:10px;padding:10px 18px;opacity:0;z-index:9;white-space:nowrap}
+#key b{font:800 18px/1 'JetBrains Mono',monospace;background:#fff;color:#000;border-radius:5px;padding:6px 9px}
+</style></head><body>
+<div id="knock" style="position:absolute;inset:0;transform-origin:960px 540px">
+ <div class="mon" style="left:482px;top:523px;width:345px;height:184px"><img src="cam1.png"><iframe id="hud1" src="screen-camhud-1.html"></iframe><iframe id="m1radar" class="hide"></iframe><iframe id="m1nav" class="hide"></iframe></div>
+ <div class="mon" style="left:835px;top:523px;width:333px;height:183px"><img src="cam2.png"><iframe id="hud2" src="screen-camhud-2.html"></iframe></div>
+ <div class="mon" style="left:1174px;top:523px;width:342px;height:184px"><img src="cam3.png"><iframe id="hud3" src="screen-camhud-3.html"></iframe><iframe id="m3spec" class="hide"></iframe><iframe id="m3shield" class="hide"></iframe></div>
+ <iframe id="cockpit" src="cockpit.html"></iframe>
+ <iframe id="sky_deep" src="sky-deep.html"></iframe>
+ <iframe id="sky_nebula" class="hide" src="sky-nebula.html"></iframe>
+ <iframe id="sky_planet" class="hide" src="sky-planet.html"></iframe>
+ <iframe id="win_deep" class="hide"></iframe><iframe id="wout_nebula" class="hide"></iframe>
+ <iframe id="win_nebula" class="hide"></iframe><iframe id="wout_planet" class="hide"></iframe>
+ <iframe id="attack" class="hide"></iframe>
+ <img id="caller" class="holo" src="caller_holo.png" style="left:700px;top:130px;width:520px;height:292px;object-position:50% 30%">
+ <img id="daw" class="holo" src="daw_holo.png" style="left:600px;top:84px;width:720px;height:405px">
+ <iframe id="hit" class="hide"></iframe>
+ <iframe id="tx" class="hide"></iframe>
+ <iframe id="bitwig" class="hide"></iframe>
+</div>
+<div id="key"><b>F1</b><span>Cruise</span></div>
+</body></html>

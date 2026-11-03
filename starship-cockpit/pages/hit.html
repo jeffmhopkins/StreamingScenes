@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Taking fire</title>
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas><script src="ship.js"></script><script>
+// Taking fire (moves with the cockpit sway), for the green-screen cockpit: two hits outside, light spilling in, a power
+// dip, sparks and arcing from the consoles, a cracked window, interference on the camera
+// screens, then red emergency lights and smoke until the layer is hidden. Transparent.
+const x=document.getElementById('c').getContext('2d');
+let hs=5;const hr=()=>(hs=(hs*16807)%2147483647)/2147483647;
+const SCREENS=[[490,531,329,168],[843,531,317,167],[1182,531,326,168]];
+const HITS=[{t:0,lx:1480,ly:220,sx:1420,sy:600,n:220,p:1},{t:1050,lx:380,ly:260,sx:470,sy:640,n:150,p:.7}];
+for(const h of HITS){h.s=[];for(let i=0;i<h.n;i++){const a=-Math.PI*(.05+.9*hr()),v=.25+hr()*1.1;h.s.push({vx:Math.cos(a)*v*(hr()<.5?-1:1),vy:Math.sin(a)*v,l:350+hr()*1100,w:hr(),d:hr()*120})}}
+// the crack: jagged radial lines and broken rings around an impact point on the canopy
+const CR={x:1225,y:255},cracks=[];
+for(let i=0;i<13;i++){let a=i/13*Math.PI*2+hr()*.3,px=0,py=0;const pts=[[0,0]];const L=60+hr()*230;for(let s=0;s<L;s+=8+hr()*14){a+=(hr()-.5)*.35;px+=Math.cos(a)*12;py+=Math.sin(a)*12;pts.push([px,py])}cracks.push(pts)}
+const rings=[];for(let r of [26,55,95]){let a0=hr()*6;for(let k=0;k<5;k++){const a=a0+k*1.25,b=a+.5+hr()*.5;rings.push([r+hr()*8,a,b])}}
+function frame(t){
+ x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);applySway(x,NOW());
+ // light from the explosions outside, washing in through the canopy
+ for(const h of HITS){const d=t-h.t;if(d<0||d>900)continue;const k=Math.exp(-d/180)*h.p;
+  let g=x.createRadialGradient(h.lx,h.ly,0,h.lx,h.ly,1300);g.addColorStop(0,`rgba(255,240,210,${.95*k})`);g.addColorStop(.18,`rgba(255,170,80,${.6*k})`);g.addColorStop(.6,`rgba(255,90,30,${.18*k})`);g.addColorStop(1,'rgba(0,0,0,0)');
+  x.globalCompositeOperation='lighter';x.fillStyle=g;x.fillRect(-20,-20,W+40,H+40);x.globalCompositeOperation='source-over'}
+ // power dips
+ let dip=0;for(const [a,b,v] of [[170,300,.55],[340,390,.35],[450,490,.5],[1220,1330,.4],[1380,1420,.3]])if(t>=a&&t<b)dip=Math.max(dip,v);
+ if(dip){x.fillStyle=`rgba(0,0,0,${dip})`;x.fillRect(-20,-20,W+40,H+40)}
+ // emergency lighting after the first hit: a red wash and a sweeping beacon
+ const em=Math.min(1,Math.max(0,(t-500)/400));
+ if(em>0){const pulse=.5+.5*Math.sin((t-500)/1400*Math.PI*2);
+  x.fillStyle=`rgba(150,0,8,${em*(.10+.12*pulse)})`;x.fillRect(-20,-20,W+40,H+40);
+  x.save();x.filter='blur(28px)';x.globalCompositeOperation='lighter';x.translate(960,-40);x.rotate(Math.sin(t/900)*1.1);
+  const bg=x.createLinearGradient(0,0,0,1300);bg.addColorStop(0,`rgba(255,40,40,${.2*em})`);bg.addColorStop(1,'rgba(255,0,0,0)');
+  x.fillStyle=bg;x.beginPath();x.moveTo(0,0);x.lineTo(-380,1300);x.lineTo(380,1300);x.closePath();x.fill();x.restore();
+  const v=x.createRadialGradient(960,540,500,960,540,1150);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,`rgba(60,0,0,${.45*em})`);x.fillStyle=v;x.fillRect(-20,-20,W+40,H+40)}
+ // interference on the camera screens
+ for(const [a,b] of [[0,700],[1050,1400]])if(t>=a&&t<b){const k=1-(t-a)/(b-a);let s2=Math.floor(t/33)*7919+1;const r2=()=>(s2=(s2*16807)%2147483647)/2147483647;
+  for(const [sx,sy,sw,sh] of SCREENS){x.save();x.beginPath();x.rect(sx,sy,sw,sh);x.clip();
+   x.fillStyle=`rgba(0,0,0,${.5*k*r2()})`;x.fillRect(sx,sy,sw,sh);
+   for(let i=0;i<10;i++){const y=sy+r2()*sh,hh=1+r2()*10;x.fillStyle=`rgba(255,255,255,${.35*k*r2()})`;x.fillRect(sx,y,sw,hh)}
+   const ty=sy+((t*.6)%sh);x.fillStyle=`rgba(255,255,255,${.12*k})`;x.fillRect(sx,ty,sw,16);x.restore()}}
+ // the cracked canopy
+ if(t>40){const g=Math.min(1,(t-40)/160);x.save();x.translate(CR.x,CR.y);
+  const fr=x.createRadialGradient(0,0,0,0,0,30);fr.addColorStop(0,'rgba(230,240,255,.55)');fr.addColorStop(1,'rgba(230,240,255,0)');x.fillStyle=fr;x.beginPath();x.arc(0,0,30,0,7);x.fill();
+  for(const [lw,col] of [[2.2,'rgba(0,0,0,.35)'],[1,'rgba(225,238,255,.55)']]){x.lineWidth=lw;x.strokeStyle=col;
+   for(const pts of cracks){const n=Math.max(2,Math.floor(pts.length*g));x.beginPath();x.moveTo(0,0);for(let i=1;i<n;i++)x.lineTo(pts[i][0],pts[i][1]);x.stroke()}
+   if(g>=1)for(const [r,a,b] of rings){x.beginPath();x.arc(0,0,r,a,b);x.stroke()}}
+  x.restore()}
+ // sparks and arcing from the consoles
+ x.globalCompositeOperation='lighter';x.lineCap='round';
+ for(const h of HITS){const d0=t-h.t-40;if(d0<0)continue;
+  if(d0<450&&Math.floor(t/50)%2==0){let s3=Math.floor(t/50)*31+7;const r3=()=>(s3=(s3*16807)%2147483647)/2147483647;
+   x.strokeStyle='rgba(190,215,255,.9)';x.lineWidth=1.6;for(let b=0;b<3;b++){x.beginPath();let px=h.sx,py=h.sy;x.moveTo(px,py);for(let i=0;i<7;i++){px+=(r3()-.5)*50;py+=(r3()-.3)*-26;x.lineTo(px,py)}x.stroke()}
+   const fl=x.createRadialGradient(h.sx,h.sy,0,h.sx,h.sy,140);fl.addColorStop(0,'rgba(200,220,255,.5)');fl.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=fl;x.fillRect(h.sx-140,h.sy-140,280,280)}
+  for(const s of h.s){const d=d0-s.d;if(d<0||d>s.l)continue;const a=1-d/s.l;
+   const px=h.sx+s.vx*d,py=Math.min(1075,h.sy+s.vy*d+.0011*d*d);const vx=s.vx,vy=s.vy+.0022*d;
+   const temp=a; x.strokeStyle=`rgba(255,${Math.floor(140+115*temp)},${Math.floor(60+190*temp*temp)},${a})`;
+   x.lineWidth=.8+1.6*s.w*a;x.beginPath();x.moveTo(px,py);x.lineTo(px-vx*22,py-vy*22);x.stroke()}}
+ x.globalCompositeOperation='source-over';
+ // smoke from the right console after the first hit
+ for(let i=0;i<22;i++){const st=300+i*130,d=t-st;if(d<0)continue;const life=(d%3600)/3600,sx=1380+((i*37)%90)+life*60*Math.sin(i),sy=600-life*480,r=40+life*170;
+  const g=x.createRadialGradient(sx,sy,0,sx,sy,r);g.addColorStop(0,`rgba(40,38,40,${.32*(1-life)})`);g.addColorStop(1,'rgba(30,30,32,0)');x.fillStyle=g;x.beginPath();x.arc(sx,sy,r,0,7);x.fill()}
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script></body></html>

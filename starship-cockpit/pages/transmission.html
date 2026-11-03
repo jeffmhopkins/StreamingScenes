@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Incoming transmission</title>
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas><script src="ship.js"></script><script>
+// Incoming transmission, for the green-screen cockpit. The centre screen shows the call
+// coming in, then a hologram rises from the projector on the dash. The caller's camera
+// goes under this layer at x 700, y 130, 520 x 292, blended "screen", fading in after
+// 1700 ms. Transparent.
+const x=document.getElementById('c').getContext('2d');
+const P={x:700,y:130,w:520,h:292},SRC={x:960,y:470},SCR=[843,531,317,167];
+const AMB='255,176,64',HC='120,220,255';
+function frame(t){
+ x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);applySway(x,NOW());
+ // 1. the call on the centre screen
+ const sa=t<150?t/150:t<1700?1:Math.max(0,1-(t-1700)/250);
+ if(sa>0){const [sx,sy,sw,sh]=SCR;x.save();x.globalAlpha=sa;x.fillStyle='#0b0703';x.fillRect(sx,sy,sw,sh);
+  let s=Math.floor(t/40)*13+3;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<500;i++){x.fillStyle=`rgba(${AMB},${.08*r()})`;x.fillRect(sx+r()*sw,sy+r()*sh,2,2)}
+  x.fillStyle=`rgba(${AMB},${Math.floor(t/380)%2?1:.35})`;x.font='700 22px "JetBrains Mono",Consolas,monospace';x.textAlign='center';
+  x.fillText('INCOMING TRANSMISSION',sx+sw/2,sy+62);x.font='500 14px "JetBrains Mono",Consolas,monospace';x.fillStyle=`rgba(${AMB},.8)`;
+  x.fillText('FLEET COMMAND  ·  CH 7  ·  ENCRYPTED',sx+sw/2,sy+92);
+  const k=cl((t-200)/1300);x.fillStyle=`rgba(${AMB},.25)`;x.fillRect(sx+60,sy+118,sw-120,6);x.fillStyle=`rgba(${AMB},.9)`;x.fillRect(sx+60,sy+118,(sw-120)*k,6);
+  for(let y=sy;y<sy+sh;y+=3){x.fillStyle='rgba(0,0,0,.18)';x.fillRect(sx,y,sw,1)}x.restore()}
+ // 2. the hologram: a projector glow, a beam, then the panel rising
+ const on=cl((t-1300)/300);
+ if(on>0){x.globalCompositeOperation='lighter';
+  const fl=.85+.15*Math.sin(t/37)*Math.sin(t/91);
+  const g=x.createRadialGradient(SRC.x,SRC.y,0,SRC.x,SRC.y,70);g.addColorStop(0,`rgba(${HC},${.8*on})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(SRC.x-70,SRC.y-70,140,140);
+  const rise=cl((t-1500)/400),top=P.y+P.h*(1-rise);
+  const b=x.createLinearGradient(0,SRC.y,0,top);b.addColorStop(0,`rgba(${HC},${.22*on*fl})`);b.addColorStop(1,`rgba(${HC},${.05*on*fl})`);
+  x.fillStyle=b;x.beginPath();x.moveTo(SRC.x-20,SRC.y);x.lineTo(P.x,P.y+P.h);x.lineTo(P.x+P.w,P.y+P.h);x.lineTo(SRC.x+20,SRC.y);x.closePath();x.fill();
+  if(rise>0){x.save();x.beginPath();x.rect(P.x,top,P.w,P.y+P.h-top);x.clip();
+   x.fillStyle=`rgba(${HC},${.05*fl})`;x.fillRect(P.x,P.y,P.w,P.h);
+   for(let y=P.y;y<P.y+P.h;y+=3){x.fillStyle=`rgba(${HC},.06)`;x.fillRect(P.x,y,P.w,1)}
+   const sy=P.y+((t*.25)%P.h);const sg=x.createLinearGradient(0,sy-30,0,sy+30);sg.addColorStop(0,`rgba(${HC},0)`);sg.addColorStop(.5,`rgba(${HC},.12)`);sg.addColorStop(1,`rgba(${HC},0)`);x.fillStyle=sg;x.fillRect(P.x,sy-30,P.w,60);
+   if(Math.floor(t/90)%17==0){x.fillStyle=`rgba(${HC},.25)`;x.fillRect(P.x,P.y+((t*7)%P.h),P.w,3)}
+   x.restore();
+   x.strokeStyle=`rgba(${HC},${.6*fl})`;x.lineWidth=1.5;x.strokeRect(P.x+.5,top+.5,P.w-1,P.y+P.h-top-1);
+   x.fillStyle=`rgba(255,255,255,${.7*Math.max(0,1-Math.abs(rise-.98)*4)})`;x.fillRect(P.x,top-1,P.w,3)}
+  x.globalCompositeOperation='source-over';
+  const ca=cl((t-2100)/400);if(ca>0){x.globalAlpha=ca;x.fillStyle=`rgba(${HC},.9)`;x.font='600 15px "JetBrains Mono",Consolas,monospace';x.textAlign='left';
+   x.fillText('ADM. R. VOSS  ·  FLEET COMMAND',P.x,P.y+P.h+26);x.textAlign='right';x.fillText((Math.floor(t/600)%2?'●':'○')+' LIVE',P.x+P.w,P.y+P.h+26);x.globalAlpha=1}}
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script></body></html>
