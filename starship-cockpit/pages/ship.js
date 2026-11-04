@@ -36,7 +36,9 @@ function audio(s){
 // ---- motion ----
 // The pilot's head in the cockpit: a slow float, a little noise, and the kick drum
 // felt through the hull. Pixels and radians, about the canvas centre.
-function sway(s){const a=audio(s);
+// ?sway=0 keeps a page still, for a host that moves the layers itself (the JStream build).
+const SWAY=(()=>{try{const v=parseFloat(new URLSearchParams(location.search).get('sway'));return isFinite(v)?v:1}catch(e){return 1}})();
+function sway(s){if(!SWAY)return {x:0,y:0,r:0};const a=audio(s);
  return {x:2.6*Math.sin(s*2*Math.PI/7.3)+1.4*vnoise(s*.6)+.5*vnoise(s*2.1+4),
          y:2.0*Math.sin(s*2*Math.PI/5.9+.7)+1.1*vnoise(s*.5+9)+.4*vnoise(s*2.3+3)+.7*a.kick,
          r:.0018*Math.sin(s*2*Math.PI/11.3)+.0008*vnoise(s*.4+5)}}

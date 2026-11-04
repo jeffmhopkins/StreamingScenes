@@ -59,7 +59,7 @@ const MODES={
   for(const [px,py,dx,dy] of [[IX,IY,1,1],[IX+IW,IY,-1,1],[IX,IY+IH,1,-1],[IX+IW,IY+IH,-1,-1]]){x.beginPath();x.moveTo(px+dx*L,py);x.lineTo(px,py);x.lineTo(px,py+dy*L);x.stroke()}
   txt(LABEL,IX+12,IY+28,17,A+'.95)');if(Math.floor(s*1.2)%2==0){x.fillStyle=R+'.95)';x.beginPath();x.arc(IX+IW-62,IY+22,6,0,7);x.fill()}txt('REC',IX+IW-12,IY+28,15,A+'.9)','right');
   const tc=new Date(s*1000);txt(tc.toISOString().substr(11,8),IX+IW-12,IY+IH-12,14,A+'.7)','right');
-  const sy=IY+((s*90)%IH);const g=x.createLinearGradient(0,sy-20,0,sy+20);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.05)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(P,sy-20,SW-2*P,40)}
+  const sy=IY+((s*90)%IH);const g=x.createLinearGradient(0,sy-20,0,sy+20);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,`rgba(255,255,255,${.05*Math.min(1,SPILL)})`);g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(P,sy-20,SW-2*P,40)}
 };
 let t0=null;
 run((s,t)=>{x.setTransform(1,0,0,1,0,0);
