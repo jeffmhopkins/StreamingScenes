@@ -178,15 +178,19 @@ How the JStream version differs from the Chromium demo:
   match, and the recording was retimed to 30 fps with
   `ffmpeg -vf "setpts=(PTS-STARTPTS)/110,fps=30"`. Every frame is a real JStream composite;
   on a machine with a GPU the scene runs at real speed with `SLOW` unset.
-- **The masks don't sway.** In the demo `refl.js` moves each gloss mask with the cockpit's
-  sway. A native `image_mask` is fixed, so the reflections slide a few pixels against the
-  surfaces they sit on.
-- **The reflections are a little weaker.** `refl.js` adds some of them more than once (a
-  gain up to 3.2); an additive item tops out at full opacity.
-- **The light spill is a third as strong.** JStream blends pages in linear light, so a
-  page's translucent spill lifts the dark cockpit far more than Chromium's sRGB blend does
-  (sRGB 30 to about 79, against 48). The warp and weapons pages take `?spill=0.33`, which
-  `Outside` in `ship.js` applies, and the flash and hyperspace frames then match the demo.
+- **One sway moves every layer.** The pages run with `?sway=0` (read by `ship.js`), and
+  `drive.py` moves the plate, the outside, the monitors, the holograms, the overlays and
+  the reflections together with the sway of `ship.js` and the knock of `rec.js`, so nothing
+  slips against its bezel. The gloss masks move with their reflections.
+- **Veils and reflections blend like a browser.** The pages with translucent light (the
+  outside with its spill, the overlays, the camera frames) use JStream's `normal_srgb`,
+  and the reflections `additive_srgb` at the gains of `refl.js` (ledge 1.8, sill 1.4, seat
+  1.7, edge 3.2, glass 0.2), with its blurs scaled to full size
+  ([#1109](https://github.com/jeffmhopkins/JStream/pull/1109),
+  [#1104](https://github.com/jeffmhopkins/JStream/pull/1104)). With plain `normal`, which
+  blends in linear light, set `SPILL=0.4` or the spill washes out the cockpit.
+- **Each arrival holds the warp-in under the warp-out** for 600 ms, since a page that is
+  shown reloads and is transparent until it paints.
 - **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
   run on real time. At real speed `build_cockpit.py` uses item transitions instead.
 - **The monitors and holograms sway and jolt through MCP.** In the demo they sit inside

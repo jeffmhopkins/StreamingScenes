@@ -66,14 +66,17 @@ def jolt(t):
 # it sway themselves; the monitors and holograms are placed, so they take the sway here too.
 KNOCK = ["mons", "cockpit_plate", "outside", "refl_ledge", "refl_sill", "refl_seat",
          "refl_edge", "refl_glass", "holo", "fx"]
-SWAYED = {"mons", "holo"}
+# The pages stay still (?sway=0), so every layer takes the same sway here. Scaled up a
+# little so the sway never shows the frame's edge.
+SWAYED = set(KNOCK)
+OVER = 1.006
 
 
 def placements(t, s):
     """Each cockpit item's geometry: full frame, swayed if it's placed on the plate, then
     knocked about the canvas centre as tools/rec.js knocks #knock."""
     kv = jolt(t)
-    tx, ty, k = -12 * kv, 8 * kv, 1 + .02 * abs(kv)
+    tx, ty, k = -12 * kv, 8 * kv, (1 + .02 * abs(kv)) * OVER
     vx, vy, r = sway(s)
     out = []
     for item in KNOCK:
@@ -88,12 +91,14 @@ EV = [
     (0, "F1", "Cruise: deep space", "cruise_deep"),
     (3000, "F6", "Monitors: radar and audio", "scan_deep"),
     (6500, "F2", "Warp to the Kestrel Nebula", "warp_deep"),
-    (11000, "F3", "Arrive: Kestrel Nebula", "arrive_nebula"),
+    (11000, "F3", "Arrive: Kestrel Nebula", "hold_nebula"),
+    (11600, None, None, "arrive_nebula"),
     (15000, "F7", "Monitors: navigation", "nav_nebula"),
     (17000, "F8", "Weapons: destroy target", "weapons_nebula"),
     (25000, "F4", "Taking fire", "hit_nebula"),
     (30500, "F2", "Warp to Tyr VII", "warp_nebula"),
-    (35000, "F3", "Arrive: Tyr VII", "arrive_planet"),
+    (35000, "F3", "Arrive: Tyr VII", "hold_planet"),
+    (35600, None, None, "arrive_planet"),
     (39000, "F5", "Incoming transmission", "tx_planet"),
     (47000, "F9", "Bitwig hologram", "bitwig_planet"),
 ]
@@ -145,16 +150,14 @@ while True:
         at, k, label, vid = EV[nxt]
         if vid == "bitwig_planet":
             opacity("bitwig_planet", "caller", sent.get(("tx_planet", "caller"), 0.75))
+        if k:
+            op({"type": "source.set_settings", "source_id": "key",
+                "patch": {"text": f"{k}  {label}"}})
+            key_at = at
         if at:
-            op({"type": "source.set_settings", "source_id": "key",
-                "patch": {"text": f"{k}  {label}"}})
             op({"type": "scene.switch", "scene_id": vid})
-        else:
-            op({"type": "source.set_settings", "source_id": "key",
-                "patch": {"text": f"{k}  {label}"}})
         log.append((round(time.time() - t0, 2), round(s), vid))
         print("event", log[-1], flush=True)
-        key_at = at
         cur = vid
         switched[vid] = at
         nxt += 1
