@@ -184,8 +184,8 @@ How the JStream version differs from the Chromium demo:
   slips against its bezel. The gloss masks move with their reflections.
 - **Veils and reflections blend like a browser.** The pages with translucent light (the
   outside with its spill, the overlays, the camera frames) use JStream's `normal_srgb`,
-  and the reflections `additive_srgb` at the gains of `refl.js` (ledge 1.8, sill 1.4, seat
-  1.7, edge 3.2, glass 0.2), with its blurs scaled to full size
+  and the reflections `additive_srgb` at about the gains of `refl.js` (ledge 2.2, sill 2.0,
+  seat 1.7, edge 3.2, glass 0.2; take 9 used 1.8 and 1.4 for the first two), with its blurs scaled to full size
   ([#1109](https://github.com/jeffmhopkins/JStream/pull/1109),
   [#1104](https://github.com/jeffmhopkins/JStream/pull/1104)). With plain `normal`, which
   blends in linear light, set `SPILL=0.4` or the spill washes out the cockpit.

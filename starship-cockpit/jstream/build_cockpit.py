@@ -121,9 +121,10 @@ e += [scene_src("s_outside", "g_outside"), scene_src("s_mons", "g_mons"),
 # console: three surfaces, each mirroring the glass from its own top edge (refl.js), so
 # the window's lower band lands on the ledge, the side windows on the sills and the window
 # base on the seat bolsters. (surface top, mirror line, squash, blur)
-# refl.js blurs at half resolution, so its blurs are about these at full size; the last
-# number is its gain.
-CONSOLE = {"ledge": (698, 492, 0.45, 2.5, 1.8), "sill": (640, 600, 0.5, 4, 1.4),
+# refl.js blurs at half resolution, so its blurs are about these at full size. The last
+# number is the gain: refl.js's 1.8 and 1.4, raised to 2.2 and 2.0 because a one-pass
+# gain loses some of what its half-resolution passes add (matched on stills of frame 400).
+CONSOLE = {"ledge": (698, 492, 0.45, 2.5, 2.2), "sill": (640, 600, 0.5, 4, 2.0),
            "seat": (958, 492, 0.4, 3.5, 1.7)}
 for n, (top, line, k, _, _) in CONSOLE.items():
     e += [{"type": "scene.create", "scene_id": f"g_refl_{n}", "name": f"Reflection: {n}",
