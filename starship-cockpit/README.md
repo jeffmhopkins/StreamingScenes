@@ -14,7 +14,7 @@ The cockpit sways slightly, as if you were sitting in it. Its amber lights pulse
 music. The space outside reflects in its glossy surfaces and lights them: hyperspace blue,
 a laser flash, the orange of an explosion.
 
-![The cockpit at the Kestrel Nebula](media/nebula.jpg)
+![The cockpit at the Kestrel Nebula, composited by JStream](media/nebula.jpg)
 
 ## Demo
 
@@ -23,8 +23,24 @@ minute. It was rendered in Chromium, from these same pages stacked as the JStrea
 stacks them and switched on the hotkey timeline.
 
 [`media/cockpit-jstream.mp4`](media/cockpit-jstream.mp4) is the same timeline running in
-JStream itself on Linux, recorded with JStream's own `record` output. See
-[In JStream](#in-jstream) for how it was built and how it differs.
+JStream itself on Linux, recorded with JStream's own `record` output (take 11). See
+[In JStream](#in-jstream) for how it was built and how it differs. Its frames differ from
+the Chromium demo's by 6 levels in 255 on average.
+
+Every still on this page is a frame of the JStream recording:
+
+| | |
+|---|---|
+| ![Monitors showing radar and the audio spectrum](media/monitors.jpg) | ![Hyperspace on the way to the Kestrel Nebula](media/hyperspace.jpg) |
+| Monitors: radar and audio (F6) | Warp (F2) |
+| ![The warp's arrival flash lighting the dash](media/reflections.jpg) | ![Locked on to the asteroid](media/asteroid-lock.jpg) |
+| Arriving: the flash lights the dash and sills (F3) | Weapons: lock-on (F8) |
+| ![The asteroid exploding](media/asteroid-explosion.jpg) | ![Emergency lighting while taking fire](media/taking-fire.jpg) |
+| Weapons: the explosion | Taking fire (F4) |
+| ![Arriving at Tyr VII](media/tyr-vii.jpg) | ![A transmission's caller as a hologram](media/transmission.jpg) |
+| Arriving at Tyr VII | Transmission (F5) |
+| ![The Bitwig session raised as a hologram](media/bitwig-hologram.jpg) | |
+| Bitwig hologram (F9) | |
 
 The camera monitors show stills from Jeff's January stream. The hologram caller is a still
 from his May stream, and the Bitwig hologram is a crop of the January stream's Bitwig
@@ -51,7 +67,7 @@ each other. That clock drives:
 the layer throws into the cockpit.
 
 **Reflections** are one layer, not each page's own (`pages/refl.js`, masks from
-`tools/masks2.py`). Round 3 had every outside page reflect itself. So while a warp-out
+`tools/masks2.py` and `tools/masks3.py`). Round 3 had every outside page reflect itself. So while a warp-out
 still covered the window, the destination sky under it was already reflecting its stars
 on the dash. Now one layer mirrors the composite that actually shows through the glass,
 whatever is stacked there, onto three specific masks. In the still below, a warp-out still covers
@@ -71,10 +87,10 @@ the window, and the dash reflects only the warp:
 - `m-glass.png`: the glass itself. It faintly ghosts the lit interior, meaning the
   monitors and the holograms, mirrored about the window's lower edge.
 
-In the demo, `demo.html` reads the shown pages' canvases to build it. In JStream it maps
-to native parts: a `scene` source of the outside layers placed with `flip_v` and a
-squashed scale, with `blur` and `image_mask` on the source's chain (drawn since #1036),
-and an `additive` blend. A second one does the same for the monitors and holograms.
+In the demo, `demo.html` reads the shown pages' canvases to build it. In JStream it is
+native: a `scene` source of the outside layers placed with `flip_v` and a squashed
+scale, with `blur` and `image_mask` filters, and an `additive_srgb` blend. A second one
+does the same for the monitors and holograms ([In JStream](#in-jstream)).
 
 **Music.** It's simulated for now: 118 BPM, with a kick, snare, hats, bass and pad, and a
 4-bar breakdown every 16 bars. When JStream can give a page audio levels, `audio(s)` in
@@ -145,8 +161,8 @@ location is easier than one hotkey per variant.
 
 `jstream/` builds the scene in a running JStream daemon over MCP and plays the timeline:
 
-- `build_cockpit.py` creates the sources, groups, filters and the 11 keyframe variants
-  that `tools/rec.js` steps through, plus an `hq` encoder profile (VBR 20 Mbps).
+- `build_cockpit.py` creates the sources, groups, filters and the 13 keyframe variants
+  that follow `tools/rec.js`'s timeline (its 11 states, plus a hold at each arrival), plus an `hq` encoder profile (VBR 20 Mbps).
 - `drive.py` switches variants on the timeline, as the hotkeys would, sets the key label,
   and records to an mp4.
 - `mcp.py` is the small MCP client they share. `collection-state.json` is a `state.get`
@@ -157,17 +173,17 @@ Run the daemon, serve `pages/` with `python3 slowserve.py <pages>` on port 8767 
 hostname (the scripts use `cockpit.test`, mapped to 127.0.0.1 in `/etc/hosts`), and run
 `build_cockpit.py`, then `drive.py`. `JS_TOKEN` names the daemon's token file.
 
-![Arriving at the Kestrel Nebula, composited by JStream](media/jstream-nebula.jpg)
-
-The reflections are fully native, as the notes above suggest:
+The reflections are fully native, as the notes above suggest. Each is placed with an
+`additive_srgb` blend, at a gain set with an opacity above 1:
 
 - **Console:** for each of the ledge, the sills and the seat bolsters, a group holds the
   outside as a `scene` source, flipped with `flip_v` and squashed so its mirror line lands
   on the surface's top edge. It has a `blur` on the item, and an `image_mask` with that
-  surface's mask on the group's source. It's placed with an `additive` blend.
-- **Edge:** the outside again, unflipped, more blurred, masked with `m-edge`, additive.
+  surface's mask on the group's source. Gains: ledge 2.2, sill 2.0, seat 1.7.
+- **Edge:** the outside again, unflipped, blurred by 11, masked with `m-edge`, then
+  softened with a blur of 3. Gain 3.2.
 - **Glass:** the monitors, holograms and overlays mirrored about the window's lower edge,
-  masked with `m-glass`, additive at 8%.
+  blurred by 3.5 and masked with `m-glass`. Gain 0.2.
 
 How the JStream version differs from the Chromium demo:
 
@@ -187,13 +203,15 @@ How the JStream version differs from the Chromium demo:
   and the reflections `additive_srgb` at about the gains of `refl.js` (ledge 2.2, sill 2.0,
   seat 1.7, edge 3.2, glass 0.2), with its blurs scaled to full size
   ([#1109](https://github.com/jeffmhopkins/JStream/pull/1109),
-  [#1104](https://github.com/jeffmhopkins/JStream/pull/1104)). With plain `normal`, which
+  [#1104](https://github.com/jeffmhopkins/JStream/pull/1104)). The gains need an opacity
+  above 1, which #1104 adds; it isn't merged yet, so take 11 ran a build with it merged in. With plain `normal`, which
   blends in linear light, set `SPILL=0.4` or the spill washes out the cockpit.
 - **The rim glow's mask is softened** with a blur of 3 after it, as `refl.js`'s
   half-resolution mask is, so no dark seam shows between the sky and the lit window rim.
 - **One frame was patched.** Take 11 had a single all-white frame at the Bitwig switch
   (47.0 s), a JStream bug ([#1151](https://github.com/jeffmhopkins/JStream/issues/1151));
-  it was replaced by the frame before it.
+  it was replaced by the frame before it. The bug is fixed since
+  [#1154](https://github.com/jeffmhopkins/JStream/pull/1154), so a new take won't need it.
 - **Each arrival holds the warp-in under the warp-out** for 600 ms, since a page that is
   shown reloads and is transparent until it paints.
 - **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
@@ -209,11 +227,24 @@ How the JStream version differs from the Chromium demo:
 - **Pages load over http from a hostname.** On Linux, a browser source refuses a local
   `http://127.0.0.1` URL ([#1069](https://github.com/jeffmhopkins/JStream/issues/1069)), and from `file` the pages can't read their own images.
 
-The gaps it found are JStream issues [#1069](https://github.com/jeffmhopkins/JStream/issues/1069) to
-[#1073](https://github.com/jeffmhopkins/JStream/issues/1073): local URLs refused on Linux, software
-compositing too slow for nested scenes with blur and masks, hidden browser sources that
-keep painting, a recording path that can't be changed or overwrite a file, and no hint to
-install a Vulkan driver when there's no adapter.
+The gaps it found are JStream issues. Still open:
+
+- [#1069](https://github.com/jeffmhopkins/JStream/issues/1069): local URLs refused on Linux;
+- [#1070](https://github.com/jeffmhopkins/JStream/issues/1070): software compositing too slow
+  for nested scenes with blur and masks;
+- [#1058](https://github.com/jeffmhopkins/JStream/issues/1058): no continuous motion on items,
+  so the sway is sent over MCP.
+
+Fixed:
+
+- [#1071](https://github.com/jeffmhopkins/JStream/issues/1071): hidden browser sources kept
+  painting;
+- [#1072](https://github.com/jeffmhopkins/JStream/issues/1072): a recording's path couldn't be
+  changed or overwrite a file;
+- [#1073](https://github.com/jeffmhopkins/JStream/issues/1073): no hint to install a Vulkan
+  driver when there's no adapter;
+- [#1151](https://github.com/jeffmhopkins/JStream/issues/1151): a white frame after a scene
+  switch.
 
 ## What this scene taught us about JStream
 

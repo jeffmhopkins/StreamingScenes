@@ -20,9 +20,11 @@ These are running notes from building the cockpit scene. They feed the end-of-bu
     draws since #1036;
   - an `additive` blend.
 
-  A second one mirrors the monitors and holograms into the glass. Round 4 simulates
-  exactly that stack in `demo.html` (`refl.js`). What's missing natively is only the
-  sway: masks and mirrors would need to follow the cockpit's continuous motion.
+  A second one mirrors the monitors and holograms into the glass. `demo.html` simulates
+  that stack (`refl.js`), and the JStream build (`jstream/build_cockpit.py`) now does it
+  natively, with `additive_srgb` blends so it adds light as a browser does. What's
+  missing natively is only the sway: the build sends every frame's placement over MCP,
+  so masks and mirrors follow the cockpit (#1058 would make that native).
 - **Audio reactivity.** It's simulated in the pages. Native candidate: JStream sends
   audio levels or bands to browser sources, or filter parameters follow a meter.
 - **Keying the plate.** The `chroma_key` filter can do this natively. HTML only needed
