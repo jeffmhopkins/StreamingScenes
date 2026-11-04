@@ -35,12 +35,12 @@ fn screen_reel() {
     };
     let world = |aim: (f32, f32)| [aim.0 - 720.0 + 960.0, aim.1 - 450.0 + 540.0, 0.0];
     let shots = [
-        Shot { aim: (930.0, 430.0), yaw: -32.0, pitch: -12.0, roll: 5.0, dist: 305.0 },
-        Shot { aim: (1180.0, 300.0), yaw: 30.0, pitch: 10.0, roll: -6.0, dist: 325.0 },
-        Shot { aim: (560.0, 300.0), yaw: 22.0, pitch: 16.0, roll: 3.0, dist: 425.0 },
-        Shot { aim: (230.0, 260.0), yaw: -26.0, pitch: -14.0, roll: 4.0, dist: 385.0 },
-        Shot { aim: (440.0, 720.0), yaw: 28.0, pitch: 14.0, roll: -4.0, dist: 335.0 },
-        Shot { aim: (980.0, 430.0), yaw: -18.0, pitch: -10.0, roll: -2.0, dist: 475.0 },
+        Shot { aim: (900.0, 470.0), yaw: -32.0, pitch: -12.0, roll: 5.0, dist: 305.0 },
+        Shot { aim: (1270.0, 250.0), yaw: 30.0, pitch: 10.0, roll: -6.0, dist: 325.0 },
+        Shot { aim: (540.0, 230.0), yaw: 22.0, pitch: 16.0, roll: 3.0, dist: 425.0 },
+        Shot { aim: (150.0, 190.0), yaw: -26.0, pitch: -14.0, roll: 4.0, dist: 385.0 },
+        Shot { aim: (360.0, 790.0), yaw: 28.0, pitch: 14.0, roll: -4.0, dist: 335.0 },
+        Shot { aim: (700.0, 380.0), yaw: -18.0, pitch: -10.0, roll: -2.0, dist: 475.0 },
     ];
     let (hold, glide) = (1.0_f32, 4.0_f32);
     let seg = hold + glide;
