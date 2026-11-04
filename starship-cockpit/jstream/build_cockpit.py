@@ -171,6 +171,9 @@ f = [x for n, (_, _, _, b, _) in CONSOLE.items() for x in (
 f += [
      flt({"type": "item", "item_id": "refl_edge"}, "blur", "blur", {"radius": 11}),
      flt({"type": "item", "item_id": "refl_edge"}, "mask", "image_mask", m("m-edge")),
+     # refl.js masks at half resolution, so its mask edge is soft and the rim glow runs into
+     # the glass; a sharp m-edge leaves a dark seam between the sky and the lit rim.
+     flt({"type": "item", "item_id": "refl_edge"}, "soft", "blur", {"radius": 3}),
      flt({"type": "source", "source_id": "s_refl_glass"}, "blur", "blur", {"radius": 3.5}),
      flt({"type": "source", "source_id": "s_refl_glass"}, "mask", "image_mask", m("m-glass")),
      flt({"type": "source", "source_id": "caller"}, "holo", "color_correction",
