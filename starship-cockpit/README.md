@@ -189,6 +189,11 @@ How the JStream version differs from the Chromium demo:
   ([#1109](https://github.com/jeffmhopkins/JStream/pull/1109),
   [#1104](https://github.com/jeffmhopkins/JStream/pull/1104)). With plain `normal`, which
   blends in linear light, set `SPILL=0.4` or the spill washes out the cockpit.
+- **The rim glow's mask is softened** with a blur of 3 after it, as `refl.js`'s
+  half-resolution mask is, so no dark seam shows between the sky and the lit window rim.
+- **One frame was patched.** Take 11 had a single all-white frame at the Bitwig switch
+  (47.0 s), a JStream bug ([#1151](https://github.com/jeffmhopkins/JStream/issues/1151));
+  it was replaced by the frame before it.
 - **Each arrival holds the warp-in under the warp-out** for 600 ms, since a page that is
   shown reloads and is transparent until it paints.
 - **The hologram fades are stepped over MCP** in a slowed capture, since item transitions
