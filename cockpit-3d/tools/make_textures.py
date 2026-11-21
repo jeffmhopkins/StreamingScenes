@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 SETS = {
     # set name: (ambientCG id, colour remap or None)
-    "paint": ("Metal029", "light"),
+    "paint": ("Metal029", "grime"),
     "floor": ("DiamondPlate008A", None),
     "leather": ("Leather034C", None),
     "plastic": ("Plastic012B", None),
@@ -27,6 +27,41 @@ FONT = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_MED = "/usr/share/fonts/opentype/inter/Inter-Medium.otf"
 
 
+def tile_noise(n, cycles, seed):
+    """Tileable smooth noise in -1..1: white noise low-passed in frequency space, so it
+    wraps at the edges. `cycles` is roughly how many blobs fit across."""
+    rng = np.random.default_rng(seed)
+    f = np.fft.fft2(rng.standard_normal((n, n)))
+    k = np.fft.fftfreq(n) * n
+    kk = np.sqrt(k[:, None] ** 2 + k[None, :] ** 2)
+    out = np.real(np.fft.ifft2(f * np.exp(-(kk / cycles) ** 2)))
+    return out / (np.abs(out).max() + 1e-9)
+
+
+def grime_mask(n, seed):
+    """0..1 dirt: large stains broken up by finer noise, mostly clean."""
+    v = (tile_noise(n, 3, seed) * 0.55 + tile_noise(n, 12, seed + 1) * 0.3
+         + tile_noise(n, 60, seed + 2) * 0.15)
+    return np.clip((v - 0.05) / 0.45, 0, 1) ** 1.5
+
+
+def scratch_mask(n, seed):
+    """0..1 fine scratches, drawn wrapped so the texture still tiles."""
+    rng = np.random.default_rng(seed)
+    im = Image.new("L", (n, n), 0)
+    d = ImageDraw.Draw(im)
+    for _ in range(900):
+        x, y = rng.uniform(0, n, 2)
+        ang = rng.normal(0.3, 0.5) if rng.random() < 0.7 else rng.uniform(0, np.pi)
+        length = rng.exponential(40) + 6
+        x1, y1 = x + np.cos(ang) * length, y + np.sin(ang) * length
+        level = int(rng.uniform(60, 200))
+        for ox in (-n, 0, n):
+            for oy in (-n, 0, n):
+                d.line([(x + ox, y + oy), (x1 + ox, y1 + oy)], fill=level, width=1)
+    return np.asarray(im).astype(np.float32) / 255.0
+
+
 def load(path, mode="L"):
     return Image.open(path).convert(mode)
 
@@ -34,13 +69,21 @@ def load(path, mode="L"):
 def build_set(src, out, name, asset, remap):
     base = os.path.join(src, asset, f"{asset}_2K-JPG_")
     color = np.asarray(load(base + "Color.jpg", "RGB")).astype(np.float32)
-    if remap == "light":
-        # A near-black powder coat, lifted to a warm mid-light grey with its own grain
-        # (the grain lifted a little so it still reads at the brighter level).
+    grime = scratches = None
+    if remap == "grime":
+        # Gunmetal paint over the powder coat's grain, with tiling grime and scratches.
+        n = color.shape[0]
         lum = color.mean(axis=2, keepdims=True)
-        grain = (lum - lum.mean()) * 1.2
-        tint = np.array([118.0, 122.0, 128.0])
-        color = np.clip(tint + grain, 0, 255)
+        grain = (lum - lum.mean()) * 1.0
+        tint = np.array([60.0, 66.0, 76.0])
+        grime = grime_mask(n, seed=7)[..., None]
+        scratches = scratch_mask(n, seed=11)[..., None]
+        mottling = tile_noise(n, 6, seed=3)[..., None] * 10.0
+        dirt = np.array([34.0, 31.0, 27.0])
+        color = tint + grain + mottling
+        color = color * (1 - grime * 0.6) + dirt * grime * 0.6
+        color = color * (1 - scratches) + np.array([128.0, 132.0, 138.0]) * scratches
+        color = np.clip(color, 0, 255)
     Image.fromarray(color.astype(np.uint8)).save(
         os.path.join(out, f"{name}-color.jpg"), quality=92
     )
@@ -48,15 +91,20 @@ def build_set(src, out, name, asset, remap):
         os.path.join(out, f"{name}-normal.jpg"), quality=95
     )
     rough = load(base + "Roughness.jpg")
-    if remap == "light":
-        # Painted, not bare metal: a little rougher, and no metalness (below).
-        rough = rough.point(lambda v: min(255, int(v * 0.8 + 70)))
+    if remap == "grime":
+        # Paint: rougher where dirty, glossy bare metal in the scratches.
+        r = np.asarray(rough).astype(np.float32) * 0.6 + 90
+        r = r + grime[..., 0] * 70
+        r = r * (1 - scratches[..., 0]) + 70 * scratches[..., 0]
+        rough = Image.fromarray(np.clip(r, 0, 255).astype(np.uint8))
     ao_path = base + "AmbientOcclusion.jpg"
     ao = load(ao_path) if os.path.exists(ao_path) else Image.new("L", rough.size, 255)
     metal_path = base + "Metalness.jpg"
     metal = load(metal_path) if os.path.exists(metal_path) else Image.new("L", rough.size, 0)
-    if remap == "light":
-        metal = Image.new("L", rough.size, 0)
+    if remap == "grime":
+        metal = Image.fromarray((np.clip(scratches[..., 0], 0, 1) * 255).astype(np.uint8))
+        ao = Image.fromarray(
+            (np.asarray(ao).astype(np.float32) * (1 - grime[..., 0] * 0.3)).astype(np.uint8))
     Image.merge("RGB", (ao, rough, metal)).save(
         os.path.join(out, f"{name}-orm.jpg"), quality=95
     )
@@ -180,7 +228,80 @@ def draw_atlas(out):
 
 
 SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right", "screen_overhead"]
+           "screen_side_right"]
+
+# Readouts: an emissive atlas of small amber displays, 8 x 16 cells of 256 x 128 px.
+# build_cockpit.py picks cells for the little display quads on the panels.
+READOUT_COLS, READOUT_ROWS = 8, 16
+
+
+def seg_digit(d, x, y, w, h, ch, fill):
+    """A seven-segment character at (x, y), w x h."""
+    segs = {"0": "abcdef", "1": "bc", "2": "abged", "3": "abgcd", "4": "fgbc", "5": "afgcd",
+            "6": "afgedc", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g", " ": ""}[ch]
+    t = max(2, w // 6)
+    pts = {"a": (x + t, y, x + w - t, y + t), "g": (x + t, y + h // 2 - t // 2, x + w - t, y + h // 2 + t // 2),
+           "d": (x + t, y + h - t, x + w - t, y + h), "f": (x, y + t, x + t, y + h // 2),
+           "b": (x + w - t, y + t, x + w, y + h // 2), "e": (x, y + h // 2, x + t, y + h - t),
+           "c": (x + w - t, y + h // 2, x + w, y + h - t)}
+    for sname in segs:
+        d.rectangle(pts[sname], fill=fill)
+
+
+def draw_readouts(out):
+    rng = np.random.default_rng(5)
+    W, H = 256, 128
+    im = Image.new("RGB", (W * READOUT_COLS, H * READOUT_ROWS), (0, 0, 0))
+    d = ImageDraw.Draw(im)
+    amber = [(255, 150, 30), (255, 120, 10), (255, 180, 70), (230, 90, 10)]
+    f = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 16)
+    for r in range(READOUT_ROWS):
+        for c in range(READOUT_COLS):
+            x, y = c * W, r * H
+            col = amber[rng.integers(len(amber))]
+            dim = tuple(int(v * 0.25) for v in col)
+            d.rectangle([x + 4, y + 4, x + W - 5, y + H - 5], fill=(10, 6, 3))
+            kind = (r * READOUT_COLS + c) % 6
+            if kind == 0:  # seven-segment numbers
+                text = "".join(str(rng.integers(10)) for _ in range(rng.integers(3, 6)))
+                cw = (W - 30) // 5
+                for i, ch in enumerate(text.rjust(5)):
+                    seg_digit(d, x + 15 + i * cw + 4, y + 22, cw - 12, H - 44, "8", dim)
+                    seg_digit(d, x + 15 + i * cw + 4, y + 22, cw - 12, H - 44, ch, col)
+            elif kind == 1:  # bar graph
+                n = 12
+                for i in range(n):
+                    hgt = int(rng.uniform(0.15, 1.0) * (H - 40))
+                    bx = x + 14 + i * (W - 28) // n
+                    d.rectangle([bx, y + H - 18 - (H - 40), bx + 10, y + H - 18], fill=dim)
+                    d.rectangle([bx, y + H - 18 - hgt, bx + 10, y + H - 18], fill=col)
+            elif kind == 2:  # text lines
+                for i in range(5):
+                    line = "".join(rng.choice(list("ABCDEFGHJKLMNPRSTUVXYZ0123456789 .:-"), 22))
+                    d.text((x + 12, y + 10 + i * 21), line, font=f, fill=col if i % 2 == 0 else dim)
+            elif kind == 3:  # segmented level strips
+                for row in range(3):
+                    lit = rng.integers(3, 16)
+                    for i in range(16):
+                        bx = x + 12 + i * 14
+                        by = y + 18 + row * 32
+                        d.rectangle([bx, by, bx + 10, by + 20], fill=col if i < lit else dim)
+            elif kind == 4:  # waveform
+                pts = []
+                ph, fq = rng.uniform(0, 6), rng.uniform(2, 6)
+                for i in range(W - 24):
+                    t = i / (W - 24)
+                    v = np.sin(t * fq * 6.28 + ph) * 0.6 + rng.normal(0, 0.08)
+                    pts.append((x + 12 + i, y + H / 2 - v * (H / 2 - 16)))
+                d.line([(x + 12, y + H // 2), (x + W - 12, y + H // 2)], fill=dim, width=1)
+                d.line(pts, fill=col, width=3)
+            else:  # dot matrix of status lights
+                for gy in range(4):
+                    for gx in range(10):
+                        bx, by = x + 16 + gx * 23, y + 16 + gy * 25
+                        on = rng.random() > 0.45
+                        d.ellipse([bx, by, bx + 14, by + 14], fill=col if on else dim)
+    im.save(os.path.join(out, "readouts.png"), optimize=True)
 
 
 def draw_screens(out):
@@ -218,6 +339,7 @@ def main():
         build_set(src, out, name, asset, remap)
     draw_atlas(out)
     draw_screens(out)
+    draw_readouts(out)
 
 
 if __name__ == "__main__":

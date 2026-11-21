@@ -15,6 +15,7 @@ The export leaves images out; finish_gltf.py wires the texture sets into the fil
 the glTF holds exactly the images in ../model/textures and nothing re-encoded.
 """
 import math
+import random
 import sys
 
 import bpy  # first: it makes bmesh and mathutils importable
@@ -46,7 +47,6 @@ SCREENS = {
     "screen_right": (0.50, (0.66, 1.36, 0.90), (-14, 0, -30)),
     "screen_side_left": (0.30, (-0.98, 0.86, 0.86), (-50, 0, 58)),
     "screen_side_right": (0.30, (0.98, 0.86, 0.86), (-50, 0, -58)),
-    "screen_overhead": (0.34, (0.0, 0.78, 1.93), (50, 0, 0)),
 }
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
@@ -115,7 +115,7 @@ def make_material(name):
             mix.data_type = "RGBA"
             mix.blend_type = "MULTIPLY"
             mix.inputs["Factor"].default_value = 1.0
-            mix.inputs[7].default_value = (0.2, 0.2, 0.21, 1)
+            mix.inputs[7].default_value = (0.45, 0.45, 0.47, 1)
             link(c.outputs["Color"], mix.inputs[6])
             link(mix.outputs[2], bsdf.inputs["Base Color"])
         else:
@@ -140,8 +140,14 @@ def make_material(name):
         col = LEDS[name]
         bsdf.inputs["Base Color"].default_value = (*[c * 0.3 for c in col], 1)
         bsdf.inputs["Emission Color"].default_value = (*col, 1)
-        bsdf.inputs["Emission Strength"].default_value = 6.0 if name == "light_strip" else 3.0
+        bsdf.inputs["Emission Strength"].default_value = 2.5 if name == "light_strip" else 5.0
         bsdf.inputs["Roughness"].default_value = 0.35
+    elif name == "readout":
+        c = tex(f"{TEX}/readouts.png")
+        bsdf.inputs["Base Color"].default_value = (0.01, 0.01, 0.01, 1)
+        link(c.outputs["Color"], bsdf.inputs["Emission Color"])
+        bsdf.inputs["Emission Strength"].default_value = 3.0
+        bsdf.inputs["Roughness"].default_value = 0.2
     elif name == "glass":
         bsdf.inputs["Base Color"].default_value = (0.55, 0.65, 0.75, 1)
         bsdf.inputs["Roughness"].default_value = 0.04
@@ -307,6 +313,7 @@ WALL = [(1.36, 0.0), (1.36, 0.85), (1.27, 1.65), (1.06, 2.16)]
 CEIL_Z = 2.16
 Y_BACK, Y_FRONT, Y_NOSE = -1.70, 1.25, 2.02
 WIN_BOTTOM_Z = 1.16
+WIN_SIDE_Y = -0.15  # the side windows run from here forward to the windshield
 
 
 def wall_x(z):
@@ -328,12 +335,14 @@ def nose_y(z):
 def build_shell():
     GROUP[0] = "cabin"
     # A dark backing shell behind the wall panels, so the seams between them read dark.
+    # Above the sill it stops where the side windows start.
     for side in (-1, 1):
         prof = [(side * (x + 0.04), z) for x, z in WALL]
         for i, ((x0, z0), (x1, z1)) in enumerate(zip(prof, prof[1:])):
+            y1 = Y_FRONT if i == 0 else WIN_SIDE_Y
             slab(
                 f"shell_{'L' if side < 0 else 'R'}{i}",
-                [(x0, Y_BACK, z0), (x0, Y_FRONT, z0), (x1, Y_FRONT, z1), (x1, Y_BACK, z1)],
+                [(x0, Y_BACK, z0), (x0, y1, z0), (x1, y1, z1), (x1, Y_BACK, z1)],
                 0.02, "paint_dark", 0, inward=(0, 0, 1.0),
             )
     slab("shell_ceiling", [(-1.1, Y_BACK, CEIL_Z + 0.04), (1.1, Y_BACK, CEIL_Z + 0.04),
@@ -348,7 +357,13 @@ def build_shell():
         for j, (ya, yb) in enumerate(zip(ribs, ribs[1:])):
             for i, ((x0, z0), (x1, z1)) in enumerate(zip(WALL, WALL[1:])):
                 d0 = Vector((x1 - x0, z1 - z0)).normalized() * gap
-                material = "hexpanel" if (i == 1 and j in (0, 3)) else "paint"
+                if i >= 1 and ya >= WIN_SIDE_Y - 1e-6:
+                    # Side windows: glass between the ribs, from the sill to the roof.
+                    slab(f"side_glass_{s}{j}{i}",
+                         [(side * x0, ya, z0), (side * x0, yb, z0), (side * x1, yb, z1),
+                          (side * x1, ya, z1)], 0.006, "glass", 0, inward=(side * 3.0, 0, 1.0))
+                    continue
+                material = "hexpanel" if (i == 1 and j == 0) else "paint"
                 slab(
                     f"wall_{s}{j}{i}",
                     [
@@ -368,8 +383,14 @@ def build_shell():
                     bolts(f"wall_{s}{j}{i}",
                           [(side * x0, ya, z0), (side * x0, yb, z0), (side * x1, yb, z1),
                            (side * x1, ya, z1)], n, inset=0.035)
-        # Ribs: a frame member over each panel join, wall and ceiling.
-        for j, y in enumerate(ribs[1:-1]):
+        # Window frame: a sill under the side glass and a transom where the wall bends.
+        for k, (x, z, th) in enumerate([(WALL[1][0], WALL[1][1], 0.07), (WALL[2][0], WALL[2][1], 0.05)]):
+            box(f"window_frame_{s}{k}", (0.07, Y_FRONT - WIN_SIDE_Y + 0.06, th),
+                (side * (x - 0.02), (Y_FRONT + WIN_SIDE_Y) / 2, z), material="paint_dark",
+                bev=0.008)
+        # Ribs: a frame member over each panel join, wall and ceiling, and a pillar where
+        # the side glass meets the windshield.
+        for j, y in enumerate(ribs[1:]):
             for i, ((x0, z0), (x1, z1)) in enumerate(zip(WALL, WALL[1:])):
                 slab(
                     f"rib_{s}{j}{i}",
@@ -377,7 +398,7 @@ def build_shell():
                      (side * (x1 - 0.02), y + 0.03, z1), (side * (x1 - 0.02), y - 0.03, z1)],
                     0.05, "paint_dark", 0.008, inward=(0, y, 1.0),
                 )
-    for j, y in enumerate(ribs[1:-1]):
+    for j, y in enumerate(ribs[1:]):
         box(f"rib_ceiling{j}", (2.12, 0.06, 0.05), (0, y, CEIL_Z - 0.025), material="paint_dark")
 
     # Ceiling: two light panels with a hex vent between, and light strips along the edges.
@@ -471,7 +492,9 @@ def build_nose():
                        (x1, Y_FRONT, z1)]
             if abs(nose_y(z1) - Y_FRONT) < 1e-4:
                 corners = corners[:3]
-            slab(f"cheek_{side}{i}", corners, 0.03, "paint", 0.004, inward=(0, Y_FRONT, 1.0))
+            glass = z0 >= WALL[1][1] - 1e-6
+            slab(f"cheek_{side}{i}", corners, 0.006 if glass else 0.03,
+                 "glass" if glass else "paint", 0 if glass else 0.004, inward=(0, Y_FRONT, 1.0))
     # Lower front wall below the windshield (mostly behind the console).
     slab("nose_lower", [(-wall_x(0), Y_NOSE, 0), (wall_x(0), Y_NOSE, 0),
                         (wall_x(WIN_BOTTOM_Z), Y_NOSE, WIN_BOTTOM_Z),
@@ -490,12 +513,12 @@ def build_nose():
                  [(-xb, b0.y, b0.z), (xb, b0.y, b0.z), (xt, b1.y, b1.z), (-xt, b1.y, b1.z)],
                  0.06, "paint_dark", 0, inward=tuple(b0 + normal))
     length = (b1 - b0).length
-    panes = [(-0.62, 0.62)] + [(s * 0.70, s * 1.08) for s in (-1, 1)]
+    panes = [(-0.78, 0.78)] + [(s * 0.84, s * 1.02) for s in (-1, 1)]
     rot = Euler((math.atan2(up.z, -up.y) - math.pi / 2, 0, 0)).to_matrix()
     for k, (xa, xb2) in enumerate(panes):
         lo, hi = sorted((xa, xb2))
         mid = b0 + up * (length * 0.5)
-        h = length * 0.86
+        h = length * 0.9
         if k:  # side panes taper with the wall
             hi_x = max(abs(lo), abs(hi))
             h = length * 0.74
@@ -543,7 +566,7 @@ def screen(name, width, loc, rot):
         k = box(f"{name}_key{i}", (width * 0.12, 0.012, 0.016), (0, 0, 0), material="plastic",
                 bev=0.003)
         k.matrix_world = m @ Matrix.Translation(((i - 2) * width * 0.19, 0.0, -h / 2 - 0.016))
-    led = box(f"{name}_led", (0.008, 0.008, 0.008), (0, 0, 0), material="led_green", bev=0.002)
+    led = box(f"{name}_led", (0.008, 0.008, 0.008), (0, 0, 0), material="led_amber", bev=0.002)
     led.matrix_world = m @ Matrix.Translation((width / 2 + 0.012, 0.0, -h / 2 - 0.012))
 
 
@@ -554,7 +577,7 @@ def button_grid(name, m, nx, ny, pitch, size=0.018, leds=True, toggles=False, se
     w, h = nx * pitch + 0.03, ny * pitch + 0.03
     p = box(f"{name}_plate", (w, 0.012, h), (0, 0, 0), material="plastic", bev=0.004)
     p.matrix_world = m @ Matrix.Translation((0, 0.006, 0))
-    colours = ["led_green", "led_amber", "led_red", "led_blue"]
+    colours = ["led_amber"] * 6 + ["led_red", "led_green", "led_blue"]
     for j in range(ny):
         for i in range(nx):
             x = (i - (nx - 1) / 2) * pitch
@@ -571,7 +594,7 @@ def button_grid(name, m, nx, ny, pitch, size=0.018, leds=True, toggles=False, se
                     Matrix.Rotation(math.pi / 2 + (0.45 if up else -0.45), 4, "X"))
                 if leds:
                     l = box(f"{name}_tled{i}{j}", (0.006, 0.004, 0.006), (0, 0, 0),
-                            material="led_green" if up else "led_red", bev=0)
+                            material="led_amber" if up else "led_red", bev=0)
                     l.matrix_world = m @ Matrix.Translation((x, -0.002, z + pitch * 0.38))
             else:
                 b = box(f"{name}_b{i}{j}", (size, 0.012, size * 0.8), (0, 0, 0),
@@ -581,6 +604,91 @@ def button_grid(name, m, nx, ny, pitch, size=0.018, leds=True, toggles=False, se
                     l = box(f"{name}_l{i}{j}", (size * 0.6, 0.004, size * 0.18), (0, 0, 0),
                             material=rnd.choice(colours), bev=0)
                     l.matrix_world = m @ Matrix.Translation((x, -0.013, z + size * 0.18))
+
+
+READOUT_COLS, READOUT_ROWS = 8, 16  # the readout atlas grid, as make_textures.py draws it
+
+
+def readout(name, w, h, m, cell):
+    """A small amber display: a recessed bezel and an emissive quad showing one cell of
+    the readout atlas, on the local x/z plane of m facing -y."""
+    c, r = cell % READOUT_COLS, (cell // READOUT_COLS) % READOUT_ROWS
+    u0, u1 = c / READOUT_COLS, (c + 1) / READOUT_COLS
+    v1, v0 = 1 - r / READOUT_ROWS, 1 - (r + 1) / READOUT_ROWS
+    bz = box(f"{name}_bezel", (w + 0.012, 0.008, h + 0.012), (0, 0, 0), material="plastic",
+             bev=0.002)
+    bz.matrix_world = m @ Matrix.Translation((0, -0.002, 0))
+    q = quad(name, w, h, (0, 0, 0), (0, 0, 0), "readout", (u0, v0, u1, v1))
+    q.matrix_world = m @ Matrix.Translation((0, -0.0065, 0))
+
+
+def knob_row(name, m, w, n, rnd):
+    for i in range(n):
+        x = (i - (n - 1) / 2) * w / n
+        k = cyl(f"{name}_k{i}", 0.009, 0.014, (0, 0, 0), material="plastic", segs=16, bev=0.002)
+        k.matrix_world = m @ Matrix.Translation((x, -0.008, 0)) @ Matrix.Rotation(math.pi / 2, 4, "X")
+        d = box(f"{name}_kd{i}", (0.002, 0.003, 0.007), (0, 0, 0), material="led_amber", bev=0)
+        d.matrix_world = m @ Matrix.Translation((x, -0.016, 0.004))
+
+
+def greeble(name, m, w, h, rnd, depth=0):
+    """Fills a w x h rectangle (local x/z of m, facing -y) with greebled sub-panels: split
+    it a few times, then give each piece a readout, buttons, switches, knobs, a vent or a
+    bolted plate. All parts sit on the -y side of m's plane."""
+    if depth < 3 and max(w, h) > 0.16 and (depth < 1 or rnd.random() < 0.8):
+        if w >= h:
+            t = rnd.uniform(0.35, 0.65)
+            wa, wb = w * t, w * (1 - t)
+            greeble(f"{name}a", m @ Matrix.Translation((-w / 2 + wa / 2, 0, 0)), wa, h, rnd, depth + 1)
+            greeble(f"{name}b", m @ Matrix.Translation((w / 2 - wb / 2, 0, 0)), wb, h, rnd, depth + 1)
+        else:
+            t = rnd.uniform(0.35, 0.65)
+            ha, hb = h * t, h * (1 - t)
+            greeble(f"{name}a", m @ Matrix.Translation((0, 0, -h / 2 + ha / 2)), w, ha, rnd, depth + 1)
+            greeble(f"{name}b", m @ Matrix.Translation((0, 0, h / 2 - hb / 2)), w, hb, rnd, depth + 1)
+        return
+    gap = 0.008
+    pw, ph = w - gap, h - gap
+    # Every piece sits on its own slightly raised or sunk plate.
+    lift = rnd.choice([0.004, 0.008, 0.012])
+    plate = box(f"{name}_plate", (pw, lift, ph), (0, 0, 0),
+                material=rnd.choice(["paint", "paint_dark", "paint_dark"]), bev=0.0025)
+    plate.matrix_world = m @ Matrix.Translation((0, -lift / 2, 0))
+    top = m @ Matrix.Translation((0, -lift, 0))
+    corners = [top @ Vector((sx * pw / 2, 0, sz * ph / 2)) for sx, sz in
+               [(-1, -1), (1, -1), (1, 1), (-1, 1)]]
+    up = (m.to_3x3() @ Vector((0, -1, 0))).normalized()
+    if min(pw, ph) > 0.05:
+        bolts(f"{name}", corners, up, inset=0.01, r=0.0035, material="plastic")
+    kind = rnd.random()
+    iw, ih = pw - 0.03, ph - 0.03
+    if iw < 0.03 or ih < 0.03:
+        return
+    if kind < 0.38:
+        rw = min(iw, ih * 2.0)
+        readout(f"{name}_ro", rw, rw / 2, top, rnd.randrange(READOUT_COLS * READOUT_ROWS))
+    elif kind < 0.66:
+        pitch = rnd.choice([0.022, 0.026, 0.03])
+        nx, ny = max(1, int(iw / pitch)), max(1, int(ih / pitch))
+        button_grid(f"{name}_bt", top, nx, ny, pitch, size=pitch * 0.62,
+                    seed=rnd.randrange(10 ** 6))
+    elif kind < 0.78:
+        pitch = 0.03
+        nx, ny = max(1, int(iw / pitch)), max(1, int(ih / 0.05))
+        button_grid(f"{name}_tg", top, nx, ny, pitch, size=0.02, toggles=True,
+                    seed=rnd.randrange(10 ** 6))
+    elif kind < 0.85:
+        n = max(1, int(iw / 0.035))
+        knob_row(f"{name}_kn", top, iw, n, rnd)
+    elif kind < 0.91:
+        v = box(f"{name}_vent", (iw, 0.004, ih), (0, 0, 0), material="hexpanel", bev=0.001)
+        v.matrix_world = top @ Matrix.Translation((0, -0.002, 0))
+    else:
+        # A row of amber indicator slits.
+        n = max(1, int(iw / 0.03))
+        for i in range(n):
+            l = box(f"{name}_sl{i}", (0.016, 0.004, 0.005), (0, 0, 0), material="led_amber", bev=0)
+            l.matrix_world = top @ Matrix.Translation(((i - (n - 1) / 2) * iw / n, -0.002, 0))
 
 
 def frame_matrix(loc, rot):
@@ -601,14 +709,12 @@ def build_console():
           "x", -xw + 0.1, xw - 0.1, "paint_dark", 0.01, 2)
     for name, (w, loc, rot) in SCREENS.items():
         screen(name, w, loc, rot)
-    # Button banks on the dash top, either side of the centre.
+    # Greebled banks across the dash top, between the lip and the screens.
+    rnd = random.Random(12)
     for side in (-1, 1):
-        m = frame_matrix((side * 0.55, 1.13, 0.645), (-75, 0, 0))
-        button_grid(f"dash_buttons_{side}", m, 8, 3, 0.03, seed=3 + side)
-    m = frame_matrix((0, 1.16, 0.655), (-75, 0, 0))
-    button_grid("dash_toggles", m, 10, 2, 0.032, toggles=True, seed=9)
-    decal("label_nav", 0.12, (-0.55, 1.07, 0.618), (-75, 0, 0))
-    decal("label_sensors", 0.12, (0.55, 1.07, 0.618), (-75, 0, 0))
+        greeble(f"dash_top_{side}", frame_matrix((side * 0.78, 1.15, 0.648), (-75, 0, 0)), 0.76,
+                0.17, rnd)
+    greeble("dash_top_mid", frame_matrix((0, 1.15, 0.648), (-75, 0, 0)), 0.78, 0.17, rnd)
     for side in (-1, 1):
         box(f"dash_vent_{side}", (0.5, 0.012, 0.22), (side * 0.6, 1.18, 0.26), material="hexpanel",
             bev=0.003)
@@ -635,35 +741,21 @@ def build_side_consoles():
         ang = math.degrees(math.atan2(0.78 - 0.66, abs(xo) - 0.74))
         top = lambda x, y: frame_matrix((side * x, y, 0.66 + (x - 0.74) * math.tan(math.radians(ang)) + 0.002),
                                         (-90, side * -ang, 0))
-        # Dark inset plates under each group, bolted down, so the top isn't one flat field.
-        for k, (px, py, pw, pd) in enumerate([(0.98, -0.5, 0.3, 0.26), (0.98, -0.1, 0.34, 0.36),
-                                              (0.98, 0.25, 0.32, 0.16), (0.98, 0.53, 0.3, 0.2)]):
-            m = top(px, py)
-            pl = box(f"console_{s}_plate{k}", (pw, 0.008, pd), (0, 0, 0), material="paint_dark",
-                     bev=0.003)
-            pl.matrix_world = m @ Matrix.Translation((0, -0.002, 0))
-            up = (m.to_3x3() @ Vector((0, -1, 0))).normalized()
-            hw, hd = pw / 2, pd / 2
-            corners = [m @ Vector((sx * hw, -0.006, sz * hd)) for sx, sz in
-                       [(-1, -1), (1, -1), (1, 1), (-1, 1)]]
-            bolts(f"console_{s}_plate{k}", corners, up, inset=0.016, r=0.004, material="plastic")
-        lift = Matrix.Translation((0, -0.006, 0))
-        button_grid(f"console_{s}_keys", top(0.98, -0.5) @ lift, 5, 4, 0.034, seed=20 + side)
-        button_grid(f"console_{s}_toggles", top(0.98, 0.25) @ lift, 6, 2, 0.04, toggles=True,
-                    seed=30 + side)
-        decal("keypad", 0.2, (0, 0, 0), (0, 0, 0), name=f"decal_keypad_{s}")
-        ALL[-1].matrix_world = top(0.98, 0.53) @ Matrix.Translation((0, -0.0075, 0))
+        # The top: greebled panels before and behind the throttle / stick, a label at the
+        # back. Each side gets its own pattern.
+        rnd = random.Random(50 + side)
+        greeble(f"console_{s}_aft", top(1.03, -0.47) @ Matrix.Translation((0, -0.001, 0)),
+                0.5, 0.44, rnd)
+        greeble(f"console_{s}_fwd", top(1.03, 0.4) @ Matrix.Translation((0, -0.001, 0)),
+                0.5, 0.56, rnd)
         decal("label_power" if side < 0 else "label_shields", 0.12, (0, 0, 0), (0, 0, 0),
               name=f"decal_label_{s}")
-        ALL[-1].matrix_world = top(0.98, -0.68) @ Matrix.Translation((0, -0.003, 0))
-        # A vent on the console's inner face.
-        vent = box(f"console_{s}_vent", (0.012, 0.5, 0.2), (xi, -0.35, 0.3), material="hexpanel",
-                   bev=0.003)
-        # Inner face trim.
+        ALL[-1].matrix_world = top(0.86, -0.15) @ Matrix.Translation((0, -0.003, 0))
+        # The console's inner face, toward the pilot's legs: greebled too.
+        greeble(f"console_{s}_face", frame_matrix((xi, 0.2, 0.3), (0, 0, -side * 90)), 1.7, 0.46,
+                rnd)
         box(f"console_{s}_trim", (0.02, 1.9, 0.04), (xi + side * 0.005, 0.21, 0.56),
             material="plastic", bev=0.006)
-        decal("grid_labels", 0.6, (xi - side * 0.002, 0.2, 0.36), (0, 0, side * -90),
-              name=f"decal_grid_{s}")
     # Throttle (left) and side stick (right).
     xo = wall_x(0.8) - 0.01
     surface_z = lambda x: 0.66 + (x - 0.74) * (0.78 - 0.66) / (xo - 0.74)
@@ -690,69 +782,115 @@ def build_side_consoles():
         bt.matrix_world = sm @ Matrix.Translation(((i - 1) * 0.016, 0.0, 0.352))
 
 
-def build_overhead():
-    GROUP[0] = "overhead_panel"
-    # Overhead panel hanging from the ceiling, its face toward the pilot.
-    prism("overhead", [(0.55, CEIL_Z), (1.2, CEIL_Z), (1.05, 1.98), (0.62, 1.9)], "x", -0.5, 0.5,
-          "paint", 0.01, 3)
-    m = frame_matrix((-0.3, 0.84, 1.945), (-120, 0, 0))
-    button_grid("overhead_toggles_L", m, 5, 2, 0.04, toggles=True, seed=41)
-    m = frame_matrix((0.3, 0.84, 1.945), (-120, 0, 0))
-    button_grid("overhead_toggles_R", m, 5, 2, 0.04, toggles=True, seed=42)
-    decal("label_lifesupport", 0.12, (0, 0, 0), (0, 0, 0))
-    ALL[-1].matrix_world = frame_matrix((-0.3, 0.74, 1.9), (-120, 0, 0)) @ Matrix.Translation(
-        (0, -0.003, 0))
-    decal("label_engines", 0.12, (0, 0, 0), (0, 0, 0))
-    ALL[-1].matrix_world = frame_matrix((0.3, 0.74, 1.9), (-120, 0, 0)) @ Matrix.Translation(
-        (0, -0.003, 0))
+def cable(name, points, r=0.008, material="plastic"):
+    """A cable or hose through `points`, as a smooth curve swept by a circle, turned
+    straight into a mesh."""
+    cu = bpy.data.curves.new(name, "CURVE")
+    cu.dimensions = "3D"
+    cu.bevel_depth = r
+    cu.bevel_resolution = 2
+    cu.resolution_u = 8
+    sp = cu.splines.new("BEZIER")
+    sp.bezier_points.add(len(points) - 1)
+    for bp, p in zip(sp.bezier_points, points):
+        bp.co = p
+        bp.handle_left_type = bp.handle_right_type = "AUTO"
+    cob = bpy.data.objects.new(name + "_curve", cu)
+    bpy.context.collection.objects.link(cob)
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(cob.evaluated_get(dg))
+    bpy.data.objects.remove(cob)
+    bpy.data.curves.remove(cu)
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    me.materials.clear()
+    me.materials.append(mat(material))
+    ob["group"] = GROUP[0]
+    ALL.append(ob)
+    return ob
 
 
-def build_seat():
-    GROUP[0] = "seat"
-    y0 = -0.35
-    box("seat_pedestal", (0.36, 0.42, 0.34), (0, y0, 0.17), material="paint_dark", bev=0.02)
-    box("seat_rail_L", (0.04, 0.9, 0.03), (-0.2, y0, 0.015), material="plastic", bev=0.005)
-    box("seat_rail_R", (0.04, 0.9, 0.03), (0.2, y0, 0.015), material="plastic", bev=0.005)
-    box("seat_shell_base", (0.64, 0.6, 0.06), (0, y0, 0.37), material="paint_dark", bev=0.02)
-    box("seat_cushion", (0.54, 0.54, 0.11), (0, y0 + 0.02, 0.455), material="leather", bev=0.04,
-        segs=5)
+def build_conduits():
+    """Used-future clutter: cable looms sagging along the roof edges and down the window
+    pillars, conduit runs on the roof, and greebled roof and lower-wall panels."""
+    GROUP[0] = "conduits"
+    rnd = random.Random(91)
     for side in (-1, 1):
-        box(f"seat_bolster_{side}", (0.07, 0.54, 0.16), (side * 0.29, y0 + 0.02, 0.47),
-            material="leather", bev=0.03, segs=5)
-    back = frame_matrix((0, y0 - 0.3, 0.92), (-14, 0, 0))
-    sh = box("seat_shell_back", (0.64, 0.07, 0.95), (0, 0, 0), material="paint_dark", bev=0.025,
-             segs=3)
-    sh.matrix_world = back @ Matrix.Translation((0, -0.05, 0))
-    bc = box("seat_back", (0.52, 0.1, 0.8), (0, 0, 0), material="leather", bev=0.04, segs=5)
-    bc.matrix_world = back @ Matrix.Translation((0, 0.03, -0.02))
+        s = "L" if side < 0 else "R"
+        # Looms along the roof edge, sagging between the ribs.
+        ribs = [Y_BACK + 0.05, -0.95, -0.15, 0.62, Y_FRONT - 0.05]
+        for c, (dx, dz, r) in enumerate([(0.0, 0.0, 0.012), (0.03, -0.01, 0.008),
+                                         (-0.02, -0.025, 0.01), (0.015, -0.03, 0.006)]):
+            x = side * (WALL[3][0] - 0.06 + dx)
+            pts = []
+            for a, b in zip(ribs, ribs[1:]):
+                pts.append((x, a, CEIL_Z - 0.05 + dz))
+                pts.append((x - side * 0.01, (a + b) / 2, CEIL_Z - 0.1 + dz - rnd.uniform(0, 0.04)))
+            pts.append((x, ribs[-1], CEIL_Z - 0.05 + dz))
+            cable(f"loom_{s}{c}", pts, r, rnd.choice(["plastic", "plastic", "leather", "paint_dark"]))
+        # Cables down the pillar where the side glass meets the windshield.
+        for c in range(3):
+            x0 = side * (wall_x(2.0) - 0.05 - c * 0.018)
+            pts = [(x0, Y_FRONT - 0.06, 2.05), (side * (wall_x(1.5) - 0.06 - c * 0.018), Y_FRONT - 0.07, 1.5),
+                   (side * (wall_x(0.95) - 0.07 - c * 0.018), Y_FRONT - 0.06, 0.95)]
+            cable(f"pillar_{s}{c}", pts, 0.007, "plastic")
+        # Greebled lower walls behind the consoles' ends, and roof side panels.
+        # (Only behind the consoles: further forward they cover the wall.)
+        m = frame_matrix((side * (wall_x(0.6) - 0.03), (Y_BACK - 0.78) / 2, 0.6),
+                         (0, 0, -side * 90))
+        greeble(f"lowwall_{s}", m, -0.78 - Y_BACK - 0.08, 0.45, rnd)
+    # Roof: two conduit runs down the middle with clamps, and greebled roof panels.
+    for k, (x, r) in enumerate([(-0.08, 0.022), (0.0, 0.016), (0.07, 0.026)]):
+        cyl(f"roof_conduit{k}", r, Y_FRONT - Y_BACK - 0.4, (x, (Y_FRONT + Y_BACK) / 2 - 0.1, CEIL_Z - 0.07),
+            (90, 0, 0), "paint_dark" if k != 1 else "plastic", 16)
+    for y in (-1.3, -0.55, 0.25, 0.95):
+        box(f"roof_clamp_{y}", (0.26, 0.04, 0.03), (0, y, CEIL_Z - 0.07), material="paint", bev=0.005)
+    for j, (ya, yb) in enumerate([(Y_BACK + 0.05, -0.98), (-0.92, -0.18), (-0.12, 0.59)]):
+        for side in (-1, 1):
+            m = frame_matrix((side * 0.62, (ya + yb) / 2, CEIL_Z - 0.026), (90, 0, 0))
+            greeble(f"roof_{j}{side}", m, 0.42, yb - ya - 0.04, rnd)
+
+
+def build_center_console():
+    """A console running back from the dashboard between the pilot's knees, with two
+    sticks and a greebled top, as in a two-handed flight deck."""
+    GROUP[0] = "center_console"
+    import random
+    rnd = random.Random(77)
+    prism("center_console", [(-0.36, 0), (0.36, 0), (0.36, 0.56), (0.32, 0.6), (-0.32, 0.6),
+                             (-0.36, 0.56)], "y", 0.35, 1.18, "paint_dark", 0.01, 3)
+    m = frame_matrix((0, 0.765, 0.601), (-90, 0, 0))
+    greeble("cc_top", m, 0.62, 0.8, rnd)
     for side in (-1, 1):
-        bo = box(f"seat_back_bolster_{side}", (0.08, 0.13, 0.7), (0, 0, 0), material="leather",
-                 bev=0.035, segs=5)
-        bo.matrix_world = back @ Matrix.Translation((side * 0.28, 0.04, -0.05))
-    hr = box("seat_headrest", (0.32, 0.12, 0.2), (0, 0, 0), material="leather", bev=0.045, segs=5)
-    hr.matrix_world = back @ Matrix.Translation((0, 0.03, 0.56))
+        sm = frame_matrix((side * 0.14, 0.62, 0.62), (0, 0, 0))
+        b = cyl(f"cc_stick_boot_{side}", 0.045, 0.03, (0, 0, 0), material="leather", segs=24)
+        b.matrix_world = sm @ Matrix.Translation((0, 0, 0.0))
+        sh = cyl(f"cc_stick_shaft_{side}", 0.011, 0.14, (0, 0, 0), material="paint_dark", segs=16)
+        sh.matrix_world = sm @ Matrix.Translation((0, 0, 0.08))
+        g = box(f"cc_stick_grip_{side}", (0.042, 0.05, 0.11), (0, 0, 0), material="plastic",
+                bev=0.018, segs=4)
+        g.matrix_world = sm @ Matrix.Translation((0, 0.004, 0.2)) @ Matrix.Rotation(-0.12, 4, "X")
+        t = cyl(f"cc_stick_btn_{side}", 0.007, 0.01, (0, 0, 0), material="led_amber", segs=12)
+        t.matrix_world = sm @ Matrix.Translation((0, 0, 0.258))
+    # Its sides: vents and a readout strip.
     for side in (-1, 1):
-        post = cyl(f"seat_headrest_post_{side}", 0.012, 0.12, (0, 0, 0), material="paint_dark",
-                   segs=12)
-        post.matrix_world = back @ Matrix.Translation((side * 0.09, 0.0, 0.43))
-        arm = box(f"seat_arm_{side}", (0.08, 0.36, 0.05), (0, 0, 0), material="leather", bev=0.02,
-                  segs=4)
-        arm.matrix_world = frame_matrix((side * 0.36, y0 - 0.02, 0.66), (0, 0, 0))
-        sup = box(f"seat_arm_post_{side}", (0.04, 0.04, 0.22), (0, 0, 0), material="paint_dark",
-                  bev=0.008)
-        sup.matrix_world = frame_matrix((side * 0.36, y0 - 0.12, 0.52), (0, 0, 0))
-    # Eject handle between the knees, with its stripe.
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.07, minor_radius=0.012,
-                                     location=(0, y0 + 0.31, 0.43), rotation=(math.pi / 2, 0, 0))
-    t = bpy.context.active_object
-    t.name = "seat_eject_handle"
-    t.data.materials.append(mat("plastic"))
-    t["group"] = GROUP[0]
-    ALL.append(t)
-    decal("stripe", 0.3, (0, y0 + 0.295, 0.395), (0, 0, 0), name="decal_stripe_eject", repeat=1.2)
-    # Back of the seat shell: a stencilled label for the camera behind it.
-    decal("serial", 0.36, (0, 0, 0), (0, 0, 0), name="decal_seat_serial")
-    ALL[-1].matrix_world = back @ Matrix.Translation((0, -0.088, 0.2))
+        m = frame_matrix((side * 0.362, 0.77, 0.3), (0, 0, side * 90))
+        greeble(f"cc_side_{side}", m, 0.76, 0.46, rnd)
+
+
+def build_header():
+    """A lit header across the top of the windshield, where the roof meets the glass."""
+    GROUP[0] = "header"
+    import random
+    rnd = random.Random(31)
+    prism("header", [(Y_FRONT - 0.25, CEIL_Z), (Y_FRONT + 0.12, CEIL_Z), (Y_FRONT + 0.05, CEIL_Z - 0.14),
+                     (Y_FRONT - 0.25, CEIL_Z - 0.1)], "x", -1.02, 1.02, "paint_dark", 0.008, 2)
+    m = frame_matrix((0, Y_FRONT - 0.1, CEIL_Z - 0.121), (-110, 0, 0))
+    for side in (-1, 1):
+        greeble(f"header_{side}", m @ Matrix.Translation((side * 0.5, 0, 0)), 0.9, 0.14, rnd)
+    for side in (-1, 1):
+        box(f"header_light_{side}", (0.03, 0.012, 0.1), (side * 0.12, Y_FRONT - 0.04, CEIL_Z - 0.13),
+            (-110, 0, 0), material="led_amber", bev=0.003)
 
 
 # ---------------------------------------------------------------------------- finishing
@@ -825,8 +963,9 @@ def main():
     build_nose()
     build_console()
     build_side_consoles()
-    build_overhead()
-    build_seat()
+    build_center_console()
+    build_header()
+    build_conduits()
     finish()
     tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in ALL)
     print(f"objects {len(ALL)}  triangles {tris}")
