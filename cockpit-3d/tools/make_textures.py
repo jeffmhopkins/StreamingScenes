@@ -23,6 +23,8 @@ SETS = {
     "hexpanel": ("MetalPlates015B", None),
 }
 
+PAINT_TINT = [50.0, 57.0, 68.0]  # dark blue-grey gunmetal paint
+
 FONT = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_MED = "/usr/share/fonts/opentype/inter/Inter-Medium.otf"
 
@@ -71,11 +73,11 @@ def build_set(src, out, name, asset, remap):
     color = np.asarray(load(base + "Color.jpg", "RGB")).astype(np.float32)
     grime = scratches = None
     if remap == "grime":
-        # Gunmetal paint over the powder coat's grain, with tiling grime and scratches.
+        # Dark blue-grey paint over the powder coat's grain, with tiling grime and scratches.
         n = color.shape[0]
         lum = color.mean(axis=2, keepdims=True)
         grain = (lum - lum.mean()) * 1.0
-        tint = np.array([60.0, 66.0, 76.0])
+        tint = np.array(PAINT_TINT)
         grime = grime_mask(n, seed=7)[..., None]
         scratches = scratch_mask(n, seed=11)[..., None]
         mottling = tile_noise(n, 6, seed=3)[..., None] * 10.0
@@ -108,6 +110,97 @@ def build_set(src, out, name, asset, remap):
     Image.merge("RGB", (ao, rough, metal)).save(
         os.path.join(out, f"{name}-orm.jpg"), quality=95
     )
+
+
+def blur_wrap(a, sigma):
+    """Gaussian blur that wraps at the edges, so the result still tiles."""
+    n = a.shape[0]
+    k = np.fft.fftfreq(n)
+    g = np.exp(-2 * (np.pi * sigma) ** 2 * (k[:, None] ** 2 + k[None, :] ** 2))
+    return np.real(np.fft.ifft2(np.fft.fft2(a) * g))
+
+
+def build_panel_set(src, out, n=2048):
+    """The `panel` set, for the big surfaces: painted metal panelling drawn here over the
+    paint set's grain. Seams between panels, rivets along them, each panel a slightly
+    different shade and height, paint chipped to bare metal along the seams and on the
+    rivet heads, and grime settled in the grooves. It tiles."""
+    rng = np.random.default_rng(42)
+    seam = Image.new("L", (n, n), 0)
+    rivet = Image.new("L", (n, n), 0)
+    shade = np.zeros((n, n), np.float32)
+    level = np.zeros((n, n), np.float32)
+    ds, dr = ImageDraw.Draw(seam), ImageDraw.Draw(rivet)
+    rects = [(0, 0, n, n)]
+    for _ in range(4):
+        nxt = []
+        for x0, y0, x1, y1 in rects:
+            w, h = x1 - x0, y1 - y0
+            if max(w, h) < 380 or rng.random() < 0.12:
+                nxt.append((x0, y0, x1, y1))
+            elif w >= h:
+                c = int(x0 + w * rng.uniform(0.35, 0.65))
+                nxt += [(x0, y0, c, y1), (c, y0, x1, y1)]
+            else:
+                c = int(y0 + h * rng.uniform(0.35, 0.65))
+                nxt += [(x0, y0, x1, c), (x0, c, x1, y1)]
+        rects = nxt
+    for x0, y0, x1, y1 in rects:
+        shade[y0:y1, x0:x1] = rng.uniform(-7, 7)
+        level[y0:y1, x0:x1] = rng.choice([0.0, 0.0, 0.35, -0.3])
+        for ox in (-n, 0, n):
+            for oy in (-n, 0, n):
+                ds.rectangle([x0 + ox, y0 + oy, x1 + ox, y1 + oy], outline=255, width=5)
+        inset, pitch = 26, 72
+        pts = []
+        for x in np.arange(x0 + inset, x1 - inset + 1, max(pitch, 1)):
+            pts += [(x, y0 + inset), (x, y1 - inset)]
+        for y in np.arange(y0 + inset + pitch, y1 - inset - pitch + 1, pitch):
+            pts += [(x0 + inset, y), (x1 - inset, y)]
+        for x, y in pts:
+            dr.ellipse([x - 6, y - 6, x + 6, y + 6], fill=255)
+    S = np.asarray(seam).astype(np.float32) / 255
+    R = blur_wrap(np.asarray(rivet).astype(np.float32) / 255, 1.5)
+    S1, S8, S30 = blur_wrap(S, 1.2), blur_wrap(S, 7), blur_wrap(S, 30)
+    # Height: grooves at the seams, domes at the rivets, panels at slightly different levels.
+    height = -S1 * 1.4 + blur_wrap(np.asarray(rivet).astype(np.float32) / 255, 3) * 2.2 \
+        + blur_wrap(level, 3) * 1.5
+    gx = (np.roll(height, -1, 1) - np.roll(height, 1, 1)) * 2.2
+    gy = (np.roll(height, -1, 0) - np.roll(height, 1, 0)) * 2.2
+    base_n = np.asarray(load(os.path.join(src, "Metal029", "Metal029_2K-JPG_NormalGL.jpg"),
+                             "RGB").resize((n, n))).astype(np.float32) / 127.5 - 1
+    nx, ny = -gx + base_n[..., 0] * 0.5, gy + base_n[..., 1] * 0.5  # image y is down
+    nz = np.ones_like(nx)
+    ln = np.sqrt(nx * nx + ny * ny + nz * nz)
+    normal = np.stack([nx / ln, ny / ln, nz / ln], -1)
+    Image.fromarray(((normal * 0.5 + 0.5) * 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-normal.jpg"), quality=95)
+    # Chipped paint: a band beside each seam and the rivet heads, broken up by noise.
+    band = np.clip(S8 * 6, 0, 1) * (1 - np.clip(S1 * 3, 0, 1))
+    chips = np.clip((band * 0.9 + tile_noise(n, 90, 5) * 0.55 + tile_noise(n, 300, 6) * 0.35 - 0.95) * 6, 0, 1)
+    chips = np.clip(chips + np.clip(R * 1.6 - 0.5, 0, 1) * np.clip(tile_noise(n, 40, 8) * 2 + 0.6, 0, 1), 0, 1)
+    scratches = scratch_mask(n, seed=21) * 0.7
+    grime = np.clip(grime_mask(n, seed=17) * 0.8 + np.clip(S30 * 5, 0, 1) * 0.55, 0, 1)
+    grain_src = np.asarray(load(os.path.join(src, "Metal029", "Metal029_2K-JPG_Color.jpg"),
+                                "RGB").resize((n, n))).astype(np.float32).mean(axis=2)
+    grain = grain_src - grain_src.mean()
+    lum = (shade + grain + tile_noise(n, 5, 13) * 8)[..., None]
+    color = np.array(PAINT_TINT) + lum
+    dirt, bare = np.array([26.0, 23.0, 20.0]), np.array([118.0, 121.0, 126.0])
+    g3 = grime[..., None]
+    color = color * (1 - g3 * 0.65) + dirt * g3 * 0.65
+    color = color * (1 - np.clip(S1 * 1.5, 0, 1)[..., None] * 0.8)
+    m = np.clip(chips + scratches, 0, 1)[..., None]
+    color = color * (1 - m) + bare * m
+    Image.fromarray(np.clip(color, 0, 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-color.jpg"), quality=92)
+    # Matte paint, rougher where dirty; bare metal is glossy and metallic.
+    rough = 150 + grime * 70 + tile_noise(n, 20, 31) * 14
+    rough = rough * (1 - m[..., 0]) + 62 * m[..., 0]
+    ao = 255 * (1 - np.clip(S8 * 2.2, 0, 1) * 0.55) * (1 - grime * 0.2)
+    metal = m[..., 0] * 255
+    Image.fromarray(np.clip(np.stack([ao, rough, metal], -1), 0, 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-orm.jpg"), quality=95)
 
 
 # The decal atlas: 2048 x 2048, eight rows of 256 px. Each entry is a rectangle in pixels;
@@ -227,8 +320,15 @@ def draw_atlas(out):
     Image.fromarray(px).save(os.path.join(out, "decals.png"), optimize=True)
 
 
-SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right"]
+# Every screen shares one material, `screens`, and one 1920 x 1080 image: a 3 x 3 grid of
+# 640 x 360 cells, (column, row) from the top left. The desk instrument is 8:3 and takes
+# the left 960 x 360 of the bottom row.
+SCREEN_CELLS = {
+    "screen_left": (0, 0), "screen_center": (1, 0), "screen_right": (2, 0),
+    "screen_overhead_left": (0, 1), "screen_overhead_right": (1, 1), "screen_side_left": (2, 1),
+    "screen_desk": (0, 2), "screen_side_right": (2, 2),
+}
+SCREENS = list(SCREEN_CELLS)
 
 # Readouts: an emissive atlas of small amber displays, 8 x 16 cells of 256 x 128 px.
 # build_cockpit.py picks cells for the little display quads on the panels.
@@ -307,7 +407,23 @@ def draw_readouts(out):
 def draw_screens(out):
     """A test card per screen, 960 x 540 (16:9), naming its material, so the screens are
     easy to tell apart until a live source replaces them."""
+    # The desk instrument, switched off: a dark 24 x 8 grid of pads, 1536 x 576 (8:3). A
+    # live source on screen_desk replaces it.
+    w, h = 1536, 576
+    im = Image.new("RGB", (w, h), (6, 6, 7))
+    d = ImageDraw.Draw(im)
+    for r in range(8):
+        for c in range(24):
+            x, y = 12 + c * 63, 12 + r * 69
+            shade = 40 + ((r * 5 + c * 7) % 4) * 3
+            d.rounded_rectangle([x, y, x + 55, y + 61], 6, fill=(shade, shade, shade + 2),
+                                outline=(70, 70, 76), width=2)
+    atlas = Image.new("RGB", (1920, 1080), (0, 0, 0))
+    c, r = SCREEN_CELLS["screen_desk"]
+    atlas.paste(im.resize((960, 360), Image.LANCZOS), (c * 640, r * 360))
     for name in SCREENS:
+        if name == "screen_desk":
+            continue
         w, h = 960, 540
         im = Image.new("RGB", (w, h), (8, 14, 22))
         d = ImageDraw.Draw(im)
@@ -329,7 +445,9 @@ def draw_screens(out):
         bb = d.textbbox((0, 0), t, font=f2)
         d.text(((w - (bb[2] - bb[0])) / 2 - bb[0], 250 - bb[1]), t, font=f2, fill=(120, 200, 220))
         d.polygon([(12, 12), (72, 12), (12, 72)], fill=(255, 80, 60))
-        im.save(os.path.join(out, f"{name}.jpg"), quality=90)
+        c, r = SCREEN_CELLS[name]
+        atlas.paste(im.resize((640, 360), Image.LANCZOS), (c * 640, r * 360))
+    atlas.save(os.path.join(out, "screens.jpg"), quality=92)
 
 
 def main():
@@ -337,6 +455,7 @@ def main():
     os.makedirs(out, exist_ok=True)
     for name, (asset, remap) in SETS.items():
         build_set(src, out, name, asset, remap)
+    build_panel_set(src, out)
     draw_atlas(out)
     draw_screens(out)
     draw_readouts(out)
