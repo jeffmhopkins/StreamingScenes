@@ -127,6 +127,66 @@ source can't do that yet, a flat card placed on the corners above does the same 
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
 `led_green`, `led_blue` (emissive), and the five `screen_*` materials above.
 
+## In JStream
+
+[`jstream/`](jstream/) builds a 3D scene around the model in a running JStream engine,
+over its MCP endpoint, and plays a camera tour of it.
+
+![The camera tour](media/jstream-tour.gif)
+
+[The tour as video (MP4)](media/jstream-tour.mp4)
+
+| | |
+|---|---|
+| ![From the seat: the live monitor in focus](media/jstream-seat.jpg) | ![Out the window: the focus pulls to the planet and the dash goes soft](media/jstream-window.jpg) |
+| ![Close on the live monitor](media/jstream-monitor.jpg) | ![Behind the seat](media/jstream-cockpit.jpg) |
+
+What it shows:
+
+- **A live source on a screen.** A 2D scene, `feed` (a camera still, a tag and a scan
+  bar sweeping down it), is a `scene` source mapped onto `screen_center` with the model
+  source's `texture` and `texture_material`. Anything a scene can hold, a real camera
+  included, can go there.
+- **Depth of field on the model itself.** Each shot's camera has a focus; the model is
+  blurred by the depth of each pixel it draws, so the dash and the window frame soften
+  while the camera looks past them (JStream ADR-0165), and the monitor is sharp when it
+  is in focus.
+- **Keyframed 3D camera moves.** Each shot is a keyframe variant of the `cockpit` scene
+  holding a full 3D camera (position, target, field of view, focus, blur). Switching
+  with a `move` preset glides every field together, eased.
+- **Scene lights and depth-aware filters.** Starlight through the windshield with
+  shadows, cabin and screen-glow point lights, an environment sky, ambient occlusion
+  and depth bloom.
+- **A plate far outside.** `starship-cockpit/pages/planet.jpg` as a card 40 m past the
+  windshield, seen through the glass.
+- **A second model.** The throttle lever, `model/throttle.gltf`, placed at its hinge.
+
+| File | What it does |
+|---|---|
+| [`jstream/build_scene.py`](jstream/build_scene.py) | Builds the `feed` and `cockpit` scenes, the lights, filters, the shot variants and the glide presets. |
+| [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point and throttle hinge from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
+| [`jstream/drive.py`](jstream/drive.py) | Plays the tour live on program and records it (`record` output, H.264). |
+| [`jstream/render_frames.py`](jstream/render_frames.py) | Renders the tour frame by frame through `video.snapshot`, for a machine too slow to composite it live. |
+| [`jstream/snap_shot.py`](jstream/snap_shot.py) | Puts one shot on program and saves a snapshot. |
+| [`jstream/mcp.py`](jstream/mcp.py) | A small MCP client for the engine's HTTP endpoint. |
+
+```sh
+cd cockpit-3d/jstream
+export JS_TOKEN=<the engine's token file> JS_MCP=http://127.0.0.1:4455/mcp
+python3 build_scene.py
+python3 drive.py                     # on a machine with a GPU: records cockpit-slow.mp4
+```
+
+How the media here was made: the test machine had no GPU, so JStream composited on the
+lavapipe software rasterizer, at a few seconds a frame with depth of field on the model.
+`render_frames.py` stepped the camera through the same tour, with the same per-field
+ease-in-out a `move` preset applies, and saved a snapshot a frame; ffmpeg joined them at
+30 fps. Snapshots are at most 1280 px wide, so the media is 1280 × 720; the canvas, and a
+recording, is 1920 × 1080. Every frame is a real JStream composite.
+
+It needs a JStream with live model textures (ADR-0107's `texture`) and depth of field on
+models (ADR-0165).
+
 ## Rebuilding it
 
 ```sh
