@@ -51,9 +51,9 @@ SCREENS = {
     # Lying on the tray in front of the pilot, its far edge raised a little and butted
     # against the console. The instrument's playing surface: 8:3 (see DESK_ASPECT).
     "screen_desk": (0.72, (0.0, 0.92, 0.69), (-78, 0, 0)),
-    # Hanging from the overhead console, facing back and down at the pilot.
-    "screen_overhead_left": (0.3, (-0.4, 0.74, 1.73), (55, 0, 10)),
-    "screen_overhead_right": (0.3, (0.4, 0.74, 1.73), (55, 0, -10)),
+    # Hanging from the overhead console, each aimed at the pilot's eyes.
+    "screen_overhead_left": (0.3, (-0.4, 0.76, 1.70), (32, 0, 24)),
+    "screen_overhead_right": (0.3, (0.4, 0.76, 1.70), (32, 0, -24)),
 }
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
@@ -156,9 +156,11 @@ def make_material(name):
         bsdf.inputs["Emission Strength"].default_value = 3.0
         bsdf.inputs["Roughness"].default_value = 0.2
     elif name == "glass":
-        bsdf.inputs["Base Color"].default_value = (0.55, 0.65, 0.75, 1)
-        bsdf.inputs["Roughness"].default_value = 0.04
-        bsdf.inputs["Alpha"].default_value = 0.10
+        # Nearly black and nearly clear: a pale tint lights up like a wall under the
+        # scene's lights, so the glass only adds a faint darkening and its reflections.
+        bsdf.inputs["Base Color"].default_value = (0.02, 0.03, 0.04, 1)
+        bsdf.inputs["Roughness"].default_value = 0.02
+        bsdf.inputs["Alpha"].default_value = 0.05
         m.surface_render_method = "BLENDED"
     elif name == "decals":
         c = tex(f"{TEX}/decals.png")
@@ -323,7 +325,7 @@ CEIL_Z = 1.85
 SILL_Z = 0.95             # the bottom of every window
 Y_BACK, Y_FRONT, Y_NOSE = -1.10, -0.10, 1.70  # rear bulkhead, B-pillar, windshield base
 NOSE_HALF_W = 0.88        # half the windshield's width at its base
-TOP_Y, TOP_HALF_W = 0.85, 0.76  # where the windshield meets the roof, and half its width
+TOP_Y, TOP_HALF_W = 0.85, 0.73  # where the windshield meets the roof, and half its width (0.73 keeps each side pane flat)
 
 
 def wall_x(z):
@@ -901,12 +903,12 @@ def build_header():
     the pilot, a switch panel between them and a lamp housing under it."""
     GROUP[0] = "header"
     rnd = random.Random(31)
-    box("overhead", (1.2, 0.3, 0.14), (0, 0.82, CEIL_Z - 0.07), (-35, 0, 0), material="paint",
+    box("overhead", (0.5, 0.2, 0.22), (0, 0.84, CEIL_Z - 0.1), (-58, 0, 0), material="paint",
         bev=0.03, segs=3)
-    greeble("overhead_mid", frame_matrix((0, 0.755, 1.735), (55, 0, 0)), 0.36, 0.16, rnd)
-    box("overhead_lamp_housing", (0.2, 0.08, 0.05), (0, 0.72, 1.66), (-35, 0, 0), material="plastic",
+    greeble("overhead_mid", frame_matrix((0, 0.775, 1.71), (32, 0, 0)), 0.4, 0.16, rnd)
+    box("overhead_lamp_housing", (0.2, 0.06, 0.05), (0, 0.75, 1.6), (-58, 0, 0), material="plastic",
         bev=0.02, segs=3)
-    box("overhead_lamp", (0.12, 0.012, 0.02), (0, 0.685, 1.648), (-35, 0, 0), material="led_amber",
+    box("overhead_lamp", (0.12, 0.012, 0.02), (0, 0.722, 1.585), (-58, 0, 0), material="led_amber",
         bev=0.004)
 
 
