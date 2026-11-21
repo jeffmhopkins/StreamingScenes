@@ -228,7 +228,7 @@ def draw_atlas(out):
 
 
 SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right"]
+           "screen_side_right", "screen_desk"]
 
 # Readouts: an emissive atlas of small amber displays, 8 x 16 cells of 256 x 128 px.
 # build_cockpit.py picks cells for the little display quads on the panels.
@@ -307,7 +307,21 @@ def draw_readouts(out):
 def draw_screens(out):
     """A test card per screen, 960 x 540 (16:9), naming its material, so the screens are
     easy to tell apart until a live source replaces them."""
+    # The desk instrument, switched off: a dark 24 x 8 grid of pads, 1536 x 576 (8:3). A
+    # live source on screen_desk replaces it.
+    w, h = 1536, 576
+    im = Image.new("RGB", (w, h), (6, 6, 7))
+    d = ImageDraw.Draw(im)
+    for r in range(8):
+        for c in range(24):
+            x, y = 12 + c * 63, 12 + r * 69
+            shade = 40 + ((r * 5 + c * 7) % 4) * 3
+            d.rounded_rectangle([x, y, x + 55, y + 61], 6, fill=(shade, shade, shade + 2),
+                                outline=(70, 70, 76), width=2)
+    im.save(os.path.join(out, "screen_desk.jpg"), quality=92)
     for name in SCREENS:
+        if name == "screen_desk":
+            continue
         w, h = 960, 540
         im = Image.new("RGB", (w, h), (8, 14, 22))
         d = ImageDraw.Draw(im)

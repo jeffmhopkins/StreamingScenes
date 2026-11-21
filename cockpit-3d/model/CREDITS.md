@@ -22,6 +22,6 @@ metalness image per set, and the paint set is recoloured from near black to gunm
 
 ambientCG's licence: <https://docs.ambientcg.com/license/>.
 
-`decals.png`, `readouts.png` and the five `screen_*.jpg` placeholder cards are drawn by `make_textures.py`. The grime and scratches on the `paint` set are generated there too. Their text is
+`decals.png`, `readouts.png` and the six `screen_*.jpg` placeholders are drawn by `make_textures.py`. The grime and scratches on the `paint` set are generated there too. Their text is
 set in [Inter](https://github.com/rsms/inter) (SIL Open Font License 1.1). Only rendered images of the
 glyphs are in the textures, not the font.

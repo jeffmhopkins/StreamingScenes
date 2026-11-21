@@ -1,24 +1,26 @@
 # 3D cockpit model
 
 A starship flight deck as a real 3D model, for JStream's `model` source (ADR-0107):
-glTF 2.0, metallic-roughness materials, and five 16:9 screens that are each their own
-material so a live source can be mapped onto any of them. It is meant for camera moves
+glTF 2.0, metallic-roughness materials, five 16:9 screens and a desk instrument that are
+each their own material so a live source can be mapped onto any of them. It is meant for camera moves
 and depth of field inside the cockpit, close enough to read the readouts.
 
 The look follows the green-screen plate of [starship-cockpit](../starship-cockpit/)
 and the "used future" of working-ship sets: dark gunmetal paint with grime and scratches,
-glass that wraps from the windshield back along both sides, and every console covered in
+a strutted canopy (one big raked windshield, corner panes, side windows and glass roof
+panels over the pilot), and every console covered in
 greebled sub-panels, amber readouts, button banks, switches, knobs and vents, with cable
 looms and conduits on the roof. There is no seat, so the camera can sit where a pilot
-would.
+would. On a desk in front of the monitors lies a grid instrument that looks switched
+off until a live source is put on it.
 
 ![The cockpit from the back of the cabin](media/overview.jpg)
 
 | | |
 |---|---|
-| ![The pilot's view](media/pilot.jpg) | ![The wraparound side glass](media/canopy.jpg) |
-| ![The centre console and its two sticks](media/center-console.jpg) | ![The left console](media/left-console.jpg) |
-| ![The dashboard up close](media/dash-closeup.jpg) | |
+| ![The pilot's view](media/pilot.jpg) | ![Through the windshield](media/windshield.jpg) |
+| ![The desk instrument, switched off](media/desk.jpg) | ![The canopy from the side](media/canopy.jpg) |
+| ![The left console](media/left-console.jpg) | ![The dashboard up close](media/dash-closeup.jpg) |
 
 ![A macro shot of the dashboard buttons: the texture stays sharp](media/button-macro.jpg)
 
@@ -31,7 +33,7 @@ scene's lights, so it will not look exactly like this there.
 | Path | What it is |
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
-| [`model/textures/`](model/textures/) | 22 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
+| [`model/textures/`](model/textures/) | 23 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set), and draws the decals, readouts and screen cards. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
@@ -45,9 +47,9 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 404,014 | 2,000,000 |
-| Textures | 22, all 2048 px or smaller | 64, 4096 px a side |
-| Memory | 376 MiB of textures with mips, 37 MiB of mesh: 413 MiB | 512 MiB |
+| Triangles | 365,116 | 2,000,000 |
+| Textures | 23, all 2048 px or smaller | 64, 4096 px a side |
+| Memory | 380 MiB of textures with mips, 34 MiB of mesh: 414 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
@@ -85,19 +87,18 @@ cabin toward the windshield.
 |---|---|
 | Whole cabin | x −1.40 to 1.40, y 0 to 2.20, z −2.02 (windshield base) to 1.76 (rear bulkhead) |
 | Pilot's eye point | about (0, 1.22, 0.45), looking toward −z |
-| `windshield` | three front panes in a frame leaning back: the bottom edge at y 1.16, z −2.02; the top edge at y 2.16, z −1.25. The centre pane spans x −0.78 to 0.78; the side panes x ±0.84 to ±1.02. Also the glass cheeks that join it to the side windows. |
-| Side windows (in `cabin`) | glass on both walls from the console sill (y 0.85) to the roof (y 2.16), from z 0.15 forward to the windshield, split by ribs at z −0.62 and −1.25 and a transom at y 1.65 |
-| `header` | the lit, greebled header across the top of the windshield |
-| `dashboard` | across the front, under the windshield; top at y ≈ 0.67; greebled banks between the lip and the screens |
-| `center_console` | between the pilot's knees, x −0.36 to 0.36, z −1.18 to −0.35, top at y 0.60, with two sticks |
+| `windshield` | the canopy forward of the side windows. One raked windshield: its base at y 1.16, z −2.45, x ±0.86; its top at the roof, y 2.16, z −1.50, x ±0.62. A corner pane each side joins it to the side windows at z −1.25. Thin struts frame every edge. Also the glareshield at the sill and the square hull below it. |
+| Side windows (in `cabin`) | glass on both walls from the console sill (y 0.85) to the roof (y 2.16), from z 0.15 forward to z −1.25, split by a rib at z −0.62 and a transom at y 1.65. The roof's outer panels between z −0.62 and −1.25 are glass too. |
+| `header` | the lit, greebled header under the roof behind the top of the windshield |
+| `dashboard` | across the front, under the canopy; top at y ≈ 0.67; greebled banks between the lip and the screens; the desk, reaching back to z −0.42 at y ≈ 0.55 to 0.68, on two arms |
 | `side_consoles` | either side, x ±0.62 to ±1.35, z −1.18 to 0.75; throttle on the left, side stick on the right; greebled tops and inner faces |
 | `conduits` | cable looms along the roof edges and down the pillars, roof conduits, greebled roof and rear-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
 | `cabin` | walls, ribs, roof with light strips, floor, pipes, the side windows |
 
 All glass is the one `glass` material (alpha-blended, nearly clear): whatever is behind the
-model in the scene shows through every window. There is no seat; the space where one
-would be (around x 0, z 0 to 0.8) is clear for the camera.
+model in the scene shows through every window. There is no seat and no centre
+console; the floor from the desk back (x ±0.6, z −0.4 to 1.6) is clear for the camera.
 
 ### Screens
 
@@ -115,6 +116,14 @@ card with its name.
 | `screen_right` | 0.500 × 0.281 | (0.461, 1.036, −1.514) | (0.894, 1.036, −1.264) | (0.426, 0.764, −1.456) | (0.859, 0.764, −1.206) | (−0.49, 0.24, 0.84) |
 | `screen_side_left` | 0.300 × 0.169 | (−1.114, 0.914, −0.767) | (−0.955, 0.914, −1.021) | (−1.005, 0.806, −0.699) | (−0.846, 0.806, −0.953) | (0.55, 0.77, 0.34) |
 | `screen_side_right` | 0.300 × 0.169 | (0.955, 0.914, −1.021) | (1.114, 0.914, −0.767) | (0.846, 0.806, −0.953) | (1.005, 0.806, −0.699) | (−0.55, 0.77, 0.34) |
+| `screen_desk` | 0.720 × 0.270 (8:3) | (−0.360, 0.688, −0.832) | (0.360, 0.688, −0.832) | (−0.360, 0.632, −0.568) | (0.360, 0.632, −0.568) | (0, 0.98, 0.21) |
+
+`screen_desk` is the playing surface of the instrument on the desk. It is the one screen
+that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, so crop
+the source to the instrument. Its placeholder is a dark 24 × 8 grid of pads, so the
+instrument reads as switched off until a live source (a top-down camera on the real
+instrument, say) replaces it. To switch it off again, take the source off the material:
+ADR-0107 says a named source that isn't drawing reads transparent, not as the placeholder.
 
 To put a live source on a screen, give the model source `texture` = that source and
 `texture_material` = the screen's material name (ADR-0107 decision 5). Where a model
@@ -125,7 +134,7 @@ source can't do that yet, a flat card placed on the corners above does the same 
 `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), and the five `screen_*` materials above.
+`led_green`, `led_blue` (emissive), and the six `screen_*` materials above.
 
 ## Rebuilding it
 
