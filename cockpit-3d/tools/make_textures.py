@@ -71,11 +71,11 @@ def build_set(src, out, name, asset, remap):
     color = np.asarray(load(base + "Color.jpg", "RGB")).astype(np.float32)
     grime = scratches = None
     if remap == "grime":
-        # Gunmetal paint over the powder coat's grain, with tiling grime and scratches.
+        # Grey-green paint over the powder coat's grain, with tiling grime and scratches.
         n = color.shape[0]
         lum = color.mean(axis=2, keepdims=True)
         grain = (lum - lum.mean()) * 1.0
-        tint = np.array([60.0, 66.0, 76.0])
+        tint = np.array([84.0, 92.0, 90.0])  # worn grey-green aircraft paint
         grime = grime_mask(n, seed=7)[..., None]
         scratches = scratch_mask(n, seed=11)[..., None]
         mottling = tile_noise(n, 6, seed=3)[..., None] * 10.0
@@ -228,7 +228,8 @@ def draw_atlas(out):
 
 
 SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right", "screen_desk"]
+           "screen_side_right", "screen_overhead_left", "screen_overhead_right",
+           "screen_desk"]
 
 # Readouts: an emissive atlas of small amber displays, 8 x 16 cells of 256 x 128 px.
 # build_cockpit.py picks cells for the little display quads on the panels.

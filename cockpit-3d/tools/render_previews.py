@@ -17,14 +17,14 @@ WIDTH = int(sys.argv[4]) if len(sys.argv) > 4 else 1280
 
 # name: (camera position, look-at point, focal length mm)
 VIEWS = {
-    "overview": ((0.0, -1.15, 1.45), (0.0, 1.2, 0.95), 14),
-    "pilot": ((0.0, -0.12, 1.22), (0.0, 1.5, 1.08), 14),
-    "desk": ((0.0, -0.05, 1.15), (0.0, 0.75, 0.66), 22),
-    "dash-closeup": ((0.3, 0.45, 1.0), (0.68, 1.0, 0.66), 40),
-    "button-macro": ((0.62, 0.8, 0.8), (0.68, 0.98, 0.69), 85),
-    "canopy": ((-0.35, -0.7, 1.3), (0.9, 0.9, 1.35), 16),
-    "windshield": ((0.0, 0.1, 1.3), (0.0, 1.6, 1.5), 14),
-    "left-console": ((-0.2, -0.45, 1.25), (-1.0, 0.0, 0.72), 26),
+    "overview": ((0.0, -0.98, 1.4), (0.0, 1.2, 1.0), 13),
+    "pilot": ((0.0, -0.05, 1.22), (0.0, 1.4, 1.12), 12),
+    "desk": ((0.0, 0.2, 1.15), (0.0, 0.98, 0.72), 20),
+    "dash-closeup": ((0.25, 0.55, 1.0), (0.6, 1.1, 0.72), 40),
+    "button-macro": ((0.55, 0.85, 0.85), (0.64, 1.1, 0.73), 85),
+    "canopy": ((-0.3, -0.6, 1.2), (0.7, 0.9, 1.3), 14),
+    "windshield": ((0.0, 0.15, 1.25), (0.0, 1.6, 1.3), 13),
+    "left-console": ((-0.1, -0.2, 1.2), (-0.9, 0.3, 0.72), 24),
 }
 
 
@@ -56,11 +56,11 @@ def main():
     bg = nt.nodes["Background"]
     # Stars: a point at the centre of each Voronoi cell, over a faint blue.
     noise = nt.nodes.new("ShaderNodeTexVoronoi")
-    noise.inputs["Scale"].default_value = 250.0
+    noise.inputs["Scale"].default_value = 120.0
     ramp = nt.nodes.new("ShaderNodeValToRGB")
     ramp.color_ramp.elements[0].position = 0.0
     ramp.color_ramp.elements[0].color = (4.0, 4.0, 4.2, 1)
-    ramp.color_ramp.elements[1].position = 0.05
+    ramp.color_ramp.elements[1].position = 0.09
     ramp.color_ramp.elements[1].color = (0.003, 0.005, 0.012, 1)
     nt.links.new(noise.outputs["Distance"], ramp.inputs["Fac"])
     nt.links.new(ramp.outputs["Color"], bg.inputs["Color"])
@@ -68,9 +68,9 @@ def main():
     sc.world = world
     # A cool key from the windshield, a warm fill from the back.
     for name, loc, energy, colour, size in [
-        ("key", (0.0, 3.2, 2.4), 260, (0.7, 0.8, 1.0), 2.5),
+        ("key", (0.0, 3.2, 2.4), 420, (0.7, 0.8, 1.0), 2.5),
         ("side", (3.0, 0.4, 1.6), 120, (0.7, 0.8, 1.0), 2.0),
-        ("fill", (0.0, -1.2, 1.9), 25, (1.0, 0.7, 0.4), 1.2),
+        ("fill", (0.0, -0.9, 1.7), 30, (1.0, 0.75, 0.5), 1.2),
     ]:
         light = bpy.data.lights.new(name, "AREA")
         light.energy = energy

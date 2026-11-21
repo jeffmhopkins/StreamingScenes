@@ -1,18 +1,18 @@
 # 3D cockpit model
 
 A starship flight deck as a real 3D model, for JStream's `model` source (ADR-0107):
-glTF 2.0, metallic-roughness materials, five 16:9 screens and a desk instrument that are
+glTF 2.0, metallic-roughness materials, seven 16:9 screens and a desk instrument that are
 each their own material so a live source can be mapped onto any of them. It is meant for camera moves
 and depth of field inside the cockpit, close enough to read the readouts.
 
-The look follows the green-screen plate of [starship-cockpit](../starship-cockpit/)
-and the "used future" of working-ship sets: a compact pod in dark gunmetal with grime and
-scratches, a wide raked windshield and one big angled window each side in thick pillars,
-three equal monitors in a row under the windshield in chunky moulded hoods, a sloped
-console of amber readouts, button banks, switches and knobs wrapping a tray in front of
-the pilot, and an overhead console with amber strips. There is no seat, so the camera can
-sit where a pilot would. On the tray lies a grid instrument that looks switched off until
-a live source is put on it.
+The look is a weathered aircraft flight deck in space: worn grey-green paint with grime
+and scratches, a wide panoramic windshield and an angled window each side in thick
+pillars, three equal monitors wrapped around the pilot under the windshield in chunky
+moulded hoods, an overhead console with two more screens, and amber readouts, button
+banks, switches and knobs around a tray in front of the pilot. There is no seat, so the
+camera can sit where a pilot would. On the tray, right under the monitors, lies a grid
+instrument that looks switched off until a live source is put on it. The layout follows
+the green-screen plate of [starship-cockpit](../starship-cockpit/).
 
 ![The cockpit from the back of the cabin](media/overview.jpg)
 
@@ -34,7 +34,7 @@ scene's lights, so it will not look exactly like this there.
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
 | [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, so a scene can move it. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
-| [`model/textures/`](model/textures/) | 23 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
+| [`model/textures/`](model/textures/) | 25 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set), and draws the decals, readouts and screen cards. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
@@ -48,9 +48,9 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 247,006 | 2,000,000 |
-| Textures | 23, all 2048 px or smaller | 64, 4096 px a side |
-| Memory | 380 MiB of textures with mips, about 21 MiB of mesh: about 401 MiB | 512 MiB |
+| Triangles | 168,058 | 2,000,000 |
+| Textures | 25, all 2048 px or smaller | 64, 4096 px a side |
+| Memory | 386 MiB of textures with mips, about 14 MiB of mesh: about 400 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
@@ -66,7 +66,7 @@ part is:
 
 | Set | Used for | Repeats every | Texels per cm |
 |---|---|---|---|
-| `paint` | walls, consoles, ceiling, frames; gunmetal with baked grime, mottling and scratches (`paint_dark` is the same set darkened) | 50 cm | 41 |
+| `paint` | walls, consoles, ceiling, frames; grey-green with baked grime, mottling and scratches (`paint_dark` is the same set darkened) | 50 cm | 41 |
 | `floor` | the deck | 60 cm | 34 |
 | `leather` | stick boots, some cable looms | 30 cm | 68 |
 | `plastic` | bezels, buttons, grips, trim | 40 cm | 51 |
@@ -87,19 +87,19 @@ cabin toward the windshield.
 
 | Part (node) | Where |
 |---|---|
-| Whole cabin | x −1.26 to 1.26, y 0 to 1.99, z −1.60 (windshield base) to 1.35 (rear bulkhead) |
-| Pilot's eye point | about (0, 1.22, 0.12), looking toward −z |
-| `windshield` | the canopy and the hull under it. One raked windshield: its base at the sill, y 1.00, z −1.60, x ±0.96; its top at the roof, y 1.95, z −0.95, x ±0.86. One side window each side, from the windshield back to the B-pillar at z −0.15 (x ±1.22 at the sill, ±0.98 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
-| `header` | the overhead console under the roof, x ±0.50, z −0.83 to −0.21: greebled, with two amber strips and a lamp |
-| `dashboard` | the monitor bank and the three hooded monitors at z ≈ −1.40; the sloped console below them (y 0.56 at z −0.50 up to y 0.79 at z −1.37), its centre ahead of the tray and a wing each side, x ±0.47 to ±0.95; the tray, reaching back to z −0.42 at y ≈ 0.55 to 0.68, on two arms, with an arm rest each side |
-| `side_consoles` | either side, x ±0.80 to ±1.20, z −0.50 to 0.75; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window from z −0.47 to −1.25 |
+| Whole cabin | x −1.13 to 1.13, y 0 to 1.91, z −1.75 (windshield base) to 1.16 (rear bulkhead) |
+| Pilot's eye point | about (0, 1.22, 0), looking toward −z |
+| `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.76, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
+| `header` | the overhead console under the roof at the top of the windshield, x ±0.60, z ≈ −0.8: a switch panel and a lamp between the two overhead screens |
+| `dashboard` | the three hooded monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
+| `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
 | `cabin` | the walls and roof behind the side windows, light strips, floor, pipes |
 
 All glass is the one `glass` material (alpha-blended, nearly clear): whatever is behind the
 model in the scene shows through every window. There is no seat and no centre
-console; the floor from the tray back (x ±0.75, z −0.4 to 1.3) is clear for the camera.
+console; the floor from the tray back (x ±0.75, z −0.6 to 1.1) is clear for the camera.
 
 ### Screens
 
@@ -112,12 +112,14 @@ card with its name.
 
 | Material / node | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
 |---|---|---|---|---|---|---|
-| `screen_center` | 0.560 × 0.315 | (−0.280, 1.105, −1.427) | (0.280, 1.105, −1.427) | (−0.280, 0.795, −1.373) | (0.280, 0.795, −1.373) | (0, 0.17, 0.98) |
-| `screen_left` | 0.560 × 0.315 | (−0.910, 1.105, −1.427) | (−0.350, 1.105, −1.427) | (−0.910, 0.795, −1.373) | (−0.350, 0.795, −1.373) | (0, 0.17, 0.98) |
-| `screen_right` | 0.560 × 0.315 | (0.350, 1.105, −1.427) | (0.910, 1.105, −1.427) | (0.350, 0.795, −1.373) | (0.910, 0.795, −1.373) | (0, 0.17, 0.98) |
-| `screen_side_left` | 0.260 × 0.146 | (−1.133, 0.907, −0.134) | (−1.053, 0.907, −0.381) | (−1.027, 0.813, −0.099) | (−0.947, 0.813, −0.346) | (0.61, 0.77, 0.20) |
-| `screen_side_right` | 0.260 × 0.146 | (1.053, 0.907, −0.381) | (1.133, 0.907, −0.134) | (0.947, 0.813, −0.346) | (1.027, 0.813, −0.099) | (−0.61, 0.77, 0.20) |
-| `screen_desk` | 0.720 × 0.270 (8:3) | (−0.360, 0.688, −0.832) | (0.360, 0.688, −0.832) | (−0.360, 0.632, −0.568) | (0.360, 0.632, −0.568) | (0, 0.98, 0.21) |
+| `screen_center` | 0.520 × 0.292 | (−0.260, 1.114, −1.465) | (0.260, 1.114, −1.465) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0, 0.17, 0.98) |
+| `screen_left` | 0.520 × 0.292 | (−0.811, 1.114, −1.261) | (−0.328, 1.114, −1.456) | (−0.792, 0.826, −1.214) | (−0.309, 0.826, −1.409) | (0.37, 0.17, 0.91) |
+| `screen_right` | 0.520 × 0.292 | (0.328, 1.114, −1.456) | (0.811, 1.114, −1.261) | (0.309, 0.826, −1.409) | (0.792, 0.826, −1.214) | (−0.37, 0.17, 0.91) |
+| `screen_side_left` | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
+| `screen_side_right` | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
+| `screen_overhead_left` | 0.300 × 0.169 | (−0.536, 1.778, −0.646) | (−0.240, 1.778, −0.698) | (−0.560, 1.682, −0.782) | (−0.264, 1.682, −0.834) | (0.10, −0.82, 0.56) |
+| `screen_overhead_right` | 0.300 × 0.169 | (0.240, 1.778, −0.698) | (0.536, 1.778, −0.646) | (0.264, 1.682, −0.834) | (0.560, 1.682, −0.782) | (−0.10, −0.82, 0.56) |
+| `screen_desk` | 0.720 × 0.270 (8:3) | (−0.360, 0.718, −1.052) | (0.360, 0.718, −1.052) | (−0.360, 0.662, −0.788) | (0.360, 0.662, −0.788) | (0, 0.98, 0.21) |
 
 `screen_desk` is the playing surface of the instrument on the tray. It is the one screen
 that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, so crop
@@ -138,7 +140,7 @@ origin at the hinge inside the base. It is modelled upright, at the middle of it
 
 | | |
 |---|---|
-| Hinge (pivot), in the cockpit's coordinates | (−1.020, 0.728, 0.100) |
+| Hinge (pivot), in the cockpit's coordinates | (−0.930, 0.737, −0.150) |
 | Hinge axis | the cockpit's x axis: the grip swings toward −z (forward) or +z (back) |
 | Travel | −25° to +25° from upright; the slot in the base is 24 cm long |
 | Size | 0.120 × 0.220 × 0.080 m (x, y, z) |
@@ -152,7 +154,7 @@ its bounds centre, and tilt the group.
 `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), and the six `screen_*` materials above.
+`led_green`, `led_blue` (emissive), and the eight `screen_*` materials above.
 
 ## Rebuilding it
 

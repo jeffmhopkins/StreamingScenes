@@ -42,15 +42,18 @@ SETS = {  # material -> texture set
 NORMAL_SCALE = {"plastic": 0.35, "paint": 0.6, "paint_dark": 0.6}
 SCREENS = {
     # name: (width m, centre, euler degrees (x tilt, y, z yaw))
-    # Three equal monitors in a row under the windshield.
-    "screen_center": (0.56, (0.0, 1.40, 0.95), (-10, 0, 0)),
-    "screen_left": (0.56, (-0.63, 1.40, 0.95), (-10, 0, 0)),
-    "screen_right": (0.56, (0.63, 1.40, 0.95), (-10, 0, 0)),
-    "screen_side_left": (0.26, (-1.04, 0.24, 0.86), (-50, 0, 72)),
-    "screen_side_right": (0.26, (1.04, 0.24, 0.86), (-50, 0, -72)),
-    # Lying on the desk in front of the pilot, its far edge raised a little.
-    # The instrument's playing surface: 8:3, not 16:9 (see DESK_ASPECT).
-    "screen_desk": (0.72, (0.0, 0.70, 0.66), (-78, 0, 0)),
+    # Three equal monitors wrapped around the pilot: one ahead, one angled in each side.
+    "screen_center": (0.52, (0.0, 1.44, 0.97), (-10, 0, 0)),
+    "screen_left": (0.52, (-0.56, 1.335, 0.97), (-10, 0, 22)),
+    "screen_right": (0.52, (0.56, 1.335, 0.97), (-10, 0, -22)),
+    "screen_side_left": (0.22, (-0.95, 0.5, 0.86), (-50, 0, 75)),
+    "screen_side_right": (0.22, (0.95, 0.5, 0.86), (-50, 0, -75)),
+    # Lying on the tray in front of the pilot, its far edge raised a little and butted
+    # against the console. The instrument's playing surface: 8:3 (see DESK_ASPECT).
+    "screen_desk": (0.72, (0.0, 0.92, 0.69), (-78, 0, 0)),
+    # Hanging from the overhead console, facing back and down at the pilot.
+    "screen_overhead_left": (0.3, (-0.4, 0.74, 1.73), (55, 0, 10)),
+    "screen_overhead_right": (0.3, (0.4, 0.74, 1.73), (55, 0, -10)),
 }
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
@@ -315,12 +318,12 @@ def decal(key, width, loc, rot, name=None, repeat=1.0):
 
 # A compact pod. Wall cross-section (x, z) for the right side behind the side windows;
 # the left mirrors it. Forward of Y_FRONT the hull tapers in plan to the windshield.
-WALL = [(1.22, 0.0), (1.22, 1.00), (0.98, 1.95)]
-CEIL_Z = 1.95
-SILL_Z = 1.00             # the bottom of every window
-Y_BACK, Y_FRONT, Y_NOSE = -1.30, 0.15, 1.60  # rear bulkhead, B-pillar, windshield base
-NOSE_HALF_W = 0.96        # half the windshield's width at its base
-TOP_Y, TOP_HALF_W = 0.95, 0.86  # where the windshield meets the roof, and half its width
+WALL = [(1.05, 0.0), (1.05, 0.95), (0.82, 1.85)]
+CEIL_Z = 1.85
+SILL_Z = 0.95             # the bottom of every window
+Y_BACK, Y_FRONT, Y_NOSE = -1.10, -0.10, 1.70  # rear bulkhead, B-pillar, windshield base
+NOSE_HALF_W = 0.88        # half the windshield's width at its base
+TOP_Y, TOP_HALF_W = 0.85, 0.76  # where the windshield meets the roof, and half its width
 
 
 def wall_x(z):
@@ -348,12 +351,12 @@ def build_shell():
             slab(f"shell_{'L' if side < 0 else 'R'}{i}",
                  [(x0, Y_BACK, z0), (x0, Y_FRONT, z0), (x1, Y_FRONT, z1), (x1, Y_BACK, z1)],
                  0.02, "paint_dark", 0, inward=(0, 0, 1.0))
-    slab("shell_ceiling", [(-1.02, Y_BACK, CEIL_Z + 0.04), (1.02, Y_BACK, CEIL_Z + 0.04),
-                           (1.02, Y_FRONT, CEIL_Z + 0.04), (-1.02, Y_FRONT, CEIL_Z + 0.04)],
+    slab("shell_ceiling", [(-0.86, Y_BACK, CEIL_Z + 0.04), (0.86, Y_BACK, CEIL_Z + 0.04),
+                           (0.86, Y_FRONT, CEIL_Z + 0.04), (-0.86, Y_FRONT, CEIL_Z + 0.04)],
          0.02, "paint_dark", 0, inward=(0, 0, 0))
 
     # Wall panels behind the side windows: between the ribs, one per profile segment.
-    ribs = [Y_BACK, -0.58, Y_FRONT]
+    ribs = [Y_BACK, -0.6, Y_FRONT]
     gap = 0.008
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
@@ -382,36 +385,36 @@ def build_shell():
                   (side * (x1 - 0.02), y + 0.03, z1), (side * (x1 - 0.02), y - 0.03, z1)],
                  0.05, "paint_dark", 0.008, inward=(0, y, 1.0))
     for j, y in enumerate(ribs[1:]):
-        box(f"rib_ceiling{j}", (1.9, 0.07, 0.05), (0, y, CEIL_Z - 0.025), material="paint_dark")
+        box(f"rib_ceiling{j}", (1.6, 0.07, 0.05), (0, y, CEIL_Z - 0.025), material="paint_dark")
 
     # Ceiling behind the canopy: panels with a hex vent in the middle and light strips.
     for j, (ya, yb) in enumerate(zip(ribs, ribs[1:])):
-        for k, (xa, xb) in enumerate([(-0.96, -0.32), (-0.32, 0.32), (0.32, 0.96)]):
+        for k, (xa, xb) in enumerate([(-0.8, -0.27), (-0.27, 0.27), (0.27, 0.8)]):
             m = "hexpanel" if k == 1 else "paint"
             box(f"ceiling_{j}{k}", (xb - xa - 0.012, yb - ya - 0.012, 0.025),
                 ((xa + xb) / 2, (ya + yb) / 2, CEIL_Z - 0.0125), material=m, bev=0.004)
         for side in (-1, 1):
-            box(f"light_strip_{j}{side}", (0.04, yb - ya - 0.2, 0.02),
-                (side * 0.8, (ya + yb) / 2, CEIL_Z - 0.035), material="light_strip", bev=0.004)
+            box(f"light_strip_{j}{side}", (0.04, yb - ya - 0.14, 0.02),
+                (side * 0.66, (ya + yb) / 2, CEIL_Z - 0.035), material="light_strip", bev=0.004)
 
     # Floor: diamond plate in two halves.
     for k, (ya, yb) in enumerate([(Y_BACK, 0.2), (0.2, Y_NOSE)]):
-        box(f"floor_{k}", (2.44, yb - ya - 0.01, 0.03), (0, (ya + yb) / 2, -0.015),
+        box(f"floor_{k}", (2.1, yb - ya - 0.01, 0.03), (0, (ya + yb) / 2, -0.015),
             material="floor", bev=0.003)
     for side in (-1, 1):
         box(f"floor_kick_{side}", (0.06, Y_FRONT - Y_BACK, 0.10),
-            (side * 1.17, (Y_FRONT + Y_BACK) / 2, 0.05), material="paint_dark")
-    decal("stripe", 1.4, (0, -1.05, 0.002), (-90, 0, 0), name="decal_stripe_floor", repeat=4)
-    decal("deck_number", 0.36, (0.5, -0.75, 0.002), (-90, 0, 0))
-    decal("arrow", 0.28, (-0.5, -0.75, 0.002), (-90, 0, 0))
+            (side * 1.0, (Y_FRONT + Y_BACK) / 2, 0.05), material="paint_dark")
+    decal("stripe", 1.2, (0, -0.9, 0.002), (-90, 0, 0), name="decal_stripe_floor", repeat=4)
+    decal("deck_number", 0.3, (0.4, -0.62, 0.002), (-90, 0, 0))
+    decal("arrow", 0.24, (-0.4, -0.62, 0.002), (-90, 0, 0))
 
     # Pipes along both walls behind the consoles, with clamps.
     for side in (-1, 1):
-        for z, r in [(0.92, 0.028), (1.0, 0.018)]:
-            cyl(f"pipe_{side}_{z}", r, -0.2 - Y_BACK, (side * (wall_x(z) - 0.07), (Y_BACK - 0.2) / 2, z),
+        for z, r in [(1.12, 0.028), (1.2, 0.018)]:
+            cyl(f"pipe_{side}_{z}", r, Y_FRONT - Y_BACK - 0.1, (side * (wall_x(z) - 0.07), (Y_BACK + Y_FRONT) / 2, z),
                 (90, 0, 0), "paint_dark", 20)
-        for y in (-1.15, -0.75, -0.35):
-            box(f"clamp_{side}_{y}", (0.06, 0.04, 0.16), (side * (wall_x(0.96) - 0.06), y, 0.96),
+        for y in (-0.95, -0.35):
+            box(f"clamp_{side}_{y}", (0.06, 0.04, 0.16), (side * (wall_x(1.16) - 0.06), y, 1.16),
                 material="plastic", bev=0.006)
 
 
@@ -428,7 +431,7 @@ def build_rear():
                         verts=[e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     ob = new_object("bulkhead", bm, "paint")
-    cutter = box("_cut", (0.84, 0.4, 1.84), (0, Y_BACK, 0.98), material="paint", bev=0)
+    cutter = box("_cut", (0.8, 0.4, 1.7), (0, Y_BACK, 0.9), material="paint", bev=0)
     b = ob.modifiers.new("hatch", "BOOLEAN")
     b.object = cutter
     b.operation = "DIFFERENCE"
@@ -439,11 +442,11 @@ def build_rear():
     bpy.data.objects.remove(cutter)
     bevel(ob, 0.006)
     # Hatch frame and door.
-    box("hatch_frame_top", (1.0, 0.1, 0.08), (0, Y_BACK + 0.02, 1.94), material="paint_dark")
+    box("hatch_frame_top", (0.96, 0.1, 0.08), (0, Y_BACK + 0.02, 1.79), material="paint_dark")
     for side in (-1, 1):
-        box(f"hatch_frame_{side}", (0.08, 0.1, 1.9), (side * 0.46, Y_BACK + 0.02, 0.95),
+        box(f"hatch_frame_{side}", (0.08, 0.1, 1.76), (side * 0.44, Y_BACK + 0.02, 0.88),
             material="paint_dark")
-    box("hatch_door", (0.84, 0.04, 1.84), (0, Y_BACK - 0.04, 0.98), material="hexpanel", bev=0.01)
+    box("hatch_door", (0.8, 0.04, 1.7), (0, Y_BACK - 0.04, 0.9), material="hexpanel", bev=0.01)
     box("hatch_wheel_hub", (0.12, 0.06, 0.12), (0, Y_BACK + 0.0, 1.0), material="plastic", bev=0.02)
     bpy.ops.mesh.primitive_torus_add(major_radius=0.17, minor_radius=0.018,
                                      location=(0, Y_BACK + 0.02, 1.0), rotation=(math.pi / 2, 0, 0))
@@ -455,11 +458,11 @@ def build_rear():
     for a in range(3):
         box(f"hatch_spoke{a}", (0.34, 0.02, 0.025), (0, Y_BACK + 0.02, 1.0), (0, a * 60, 0),
             material="paint_dark", bev=0.003)
-    decal("warn_hatch", 0.6, (0, Y_BACK + 0.012, 1.55), (0, 0, 180), name="decal_warn_hatch")
+    decal("warn_hatch", 0.6, (0, Y_BACK + 0.012, 1.45), (0, 0, 180), name="decal_warn_hatch")
     for side in (-1, 1):
-        decal("stripe", 1.8, (side * 0.53, Y_BACK + 0.012, 0.95), (0, 90, 180),
+        decal("stripe", 1.6, (side * 0.51, Y_BACK + 0.012, 0.9), (0, 90, 180),
               name=f"decal_stripe_hatch_{side}", repeat=6)
-        box(f"rear_light_{side}", (0.06, 0.03, 0.3), (side * 0.75, Y_BACK + 0.015, 1.6),
+        box(f"rear_light_{side}", (0.06, 0.03, 0.3), (side * 0.62, Y_BACK + 0.015, 1.5),
             material="led_red", bev=0.005)
 
 
@@ -488,7 +491,7 @@ def build_nose():
     ft = [Vector((s * TOP_HALF_W, TOP_Y, CEIL_Z)) for s in (-1, 1)]
     sb = [Vector((s * WALL[1][0], Y_FRONT, SILL_Z)) for s in (-1, 1)]
     st = [Vector((s * WALL[2][0], Y_FRONT, CEIL_Z)) for s in (-1, 1)]
-    centre = Vector((0, 0.5, 1.45))
+    centre = Vector((0, 0.5, 1.35))
     # Below the sill: cheeks tapering to the nose, and the nose wall.
     for k, side in enumerate((-1, 1)):
         slab(f"cheek_{side}", [(sb[k].x, Y_FRONT, 0), (fb[k].x, Y_NOSE, 0), fb[k], sb[k]],
@@ -523,9 +526,14 @@ def build_nose():
             strut(f"canopy_trim_{nm}_{s}", p, q, 0.05, 0.03, "plastic", 0.008)
             p2, q2 = inset(a, b, 0.075)
             strut(f"canopy_led_{nm}_{s}", p2, p2.lerp(q2, 0.08), 0.012, 0.012, "led_amber", 0)
+    # Gussets across the windshield's corners, so its opening reads rounded.
+    for k in (0, 1):
+        strut(f"canopy_gusset_b{k}", fb[k].lerp(fb[1 - k], 0.12), fb[k].lerp(ft[k], 0.2), 0.1, 0.07,
+              bev=0.02)
+        strut(f"canopy_gusset_t{k}", ft[k].lerp(ft[1 - k], 0.12), ft[k].lerp(fb[k], 0.2), 0.1, 0.07,
+              bev=0.02)
     # The roof over the pilot, from the B-pillars forward to the top of the windshield.
-    slab("roof_front", [st[0], st[1], ft[1], ft[0]], 0.04, "paint_dark", 0.004,
-         inward=(0, 0.5, 5.0))
+    slab("roof_front", [st[0], st[1], ft[1], ft[0]], 0.04, "paint", 0.004, inward=(0, 0.5, 5.0))
 
 
 DESK_ASPECT = 3 / 8  # the desk instrument's surface is 8:3
@@ -680,7 +688,7 @@ def frame_matrix(loc, rot):
 
 
 # The sloped button console under the monitors, as a (y, z) line.
-SLOPE_A, SLOPE_B = (0.50, 0.56), (1.37, 0.79)
+SLOPE_A, SLOPE_B = (0.65, 0.62), (1.37, 0.79)
 
 
 def slope_z(y):
@@ -693,7 +701,7 @@ def build_console():
     rnd = random.Random(12)
     ang = math.degrees(math.atan2(SLOPE_B[1] - SLOPE_A[1], SLOPE_B[0] - SLOPE_A[0]))
     # The monitor bank: three equal screens in a row right under the windshield.
-    box("monitor_bank", (1.9, 0.17, 0.24), (0, 1.53, 0.87), material="paint_dark", bev=0.01)
+    box("monitor_bank", (0.66, 0.2, 0.24), (0, 1.56, 0.87), material="paint_dark", bev=0.01)
     for name, (w, loc, rot) in SCREENS.items():
         screen(name, w, loc, rot)
         if name in ("screen_center", "screen_left", "screen_right"):
@@ -713,65 +721,65 @@ def build_console():
             led.matrix_world = m @ Matrix.Translation((0, -0.05, h / 2 + 0.024))
     # The sloped console: a centre section ahead of the desk, and a wing each side that
     # reaches back past the desk toward the pilot.
-    y_c = 1.04
+    y_c = 1.10
     prism("console_centre", [(Y_NOSE, 0), (y_c, 0), (y_c, slope_z(y_c)), SLOPE_B,
-                             (Y_NOSE, SLOPE_B[1])], "x", -0.47, 0.47, "paint_dark", 0.008, 2)
+                             (Y_NOSE, SLOPE_B[1])], "x", -0.45, 0.45, "paint", 0.008, 2)
     slope = lambda x, y: frame_matrix((x, y, slope_z(y) + 0.002), (-90 + ang, 0, 0))
-    greeble("console_centre", slope(0, (y_c + SLOPE_B[0]) / 2), 0.9, 0.32, rnd)
+    greeble("console_centre", slope(0, (y_c + SLOPE_B[0]) / 2 - 0.02), 0.86, 0.2, rnd)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
-        xa, xb = sorted((side * 0.47, side * 0.95))
+        xa, xb = sorted((side * 0.45, side * 0.84))
         prism(f"console_wing_{s}", [(Y_NOSE, 0), (SLOPE_A[0], 0), SLOPE_A, SLOPE_B,
-                                    (Y_NOSE, SLOPE_B[1])], "x", xa, xb, "paint_dark", 0.008, 2)
-        greeble(f"console_wing_{s}_fwd", slope(side * 0.71, 1.15), 0.46, 0.42, rnd)
-        greeble(f"console_wing_{s}_aft", slope(side * 0.71, 0.72), 0.46, 0.42, rnd)
-        box(f"console_wing_{s}_lip", (0.5, 0.03, 0.05), (side * 0.71, SLOPE_A[0], SLOPE_A[1] - 0.01),
+                                    (Y_NOSE, SLOPE_B[1])], "x", xa, xb, "paint", 0.008, 2)
+        greeble(f"console_wing_{s}_fwd", slope(side * 0.645, 1.17), 0.36, 0.3, rnd)
+        greeble(f"console_wing_{s}_aft", slope(side * 0.645, 0.85), 0.36, 0.3, rnd)
+        box(f"console_wing_{s}_lip", (0.4, 0.03, 0.05), (side * 0.645, SLOPE_A[0], SLOPE_A[1] - 0.01),
             material="plastic", bev=0.012, segs=3)
         # The wing's face toward the pilot's knees.
-        box(f"console_vent_{s}", (0.4, 0.012, 0.22), (side * 0.71, SLOPE_A[0] - 0.004, 0.3),
+        box(f"console_vent_{s}", (0.34, 0.012, 0.22), (side * 0.645, SLOPE_A[0] - 0.004, 0.3),
             material="hexpanel", bev=0.003)
     decal("serial", 0.3, (0, y_c - 0.001, 0.3), (0, 0, 0))
     decal("warn_eject", 0.24, (0, y_c - 0.001, 0.42), (0, 0, 0))
     # The desk: a tray reaching back from the console toward the pilot, carrying the
     # desk screen, on two arms so the floor under it stays clear.
-    box("desk", (0.86, 0.6, 0.03), (0, 0.72, 0.6), (12, 0, 0), material="paint_dark", bev=0.01,
+    box("desk", (0.86, 0.36, 0.03), (0, 0.94, 0.63), (12, 0, 0), material="paint", bev=0.01,
         segs=3)
-    box("desk_edge", (0.9, 0.04, 0.05), (0, 0.415, 0.545), (12, 0, 0), material="plastic",
+    box("desk_edge", (0.88, 0.04, 0.05), (0, 0.75, 0.585), (12, 0, 0), material="plastic",
         bev=0.015, segs=3)
     for side in (-1, 1):
-        strut(f"desk_arm_{side}", (side * 0.34, 0.5, 0.5), (side * 0.34, 1.18, 0.36), 0.05, 0.06)
-        box(f"desk_led_{side}", (0.09, 0.006, 0.01), (side * 0.3, 0.392, 0.545), (12, 0, 0),
+        strut(f"desk_arm_{side}", (side * 0.34, 0.82, 0.52), (side * 0.34, 1.2, 0.4), 0.05, 0.06)
+        box(f"desk_led_{side}", (0.09, 0.006, 0.01), (side * 0.3, 0.727, 0.585), (12, 0, 0),
             material="led_amber", bev=0)
         # Arm rests either side of the tray's near edge.
-        box(f"arm_rest_{side}", (0.13, 0.26, 0.06), (side * 0.55, 0.40, 0.575), (12, 0, 0),
+        box(f"arm_rest_{side}", (0.13, 0.24, 0.06), (side * 0.64, 0.58, 0.61), (12, 0, 0),
             material="leather", bev=0.025, segs=4)
 
 
 def build_side_consoles():
     GROUP[0] = "side_consoles"
-    xo_abs, xi_abs = WALL[1][0] - 0.02, 0.80
-    rise = (0.78 - 0.66) / (xo_abs - 0.90)
+    xo_abs, xi_abs = WALL[1][0] - 0.02, 0.78
+    rise = (0.78 - 0.66) / (xo_abs - 0.84)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
         xo, xi = side * xo_abs, side * xi_abs
-        prof = [(xo, 0), (xi, 0), (xi, 0.58), (side * 0.90, 0.66), (xo, 0.78)]
+        prof = [(xo, 0), (xi, 0), (xi, 0.58), (side * 0.84, 0.66), (xo, 0.78)]
         if side > 0:
             prof = list(reversed(prof))
-        prism(f"console_{s}", prof, "y", -0.75, 0.50, "paint", 0.01, 3)
+        prism(f"console_{s}", prof, "y", -0.70, 0.65, "paint", 0.01, 3)
         ang = math.degrees(math.atan(rise))
-        top = lambda x, y: frame_matrix((side * x, y, 0.66 + (x - 0.90) * rise + 0.002),
+        top = lambda x, y: frame_matrix((side * x, y, 0.66 + (x - 0.84) * rise + 0.002),
                                         (-90, side * -ang, 0))
         rnd = random.Random(50 + side)
-        greeble(f"console_{s}_aft", top(1.05, -0.5) @ Matrix.Translation((0, -0.001, 0)),
-                0.28, 0.44, rnd)
+        greeble(f"console_{s}_aft", top(0.94, -0.3) @ Matrix.Translation((0, -0.001, 0)),
+                0.17, 0.4, rnd)
         # The console's inner face, toward the pilot's legs: greebled too.
-        greeble(f"console_{s}_face", frame_matrix((xi, -0.125, 0.3), (0, 0, -side * 90)), 1.2, 0.46,
+        greeble(f"console_{s}_face", frame_matrix((xi, -0.15, 0.3), (0, 0, -side * 90)), 1.0, 0.46,
                 rnd)
-        box(f"console_{s}_trim", (0.02, 1.25, 0.04), (xi + side * 0.005, -0.125, 0.56),
+        box(f"console_{s}_trim", (0.02, 1.1, 0.04), (xi + side * 0.005, -0.15, 0.56),
             material="plastic", bev=0.006)
         # A ledge along the cheek under the side window, from the console to the monitors.
-        a = Vector((side * hull_x(0.47), 0.47, 0))
-        b = Vector((side * hull_x(1.25), 1.25, 0))
+        a = Vector((side * hull_x(0.65), 0.65, 0))
+        b = Vector((side * hull_x(1.12), 1.12, 0))
         d = (b - a).normalized()
         inward = Vector((-side * d.y, side * d.x, 0)) * 1.0
         if inward.x * side > 0:
@@ -797,11 +805,11 @@ def build_side_consoles():
         fx = fy.cross(up)
         fm = Matrix((fx, fy, up)).transposed().to_4x4()
         fm.translation = (a + b) / 2 + inward * 0.127 + up * (SILL_Z - 0.17)
-        greeble(f"ledge_{s}_face", fm, 0.72, 0.14, rnd)
+        greeble(f"ledge_{s}_face", fm, 0.44, 0.14, rnd)
     # Throttle (left) and side stick (right).
-    surface_z = lambda x: 0.66 + (x - 0.90) * rise
-    tm = frame_matrix((-1.02, -0.1, surface_z(1.02) + 0.02), (0, 0, 0))
-    base = box("throttle_base", (0.16, 0.3, 0.05), (0, 0, 0), material="paint_dark", bev=0.01)
+    surface_z = lambda x: 0.66 + (x - 0.84) * rise
+    tm = frame_matrix((-0.93, 0.15, surface_z(0.93) + 0.02), (0, 0, 0))
+    base = box("throttle_base", (0.14, 0.3, 0.05), (0, 0, 0), material="paint_dark", bev=0.01)
     base.matrix_world = tm
     box("throttle_slot", (0.03, 0.24, 0.01), (0, 0, 0), material="plastic", bev=0).matrix_world = (
         tm @ Matrix.Translation((0, 0, 0.027)))
@@ -814,7 +822,7 @@ def build_side_consoles():
     grip = box("throttle_grip", (0.12, 0.08, 0.06), (0, 0, 0), material="plastic", bev=0.025, segs=4)
     grip.matrix_world = tm @ Matrix.Translation((0, 0, 0.19))
     GROUP[0] = "side_consoles"
-    sm = frame_matrix((1.02, -0.1, surface_z(1.02) - 0.004), (0, 0, 0))
+    sm = frame_matrix((0.93, 0.15, surface_z(0.93) - 0.004), (0, 0, 0))
     b = cyl("stick_boot", 0.06, 0.05, (0, 0, 0), material="leather", segs=24)
     b.matrix_world = sm @ Matrix.Translation((0, 0, 0.025))
     sh = cyl("stick_shaft", 0.014, 0.18, (0, 0, 0), material="paint_dark", segs=16)
@@ -863,7 +871,7 @@ def build_conduits():
     rnd = random.Random(91)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
-        ribs = [Y_BACK + 0.05, -0.58, Y_FRONT - 0.08]
+        ribs = [Y_BACK + 0.05, -0.6, Y_FRONT - 0.08]
         for c, (dx, dz, r) in enumerate([(0.0, 0.0, 0.012), (0.03, -0.01, 0.008),
                                          (-0.02, -0.025, 0.01), (0.015, -0.03, 0.006)]):
             x = side * (WALL[-1][0] - 0.07 + dx)
@@ -874,37 +882,32 @@ def build_conduits():
             pts.append((x, ribs[-1], CEIL_Z - 0.05 + dz))
             cable(f"loom_{s}{c}", pts, r, rnd.choice(["plastic", "plastic", "leather", "paint_dark"]))
         # Greebled lower walls behind the consoles' ends.
-        m = frame_matrix((side * (wall_x(0.6) - 0.03), (Y_BACK - 0.75) / 2, 0.55),
+        m = frame_matrix((side * (wall_x(0.6) - 0.03), (Y_BACK - 0.70) / 2, 0.55),
                          (0, 0, -side * 90))
-        greeble(f"lowwall_{s}", m, -0.75 - Y_BACK - 0.08, 0.6, rnd)
+        greeble(f"lowwall_{s}", m, -0.70 - Y_BACK - 0.08, 0.6, rnd)
     for k, (x, r) in enumerate([(-0.08, 0.022), (0.0, 0.016), (0.07, 0.026)]):
         cyl(f"roof_conduit{k}", r, Y_FRONT - Y_BACK - 0.2, (x, (Y_FRONT + Y_BACK) / 2 - 0.05, CEIL_Z - 0.07),
             (90, 0, 0), "paint_dark" if k != 1 else "plastic", 16)
-    for y in (-1.05, -0.3):
+    for y in (-0.95, -0.35):
         box(f"roof_clamp_{y}", (0.26, 0.04, 0.03), (0, y, CEIL_Z - 0.07), material="paint", bev=0.005)
-    for j, (ya, yb) in enumerate([(Y_BACK + 0.05, -0.62), (-0.54, Y_FRONT - 0.05)]):
+    for j, (ya, yb) in enumerate([(Y_BACK + 0.05, -0.64), (-0.56, Y_FRONT - 0.05)]):
         for side in (-1, 1):
-            m = frame_matrix((side * 0.55, (ya + yb) / 2, CEIL_Z - 0.026), (90, 0, 0))
-            greeble(f"roof_{j}{side}", m, 0.36, yb - ya - 0.04, rnd)
+            m = frame_matrix((side * 0.47, (ya + yb) / 2, CEIL_Z - 0.026), (90, 0, 0))
+            greeble(f"roof_{j}{side}", m, 0.28, yb - ya - 0.04, rnd)
 
 
 def build_header():
-    """The overhead console: a greebled panel under the roof, over the pilot's forehead,
-    with two amber strips and a lamp down its middle."""
+    """The overhead console under the roof: a screen each side, facing back and down at
+    the pilot, a switch panel between them and a lamp housing under it."""
     GROUP[0] = "header"
     rnd = random.Random(31)
-    z = CEIL_Z - 0.05
-    box("overhead", (1.0, 0.62, 0.09), (0, 0.52, z), material="paint_dark", bev=0.015, segs=3)
-    under = z - 0.046
-    for side in (-1, 1):
-        greeble(f"overhead_{side}", frame_matrix((side * 0.31, 0.52, under), (90, 0, 0)), 0.32,
-                0.54, rnd)
-        box(f"overhead_strip_{side}", (0.025, 0.36, 0.012), (side * 0.08, 0.56, under - 0.004),
-            material="led_amber", bev=0.003)
-    box("overhead_spine", (0.11, 0.56, 0.02), (0, 0.52, under - 0.006), material="plastic",
-        bev=0.006)
-    box("overhead_lamp", (0.06, 0.09, 0.02), (0, 0.72, under - 0.02), material="led_amber",
-        bev=0.006)
+    box("overhead", (1.2, 0.3, 0.14), (0, 0.82, CEIL_Z - 0.07), (-35, 0, 0), material="paint",
+        bev=0.03, segs=3)
+    greeble("overhead_mid", frame_matrix((0, 0.755, 1.735), (55, 0, 0)), 0.36, 0.16, rnd)
+    box("overhead_lamp_housing", (0.2, 0.08, 0.05), (0, 0.72, 1.66), (-35, 0, 0), material="plastic",
+        bev=0.02, segs=3)
+    box("overhead_lamp", (0.12, 0.012, 0.02), (0, 0.685, 1.648), (-35, 0, 0), material="led_amber",
+        bev=0.004)
 
 
 # ---------------------------------------------------------------------------- finishing

@@ -23,7 +23,8 @@ TILED = {
     "hexpanel": ("hexpanel", [1, 1, 1, 1], 1.0, 1.0, 1.0),
 }
 SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right", "screen_desk"]
+           "screen_side_right", "screen_overhead_left", "screen_overhead_right",
+           "screen_desk"]
 
 
 def main():
