@@ -16,15 +16,14 @@ PATH = sys.argv[1]
 # Tiling sets: material -> (texture set, base colour factor, metallic, roughness, normal scale)
 TILED = {
     "paint": ("paint", [1, 1, 1, 1], 1.0, 1.0, 0.6),
-    "paint_dark": ("paint", [0.45, 0.45, 0.47, 1], 1.0, 1.0, 0.6),
+    "paint_dark": ("paint", [0.45, 0.45, 0.47, 1], 1.0, 0.8, 0.6),
     "floor": ("floor", [1, 1, 1, 1], 1.0, 1.0, 1.0),
     "leather": ("leather", [1, 1, 1, 1], 1.0, 1.0, 1.0),
-    "plastic": ("plastic", [1, 1, 1, 1], 1.0, 1.0, 0.35),
+    "plastic": ("plastic", [1, 1, 1, 1], 1.0, 0.6, 0.35),  # glossy bezels and buttons
     "hexpanel": ("hexpanel", [1, 1, 1, 1], 1.0, 1.0, 1.0),
+    "panel": ("panel", [1, 1, 1, 1], 1.0, 1.0, 1.0),
 }
-SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right", "screen_overhead_left", "screen_overhead_right",
-           "screen_desk"]
+SCREENS = ["screens"]  # one material and one atlas image for every screen
 
 
 def main():
@@ -62,7 +61,7 @@ def main():
             })
         elif name in SCREENS:
             # Unlit: whatever source is mapped here shows at its own colours, like a
-            # screen, whatever the lighting. `texture_material` = this name replaces it.
+            # screen, whatever the lighting. `texture_material` = "screens" replaces the atlas.
             m.clear()
             m.update({
                 "name": name,

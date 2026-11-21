@@ -1,18 +1,19 @@
 # 3D cockpit model
 
 A starship flight deck as a real 3D model, for JStream's `model` source (ADR-0107):
-glTF 2.0, metallic-roughness materials, seven 16:9 screens and a desk instrument that are
-each their own material so a live source can be mapped onto any of them. It is meant for camera moves
+glTF 2.0, metallic-roughness materials, seven 16:9 screens and a desk instrument that
+share one material and one atlas image, so a single live source can fill all of them. It is meant for camera moves
 and depth of field inside the cockpit, close enough to read the readouts.
 
-The look is a weathered aircraft flight deck in space: worn grey-green paint with grime
-and scratches, a wide panoramic windshield and an angled window each side in thick
-pillars, three equal monitors wrapped around the pilot under the windshield in chunky
-moulded hoods, an overhead console with two more screens, and amber readouts, button
-banks, switches and knobs around a tray in front of the pilot. There is no seat, so the
-camera can sit where a pilot would. On the tray, right under the monitors, lies a grid
-instrument that looks switched off until a live source is put on it. The layout follows
-the green-screen plate of [starship-cockpit](../starship-cockpit/).
+The look follows the 2D [starship-cockpit](../starship-cockpit/) plate: dark blue-grey
+painted metal panelling with seams, rivets, chipped edges and grime, amber indicator
+lights all over the consoles, dim orange glow strips along the pillars and sills, and
+glossy bezels that catch the light from outside. The shape is an aircraft flight deck: a
+wide panoramic windshield and an angled window each side in thick pillars, three equal
+monitors wrapped around the pilot in chunky moulded hoods, an overhead console with two
+more screens, and a tray in front of the pilot. There is no seat, so the camera can sit
+where a pilot would. On the tray, right under the monitors, lies a grid instrument that
+looks switched off until a live source is put on it.
 
 ![The cockpit from the back of the cabin](media/overview.jpg)
 
@@ -34,9 +35,9 @@ scene's lights, so it will not look exactly like this there.
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
 | [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, so a scene can move it. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
-| [`model/textures/`](model/textures/) | 25 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
+| [`model/textures/`](model/textures/) | 21 images: six tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and the screens' placeholder atlas. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
-| [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set), and draws the decals, readouts and screen cards. |
+| [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
@@ -48,9 +49,9 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 170,828 | 2,000,000 |
-| Textures | 25, all 2048 px or smaller | 64, 4096 px a side |
-| Memory | 386 MiB of textures with mips, about 14 MiB of mesh: about 400 MiB | 512 MiB |
+| Triangles | 170,948 | 2,000,000 |
+| Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
+| Memory | 437 MiB of textures with mips, about 14 MiB of mesh: about 451 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
@@ -59,14 +60,15 @@ triangles, and its own copy of the `paint` and `plastic` sets, 128 MiB.
 
 ## Why it stays sharp up close
 
-No surface has one unique texture stretched over it. Every surface uses one of five
+No surface has one unique texture stretched over it. Every surface uses one of six
 tiling 2048 px texture sets, with texture coordinates projected from world position in
 metres, so the detail per metre is the same everywhere and doesn't depend on how big a
 part is:
 
 | Set | Used for | Repeats every | Texels per cm |
 |---|---|---|---|
-| `paint` | walls, consoles, ceiling, frames; grey-green with baked grime, mottling and scratches (`paint_dark` is the same set darkened) | 50 cm | 41 |
+| `panel` | walls, console bodies, ceiling, cheeks, the overhead console: dark blue-grey panelling with seams, rivets, paint chipped to bare metal along the seams, and grime in the grooves | 80 cm | 26 |
+| `paint` | the small plates, frames and housings: the same paint with baked grime, mottling and scratches (`paint_dark` is the same set darkened) | 50 cm | 41 |
 | `floor` | the deck | 60 cm | 34 |
 | `leather` | stick boots, some cable looms | 30 cm | 68 |
 | `plastic` | bezels, buttons, grips, trim | 40 cm | 51 |
@@ -103,34 +105,34 @@ console; the floor from the tray back (x ±0.75, z −0.6 to 1.1) is clear for t
 
 ### Screens
 
-Each screen is its own node **and** its own material, with the same name. Its texture
-coordinates cover the whole image once, with the image's top-left at the screen's
-top-left as the pilot sees it, at 16:9, so a 1920 × 1080 source maps without stretching.
-Screen materials are `KHR_materials_unlit`: a source on a screen shows at its own colours,
-like a display, whatever the lighting. Until a live source replaces one, it shows a test
-card with its name.
+Each screen is its own node, named below, and they all share **one material, `screens`**.
+Its image is a 1920 × 1080 atlas, a 3 × 3 grid of 640 × 360 cells counted from the top
+left. Each screen's texture coordinates fill its own cell edge to edge, with the cell's
+top-left at the screen's top-left as the pilot sees it, so a 16:9 picture in a cell maps
+without stretching. `screens` is `KHR_materials_unlit`: what is mapped there shows at its
+own colours, like a display, whatever the lighting. Until a live source replaces it, the
+atlas holds a test card per screen.
 
-| Material / node | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
-|---|---|---|---|---|---|---|
-| `screen_center` | 0.520 × 0.292 | (−0.260, 1.114, −1.465) | (0.260, 1.114, −1.465) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0, 0.17, 0.98) |
-| `screen_left` | 0.520 × 0.292 | (−0.811, 1.114, −1.261) | (−0.328, 1.114, −1.456) | (−0.792, 0.826, −1.214) | (−0.309, 0.826, −1.409) | (0.37, 0.17, 0.91) |
-| `screen_right` | 0.520 × 0.292 | (0.328, 1.114, −1.456) | (0.811, 1.114, −1.261) | (0.309, 0.826, −1.409) | (0.792, 0.826, −1.214) | (−0.37, 0.17, 0.91) |
-| `screen_side_left` | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
-| `screen_side_right` | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
-| `screen_overhead_left` | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
-| `screen_overhead_right` | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
-| `screen_desk` | 0.720 × 0.270 (8:3) | (−0.360, 0.718, −1.052) | (0.360, 0.718, −1.052) | (−0.360, 0.662, −0.788) | (0.360, 0.662, −0.788) | (0, 0.98, 0.21) |
+| Node | Atlas cell (px) | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
+|---|---|---|---|---|---|---|---|
+| `screen_left` | 0, 0 to 640, 360 | 0.520 × 0.292 | (−0.811, 1.114, −1.261) | (−0.328, 1.114, −1.456) | (−0.792, 0.826, −1.214) | (−0.309, 0.826, −1.409) | (0.37, 0.17, 0.91) |
+| `screen_center` | 640, 0 to 1280, 360 | 0.520 × 0.292 | (−0.260, 1.114, −1.465) | (0.260, 1.114, −1.465) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0, 0.17, 0.98) |
+| `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.328, 1.114, −1.456) | (0.811, 1.114, −1.261) | (0.309, 0.826, −1.409) | (0.792, 0.826, −1.214) | (−0.37, 0.17, 0.91) |
+| `screen_overhead_left` | 0, 360 to 640, 720 | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
+| `screen_overhead_right` | 640, 360 to 1280, 720 | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
+| `screen_side_left` | 1280, 360 to 1920, 720 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
+| `screen_side_right` | 1280, 720 to 1920, 1080 | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
+| `screen_desk` | 0, 720 to 960, 1080 | 0.720 × 0.270 (8:3) | (−0.360, 0.718, −1.052) | (0.360, 0.718, −1.052) | (−0.360, 0.662, −0.788) | (0.360, 0.662, −0.788) | (0, 0.98, 0.21) |
 
 `screen_desk` is the playing surface of the instrument on the tray. It is the one screen
-that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, so crop
-the source to the instrument. Its placeholder is a dark 24 × 8 grid of pads, so the
-instrument reads as switched off until a live source (a top-down camera on the real
-instrument, say) replaces it. To switch it off again, take the source off the material:
-ADR-0107 says a named source that isn't drawing reads transparent, not as the placeholder.
+that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, and takes
+the left 960 × 360 of the bottom row. Its placeholder is a dark 24 × 8 grid of pads, so the
+instrument reads as switched off; draw the same dark grid in that cell when the live
+instrument camera is off. The bottom row's middle 320 px (960 to 1280) is unused.
 
-To put a live source on a screen, give the model source `texture` = that source and
-`texture_material` = the screen's material name (ADR-0107 decision 5). Where a model
-source can't do that yet, a flat card placed on the corners above does the same job.
+To put live pictures on the screens, lay them out in one 1920 × 1080 scene in those cells
+and give the model source `texture` = that scene and `texture_material` = `screens`
+(ADR-0107 decision 5).
 
 ### The throttle lever
 
@@ -151,10 +153,10 @@ its bounds centre, and tilt the group.
 
 ### All materials
 
-`paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
+`panel`, `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), and the eight `screen_*` materials above.
+`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and `screens` above.
 
 ## Rebuilding it
 

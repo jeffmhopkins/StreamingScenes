@@ -16,6 +16,7 @@ the glTF holds exactly the images in ../model/textures and nothing re-encoded.
 """
 import math
 import random
+import re
 import sys
 
 import bpy  # first: it makes bmesh and mathutils importable
@@ -30,6 +31,7 @@ TILE = {
     "leather": 0.3,
     "plastic": 0.4,
     "hexpanel": 0.5,
+    "panel": 0.8,
 }
 SETS = {  # material -> texture set
     "paint": "paint",
@@ -38,6 +40,7 @@ SETS = {  # material -> texture set
     "leather": "leather",
     "plastic": "plastic",
     "hexpanel": "hexpanel",
+    "panel": "panel",
 }
 NORMAL_SCALE = {"plastic": 0.35, "paint": 0.6, "paint_dark": 0.6}
 SCREENS = {
@@ -55,13 +58,26 @@ SCREENS = {
     "screen_overhead_left": (0.3, (-0.38, 0.62, 1.70), (31, 0, 0)),
     "screen_overhead_right": (0.3, (0.38, 0.62, 1.70), (31, 0, 0)),
 }
+# Every screen shares one material, `screens`, and one 1920 x 1080 image: a 3 x 3 grid of
+# 640 x 360 cells, (column, row) from the top left. The desk instrument is 8:3 and takes
+# the left 960 x 360 of the bottom row.
+SCREEN_CELLS = {
+    "screen_left": (0, 0), "screen_center": (1, 0), "screen_right": (2, 0),
+    "screen_overhead_left": (0, 1), "screen_overhead_right": (1, 1), "screen_side_left": (2, 1),
+    "screen_desk": (0, 2), "screen_side_right": (2, 2),
+}
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
     "led_amber": (1.0, 0.55, 0.05),
     "led_red": (1.0, 0.08, 0.05),
     "led_blue": (0.15, 0.55, 1.0),
-    "light_strip": (0.85, 0.92, 1.0),
+    "light_strip": (1.0, 0.62, 0.2),
+    # Dim orange accent grooves along the pillars, sills and console edges.
+    "glow_amber": (1.0, 0.42, 0.08),
 }
+# The big structural surfaces take the panelled-metal set instead of plain paint.
+PANELLED = re.compile(r"^(wall_[LR]\d\d|ceiling_\d\d|console_centre|console_wing_[LR]|console_[LR]|"
+                      r"cheek_-?1|roof_front|overhead|ledge_[LR]|desk|bulkhead|monitor_bank)$")
 
 ATLAS = 2048
 DECALS = {  # same table as make_textures.py: x, y, w, h in atlas pixels
@@ -137,7 +153,7 @@ def make_material(name):
         nm.inputs["Strength"].default_value = NORMAL_SCALE.get(name, 1.0)
         link(nrm.outputs["Color"], nm.inputs["Color"])
         link(nm.outputs["Normal"], bsdf.inputs["Normal"])
-    elif name.startswith("screen_"):
+    elif name == "screens":
         c = tex(f"{TEX}/{name}.jpg")
         em = nt.nodes.new("ShaderNodeEmission")
         link(c.outputs["Color"], em.inputs["Color"])
@@ -147,7 +163,7 @@ def make_material(name):
         col = LEDS[name]
         bsdf.inputs["Base Color"].default_value = (*[c * 0.3 for c in col], 1)
         bsdf.inputs["Emission Color"].default_value = (*col, 1)
-        bsdf.inputs["Emission Strength"].default_value = 2.5 if name == "light_strip" else 5.0
+        bsdf.inputs["Emission Strength"].default_value = {"light_strip": 2.5, "glow_amber": 1.6}.get(name, 5.0)
         bsdf.inputs["Roughness"].default_value = 0.35
     elif name == "readout":
         c = tex(f"{TEX}/readouts.png")
@@ -190,6 +206,8 @@ def new_object(name, bm, material):
     bm.free()
     ob = bpy.data.objects.new(name, me)
     bpy.context.collection.objects.link(ob)
+    if material in ("paint", "paint_dark") and PANELLED.match(name):
+        material = "panel"
     ob.data.materials.append(mat(material))
     ob["group"] = GROUP[0]
     ALL.append(ob)
@@ -522,12 +540,15 @@ def build_nose():
         strut(f"canopy_pillar_b_{s}", sb[k], st[k], 0.14, 0.11, bev=0.02)
         strut(f"canopy_sill_{s}", fb[k], sb[k], 0.10, 0.08)
         strut(f"canopy_top_{s}", ft[k], st[k], 0.10, 0.08)
+        gp, gq = inset(fb[k], sb[k], 0.052)
+        strut(f"canopy_glow_sill_{s}", gp, gq, 0.012, 0.01, "glow_amber", 0)
         # Trim down the inside of each pillar, and an amber marker at its foot.
         for nm, (a, b) in (("a", (fb[k], ft[k])), ("b", (sb[k], st[k]))):
             p, q = inset(a, b, 0.055)
             strut(f"canopy_trim_{nm}_{s}", p, q, 0.05, 0.03, "plastic", 0.008)
             p2, q2 = inset(a, b, 0.075)
             strut(f"canopy_led_{nm}_{s}", p2, p2.lerp(q2, 0.08), 0.012, 0.012, "led_amber", 0)
+            strut(f"canopy_glow_{nm}_{s}", p2.lerp(q2, 0.14), p2.lerp(q2, 0.92), 0.014, 0.01, "glow_amber", 0)
     # Gussets across the windshield's corners, so its opening reads rounded.
     for k in (0, 1):
         strut(f"canopy_gusset_b{k}", fb[k].lerp(fb[1 - k], 0.12), fb[k].lerp(ft[k], 0.2), 0.1, 0.07,
@@ -543,7 +564,9 @@ DESK_ASPECT = 3 / 8  # the desk instrument's surface is 8:3
 
 def screen(name, width, loc, rot):
     h = width * (DESK_ASPECT if name == "screen_desk" else 9 / 16)
-    q = quad(name, width, h, (0, 0, 0), (0, 0, 0), name)
+    c, r = SCREEN_CELLS[name]
+    u0, u1 = c / 3, (c + 1.5 if name == "screen_desk" else c + 1) / 3
+    q = quad(name, width, h, (0, 0, 0), (0, 0, 0), "screens", (u0, 1 - (r + 1) / 3, u1, 1 - r / 3))
     q["group"] = name
     m = Matrix.Translation(Vector(loc)) @ Euler([math.radians(a) for a in rot], "XYZ").to_matrix().to_4x4()
     q.matrix_world = m
@@ -738,6 +761,8 @@ def build_console():
         greeble(f"console_wing_{s}_aft", slope(side * 0.645, 0.85), 0.36, 0.3, rnd)
         box(f"console_wing_{s}_lip", (0.4, 0.03, 0.05), (side * 0.645, SLOPE_A[0], SLOPE_A[1] - 0.01),
             material="plastic", bev=0.012, segs=3)
+        box(f"console_wing_{s}_glow", (0.34, 0.006, 0.008), (side * 0.645, SLOPE_A[0] - 0.016, SLOPE_A[1] - 0.03),
+            material="glow_amber", bev=0)
         # The wing's face toward the pilot's knees.
         box(f"console_vent_{s}", (0.34, 0.012, 0.22), (side * 0.645, SLOPE_A[0] - 0.004, 0.3),
             material="hexpanel", bev=0.003)
@@ -909,6 +934,9 @@ def build_header():
                        (0.92, CEIL_Z + 0.01)], "x", -0.68, 0.68, "paint", 0.012, 3)
     greeble("overhead_mid", frame_matrix((0, 0.645, 1.72), (31, 0, 0)), 0.34, 0.2, rnd)
     box("overhead_lamp", (0.16, 0.05, 0.012), (0, 0.79, 1.603), material="led_amber", bev=0.004)
+    for side in (-1, 1):
+        box(f"overhead_glow_{side}", (0.4, 0.02, 0.008), (side * 0.4, 0.79, 1.604),
+            material="glow_amber", bev=0)
 
 
 # ---------------------------------------------------------------------------- finishing
