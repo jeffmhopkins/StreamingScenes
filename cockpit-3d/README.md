@@ -6,20 +6,20 @@ each their own material so a live source can be mapped onto any of them. It is m
 and depth of field inside the cockpit, close enough to read the readouts.
 
 The look follows the green-screen plate of [starship-cockpit](../starship-cockpit/)
-and the "used future" of working-ship sets: dark gunmetal paint with grime and scratches,
-a strutted canopy (one big raked windshield, corner panes, side windows and glass roof
-panels over the pilot), and every console covered in
-greebled sub-panels, amber readouts, button banks, switches, knobs and vents, with cable
-looms and conduits on the roof. There is no seat, so the camera can sit where a pilot
-would. On a desk in front of the monitors lies a grid instrument that looks switched
-off until a live source is put on it.
+and the "used future" of working-ship sets: a compact pod in dark gunmetal with grime and
+scratches, a wide raked windshield and one big angled window each side in thick pillars,
+three equal monitors in a row under the windshield in chunky moulded hoods, a sloped
+console of amber readouts, button banks, switches and knobs wrapping a tray in front of
+the pilot, and an overhead console with amber strips. There is no seat, so the camera can
+sit where a pilot would. On the tray lies a grid instrument that looks switched off until
+a live source is put on it.
 
 ![The cockpit from the back of the cabin](media/overview.jpg)
 
 | | |
 |---|---|
 | ![The pilot's view](media/pilot.jpg) | ![Through the windshield](media/windshield.jpg) |
-| ![The desk instrument, switched off](media/desk.jpg) | ![The canopy from the side](media/canopy.jpg) |
+| ![The instrument on the tray, switched off](media/desk.jpg) | ![The canopy from the side](media/canopy.jpg) |
 | ![The left console](media/left-console.jpg) | ![The dashboard up close](media/dash-closeup.jpg) |
 
 ![A macro shot of the dashboard buttons: the texture stays sharp](media/button-macro.jpg)
@@ -48,9 +48,9 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 364,708 | 2,000,000 |
+| Triangles | 247,006 | 2,000,000 |
 | Textures | 23, all 2048 px or smaller | 64, 4096 px a side |
-| Memory | 380 MiB of textures with mips, 34 MiB of mesh: 414 MiB | 512 MiB |
+| Memory | 380 MiB of textures with mips, about 21 MiB of mesh: about 401 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
@@ -87,20 +87,19 @@ cabin toward the windshield.
 
 | Part (node) | Where |
 |---|---|
-| Whole cabin | x −1.40 to 1.40, y 0 to 2.20, z −2.02 (windshield base) to 1.76 (rear bulkhead) |
-| Pilot's eye point | about (0, 1.22, 0.45), looking toward −z |
-| `windshield` | the canopy forward of the side windows. One raked windshield: its base at y 1.16, z −2.45, x ±0.86; its top at the roof, y 2.16, z −1.50, x ±0.62. A corner pane each side joins it to the side windows at z −1.25. Thin struts frame every edge. Also the glareshield at the sill and the square hull below it. |
-| Side windows (in `cabin`) | glass on both walls from the console sill (y 0.85) to the roof (y 2.16), from z 0.15 forward to z −1.25, split by a rib at z −0.62 and a transom at y 1.65. The roof's outer panels between z −0.62 and −1.25 are glass too. |
-| `header` | the lit, greebled header under the roof behind the top of the windshield |
-| `dashboard` | across the front, under the canopy; top at y ≈ 0.67; greebled banks between the lip and the screens; the desk, reaching back to z −0.42 at y ≈ 0.55 to 0.68, on two arms |
-| `side_consoles` | either side, x ±0.62 to ±1.35, z −1.18 to 0.75; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; greebled tops and inner faces |
-| `conduits` | cable looms along the roof edges and down the pillars, roof conduits, greebled roof and rear-wall panels |
+| Whole cabin | x −1.26 to 1.26, y 0 to 1.99, z −1.60 (windshield base) to 1.35 (rear bulkhead) |
+| Pilot's eye point | about (0, 1.22, 0.12), looking toward −z |
+| `windshield` | the canopy and the hull under it. One raked windshield: its base at the sill, y 1.00, z −1.60, x ±0.96; its top at the roof, y 1.95, z −0.95, x ±0.86. One side window each side, from the windshield back to the B-pillar at z −0.15 (x ±1.22 at the sill, ±0.98 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
+| `header` | the overhead console under the roof, x ±0.50, z −0.83 to −0.21: greebled, with two amber strips and a lamp |
+| `dashboard` | the monitor bank and the three hooded monitors at z ≈ −1.40; the sloped console below them (y 0.56 at z −0.50 up to y 0.79 at z −1.37), its centre ahead of the tray and a wing each side, x ±0.47 to ±0.95; the tray, reaching back to z −0.42 at y ≈ 0.55 to 0.68, on two arms, with an arm rest each side |
+| `side_consoles` | either side, x ±0.80 to ±1.20, z −0.50 to 0.75; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window from z −0.47 to −1.25 |
+| `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
-| `cabin` | walls, ribs, roof with light strips, floor, pipes, the side windows |
+| `cabin` | the walls and roof behind the side windows, light strips, floor, pipes |
 
 All glass is the one `glass` material (alpha-blended, nearly clear): whatever is behind the
 model in the scene shows through every window. There is no seat and no centre
-console; the floor from the desk back (x ±0.6, z −0.4 to 1.6) is clear for the camera.
+console; the floor from the tray back (x ±0.75, z −0.4 to 1.3) is clear for the camera.
 
 ### Screens
 
@@ -113,14 +112,14 @@ card with its name.
 
 | Material / node | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
 |---|---|---|---|---|---|---|
-| `screen_center` | 0.720 × 0.405 | (−0.360, 1.136, −1.489) | (0.360, 1.136, −1.489) | (−0.360, 0.744, −1.391) | (0.360, 0.744, −1.391) | (0, 0.24, 0.97) |
-| `screen_left` | 0.500 × 0.281 | (−0.894, 1.036, −1.264) | (−0.461, 1.036, −1.514) | (−0.859, 0.764, −1.206) | (−0.426, 0.764, −1.456) | (0.49, 0.24, 0.84) |
-| `screen_right` | 0.500 × 0.281 | (0.461, 1.036, −1.514) | (0.894, 1.036, −1.264) | (0.426, 0.764, −1.456) | (0.859, 0.764, −1.206) | (−0.49, 0.24, 0.84) |
-| `screen_side_left` | 0.300 × 0.169 | (−1.114, 0.914, −0.767) | (−0.955, 0.914, −1.021) | (−1.005, 0.806, −0.699) | (−0.846, 0.806, −0.953) | (0.55, 0.77, 0.34) |
-| `screen_side_right` | 0.300 × 0.169 | (0.955, 0.914, −1.021) | (1.114, 0.914, −0.767) | (0.846, 0.806, −0.953) | (1.005, 0.806, −0.699) | (−0.55, 0.77, 0.34) |
+| `screen_center` | 0.560 × 0.315 | (−0.280, 1.105, −1.427) | (0.280, 1.105, −1.427) | (−0.280, 0.795, −1.373) | (0.280, 0.795, −1.373) | (0, 0.17, 0.98) |
+| `screen_left` | 0.560 × 0.315 | (−0.910, 1.105, −1.427) | (−0.350, 1.105, −1.427) | (−0.910, 0.795, −1.373) | (−0.350, 0.795, −1.373) | (0, 0.17, 0.98) |
+| `screen_right` | 0.560 × 0.315 | (0.350, 1.105, −1.427) | (0.910, 1.105, −1.427) | (0.350, 0.795, −1.373) | (0.910, 0.795, −1.373) | (0, 0.17, 0.98) |
+| `screen_side_left` | 0.260 × 0.146 | (−1.133, 0.907, −0.134) | (−1.053, 0.907, −0.381) | (−1.027, 0.813, −0.099) | (−0.947, 0.813, −0.346) | (0.61, 0.77, 0.20) |
+| `screen_side_right` | 0.260 × 0.146 | (1.053, 0.907, −0.381) | (1.133, 0.907, −0.134) | (0.947, 0.813, −0.346) | (1.027, 0.813, −0.099) | (−0.61, 0.77, 0.20) |
 | `screen_desk` | 0.720 × 0.270 (8:3) | (−0.360, 0.688, −0.832) | (0.360, 0.688, −0.832) | (−0.360, 0.632, −0.568) | (0.360, 0.632, −0.568) | (0, 0.98, 0.21) |
 
-`screen_desk` is the playing surface of the instrument on the desk. It is the one screen
+`screen_desk` is the playing surface of the instrument on the tray. It is the one screen
 that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, so crop
 the source to the instrument. Its placeholder is a dark 24 × 8 grid of pads, so the
 instrument reads as switched off until a live source (a top-down camera on the real
@@ -139,7 +138,7 @@ origin at the hinge inside the base. It is modelled upright, at the middle of it
 
 | | |
 |---|---|
-| Hinge (pivot), in the cockpit's coordinates | (−0.950, 0.721, 0.100) |
+| Hinge (pivot), in the cockpit's coordinates | (−1.020, 0.728, 0.100) |
 | Hinge axis | the cockpit's x axis: the grip swings toward −z (forward) or +z (back) |
 | Travel | −25° to +25° from upright; the slot in the base is 24 cm long |
 | Size | 0.120 × 0.220 × 0.080 m (x, y, z) |

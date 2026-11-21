@@ -42,11 +42,12 @@ SETS = {  # material -> texture set
 NORMAL_SCALE = {"plastic": 0.35, "paint": 0.6, "paint_dark": 0.6}
 SCREENS = {
     # name: (width m, centre, euler degrees (x tilt, y, z yaw))
-    "screen_center": (0.72, (0.0, 1.44, 0.94), (-14, 0, 0)),
-    "screen_left": (0.50, (-0.66, 1.36, 0.90), (-14, 0, 30)),
-    "screen_right": (0.50, (0.66, 1.36, 0.90), (-14, 0, -30)),
-    "screen_side_left": (0.30, (-0.98, 0.86, 0.86), (-50, 0, 58)),
-    "screen_side_right": (0.30, (0.98, 0.86, 0.86), (-50, 0, -58)),
+    # Three equal monitors in a row under the windshield.
+    "screen_center": (0.56, (0.0, 1.40, 0.95), (-10, 0, 0)),
+    "screen_left": (0.56, (-0.63, 1.40, 0.95), (-10, 0, 0)),
+    "screen_right": (0.56, (0.63, 1.40, 0.95), (-10, 0, 0)),
+    "screen_side_left": (0.26, (-1.04, 0.24, 0.86), (-50, 0, 72)),
+    "screen_side_right": (0.26, (1.04, 0.24, 0.86), (-50, 0, -72)),
     # Lying on the desk in front of the pilot, its far edge raised a little.
     # The instrument's playing surface: 8:3, not 16:9 (see DESK_ASPECT).
     "screen_desk": (0.72, (0.0, 0.70, 0.66), (-78, 0, 0)),
@@ -312,12 +313,14 @@ def decal(key, width, loc, rot, name=None, repeat=1.0):
 
 # ---------------------------------------------------------------------------- the cabin
 
-# Wall cross-section (x, z) for the right side; the left mirrors it.
-WALL = [(1.36, 0.0), (1.36, 0.85), (1.27, 1.65), (1.06, 2.16)]
-CEIL_Z = 2.16
-Y_BACK, Y_FRONT, Y_NOSE = -1.70, 1.25, 2.02
-WIN_BOTTOM_Z = 1.16
-WIN_SIDE_Y = -0.15  # the side windows run from here forward to the windshield
+# A compact pod. Wall cross-section (x, z) for the right side behind the side windows;
+# the left mirrors it. Forward of Y_FRONT the hull tapers in plan to the windshield.
+WALL = [(1.22, 0.0), (1.22, 1.00), (0.98, 1.95)]
+CEIL_Z = 1.95
+SILL_Z = 1.00             # the bottom of every window
+Y_BACK, Y_FRONT, Y_NOSE = -1.30, 0.15, 1.60  # rear bulkhead, B-pillar, windshield base
+NOSE_HALF_W = 0.96        # half the windshield's width at its base
+TOP_Y, TOP_HALF_W = 0.95, 0.86  # where the windshield meets the roof, and half its width
 
 
 def wall_x(z):
@@ -328,60 +331,42 @@ def wall_x(z):
     return WALL[-1][0]
 
 
-def nose_y(z):
-    """The windshield plane: y where it meets height z (it leans back as it rises)."""
-    if z <= WIN_BOTTOM_Z:
-        return Y_NOSE
-    t = (z - WIN_BOTTOM_Z) / (CEIL_Z - WIN_BOTTOM_Z)
-    return Y_NOSE + (Y_FRONT - Y_NOSE) * t
+def hull_x(y):
+    """Half the hull's width at the sill, at station y."""
+    if y <= Y_FRONT:
+        return WALL[1][0]
+    t = (y - Y_FRONT) / (Y_NOSE - Y_FRONT)
+    return WALL[1][0] + (NOSE_HALF_W - WALL[1][0]) * t
 
 
 def build_shell():
     GROUP[0] = "cabin"
     # A dark backing shell behind the wall panels, so the seams between them read dark.
-    # Above the sill it stops where the side windows start.
     for side in (-1, 1):
         prof = [(side * (x + 0.04), z) for x, z in WALL]
         for i, ((x0, z0), (x1, z1)) in enumerate(zip(prof, prof[1:])):
-            y1 = Y_FRONT if i == 0 else WIN_SIDE_Y
-            slab(
-                f"shell_{'L' if side < 0 else 'R'}{i}",
-                [(x0, Y_BACK, z0), (x0, y1, z0), (x1, y1, z1), (x1, Y_BACK, z1)],
-                0.02, "paint_dark", 0, inward=(0, 0, 1.0),
-            )
-    slab("shell_spine", [(-0.37, 0.6, CEIL_Z + 0.04), (0.37, 0.6, CEIL_Z + 0.04),
-                         (0.37, Y_FRONT, CEIL_Z + 0.04), (-0.37, Y_FRONT, CEIL_Z + 0.04)],
-         0.02, "paint_dark", 0, inward=(0, 0, 0))
-    slab("shell_ceiling", [(-1.1, Y_BACK, CEIL_Z + 0.04), (1.1, Y_BACK, CEIL_Z + 0.04),
-                           (1.1, 0.6, CEIL_Z + 0.04), (-1.1, 0.6, CEIL_Z + 0.04)],
+            slab(f"shell_{'L' if side < 0 else 'R'}{i}",
+                 [(x0, Y_BACK, z0), (x0, Y_FRONT, z0), (x1, Y_FRONT, z1), (x1, Y_BACK, z1)],
+                 0.02, "paint_dark", 0, inward=(0, 0, 1.0))
+    slab("shell_ceiling", [(-1.02, Y_BACK, CEIL_Z + 0.04), (1.02, Y_BACK, CEIL_Z + 0.04),
+                           (1.02, Y_FRONT, CEIL_Z + 0.04), (-1.02, Y_FRONT, CEIL_Z + 0.04)],
          0.02, "paint_dark", 0, inward=(0, 0, 0))
 
-    # Wall panels: between the ribs, one per profile segment, inset from each other.
-    ribs = [Y_BACK, -0.95, -0.15, 0.62, Y_FRONT]
+    # Wall panels behind the side windows: between the ribs, one per profile segment.
+    ribs = [Y_BACK, -0.58, Y_FRONT]
     gap = 0.008
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
         for j, (ya, yb) in enumerate(zip(ribs, ribs[1:])):
             for i, ((x0, z0), (x1, z1)) in enumerate(zip(WALL, WALL[1:])):
                 d0 = Vector((x1 - x0, z1 - z0)).normalized() * gap
-                if i >= 1 and ya >= WIN_SIDE_Y - 1e-6:
-                    # Side windows: glass between the ribs, from the sill to the roof.
-                    slab(f"side_glass_{s}{j}{i}",
-                         [(side * x0, ya, z0), (side * x0, yb, z0), (side * x1, yb, z1),
-                          (side * x1, ya, z1)], 0.006, "glass", 0, inward=(side * 3.0, 0, 1.0))
-                    continue
                 material = "hexpanel" if (i == 1 and j == 0) else "paint"
-                slab(
-                    f"wall_{s}{j}{i}",
-                    [
-                        (side * (x0 + d0.x), ya + gap, z0 + d0.y),
-                        (side * (x0 + d0.x), yb - gap, z0 + d0.y),
-                        (side * (x1 - d0.x), yb - gap, z1 - d0.y),
-                        (side * (x1 - d0.x), ya + gap, z1 - d0.y),
-                    ],
-                    0.025, material, 0.005, inward=(side * 3.0, (ya + yb) / 2, (z0 + z1) / 2),
-                )
-                # Inward normal: across the segment, toward the cabin's centre.
+                slab(f"wall_{s}{j}{i}",
+                     [(side * (x0 + d0.x), ya + gap, z0 + d0.y),
+                      (side * (x0 + d0.x), yb - gap, z0 + d0.y),
+                      (side * (x1 - d0.x), yb - gap, z1 - d0.y),
+                      (side * (x1 - d0.x), ya + gap, z1 - d0.y)],
+                     0.025, material, 0.005, inward=(side * 3.0, (ya + yb) / 2, (z0 + z1) / 2))
                 n = Vector((-(z1 - z0), 0, x1 - x0)).normalized()
                 n = Vector((side * n.x, 0, n.z))
                 if n.dot(Vector((-side, 0, 0.3))) < 0:
@@ -390,58 +375,43 @@ def build_shell():
                     bolts(f"wall_{s}{j}{i}",
                           [(side * x0, ya, z0), (side * x0, yb, z0), (side * x1, yb, z1),
                            (side * x1, ya, z1)], n, inset=0.035)
-        # Window frame: a sill under the side glass and a transom where the wall bends.
-        for k, (x, z, th) in enumerate([(WALL[1][0], WALL[1][1], 0.07), (WALL[2][0], WALL[2][1], 0.05)]):
-            box(f"window_frame_{s}{k}", (0.07, Y_FRONT - WIN_SIDE_Y + 0.06, th),
-                (side * (x - 0.02), (Y_FRONT + WIN_SIDE_Y) / 2, z), material="paint_dark",
-                bev=0.008)
-        # Ribs: a frame member over each panel join, wall and ceiling, and a pillar where
-        # the side glass meets the windshield.
-        for j, y in enumerate(ribs[1:]):
-            for i, ((x0, z0), (x1, z1)) in enumerate(zip(WALL, WALL[1:])):
-                slab(
-                    f"rib_{s}{j}{i}",
-                    [(side * (x0 - 0.02), y - 0.03, z0), (side * (x0 - 0.02), y + 0.03, z0),
-                     (side * (x1 - 0.02), y + 0.03, z1), (side * (x1 - 0.02), y - 0.03, z1)],
-                    0.05, "paint_dark", 0.008, inward=(0, y, 1.0),
-                )
+        for i, ((x0, z0), (x1, z1)) in enumerate(zip(WALL, WALL[1:])):
+            y = ribs[1]
+            slab(f"rib_{s}{i}",
+                 [(side * (x0 - 0.02), y - 0.03, z0), (side * (x0 - 0.02), y + 0.03, z0),
+                  (side * (x1 - 0.02), y + 0.03, z1), (side * (x1 - 0.02), y - 0.03, z1)],
+                 0.05, "paint_dark", 0.008, inward=(0, y, 1.0))
     for j, y in enumerate(ribs[1:]):
-        box(f"rib_ceiling{j}", (2.12, 0.06, 0.05), (0, y, CEIL_Z - 0.025), material="paint_dark")
+        box(f"rib_ceiling{j}", (1.9, 0.07, 0.05), (0, y, CEIL_Z - 0.025), material="paint_dark")
 
-    # Ceiling: two light panels with a hex vent between, and light strips along the edges.
+    # Ceiling behind the canopy: panels with a hex vent in the middle and light strips.
     for j, (ya, yb) in enumerate(zip(ribs, ribs[1:])):
-        for k, (xa, xb) in enumerate([(-1.06, -0.36), (-0.36, 0.36), (0.36, 1.06)]):
-            m = "hexpanel" if k == 1 and j in (1, 2) else "paint"
-            if j == 3 and k != 1:
-                # Over the pilot the roof's outer panels are glass, up to the windshield.
-                m = "glass"
+        for k, (xa, xb) in enumerate([(-0.96, -0.32), (-0.32, 0.32), (0.32, 0.96)]):
+            m = "hexpanel" if k == 1 else "paint"
             box(f"ceiling_{j}{k}", (xb - xa - 0.012, yb - ya - 0.012, 0.025),
                 ((xa + xb) / 2, (ya + yb) / 2, CEIL_Z - 0.0125), material=m, bev=0.004)
         for side in (-1, 1):
-            if j == 3:
-                continue
-            box(f"light_strip_{j}{side}", (0.05, yb - ya - 0.2, 0.02),
-                (side * 0.9, (ya + yb) / 2, CEIL_Z - 0.035), material="light_strip", bev=0.004)
+            box(f"light_strip_{j}{side}", (0.04, yb - ya - 0.2, 0.02),
+                (side * 0.8, (ya + yb) / 2, CEIL_Z - 0.035), material="light_strip", bev=0.004)
 
-    # Floor: diamond plate in two halves, a dark seam and a raised centre walkway edge.
+    # Floor: diamond plate in two halves.
     for k, (ya, yb) in enumerate([(Y_BACK, 0.2), (0.2, Y_NOSE)]):
-        box(f"floor_{k}", (2.72, yb - ya - 0.01, 0.03), (0, (ya + yb) / 2, -0.015),
+        box(f"floor_{k}", (2.44, yb - ya - 0.01, 0.03), (0, (ya + yb) / 2, -0.015),
             material="floor", bev=0.003)
     for side in (-1, 1):
-        box(f"floor_kick_{side}", (0.06, Y_NOSE - Y_BACK, 0.10),
-            (side * 1.31, (Y_NOSE + Y_BACK) / 2, 0.05), material="paint_dark")
-    decal("stripe", 1.4, (0, -1.35, 0.002), (-90, 0, 0), name="decal_stripe_floor", repeat=4)
-    decal("deck_number", 0.4, (0.75, -1.05, 0.002), (-90, 0, 0))
-    decal("arrow", 0.3, (-0.75, -1.05, 0.002), (-90, 0, 0))
+        box(f"floor_kick_{side}", (0.06, Y_FRONT - Y_BACK, 0.10),
+            (side * 1.17, (Y_FRONT + Y_BACK) / 2, 0.05), material="paint_dark")
+    decal("stripe", 1.4, (0, -1.05, 0.002), (-90, 0, 0), name="decal_stripe_floor", repeat=4)
+    decal("deck_number", 0.36, (0.5, -0.75, 0.002), (-90, 0, 0))
+    decal("arrow", 0.28, (-0.5, -0.75, 0.002), (-90, 0, 0))
 
-    # Pipes along both walls, with clamps.
+    # Pipes along both walls behind the consoles, with clamps.
     for side in (-1, 1):
-        for z, r in [(0.22, 0.028), (0.30, 0.018)]:
-            x = side * (wall_x(z) - 0.08)
-            cyl(f"pipe_{side}_{z}", r, Y_FRONT - Y_BACK - 0.1, (x, (Y_FRONT + Y_BACK) / 2, z),
+        for z, r in [(0.92, 0.028), (1.0, 0.018)]:
+            cyl(f"pipe_{side}_{z}", r, -0.2 - Y_BACK, (side * (wall_x(z) - 0.07), (Y_BACK - 0.2) / 2, z),
                 (90, 0, 0), "paint_dark", 20)
-        for y in (-1.3, -0.55, 0.25, 1.0):
-            box(f"clamp_{side}_{y}", (0.06, 0.04, 0.16), (side * (wall_x(0.26) - 0.07), y, 0.26),
+        for y in (-1.15, -0.75, -0.35):
+            box(f"clamp_{side}_{y}", (0.06, 0.04, 0.16), (side * (wall_x(0.96) - 0.06), y, 0.96),
                 material="plastic", bev=0.006)
 
 
@@ -510,76 +480,52 @@ def pane(name, pts, material="glass"):
     return new_object(name, bm, material)
 
 
-# The canopy, above the sill. In plan the nose tapers in from the side walls to the
-# windshield, and the windshield rakes back to meet the roof well behind its base.
-SILL_Z = WIN_BOTTOM_Z
-CANOPY_FRONT_Y = 2.45     # the windshield's base
-CANOPY_HALF_W = 0.86      # half its width at the base
-CANOPY_TOP_Y = 1.5        # where it meets the roof
-CANOPY_TOP_HALF_W = 0.62  # half its width there
-
-
 def build_nose():
+    """The canopy: a wide raked windshield and one big angled window each side, in thick
+    pillars, over an opaque hull below the sill."""
     GROUP[0] = "windshield"
-    # Below the sill the hull stays square: opaque cheeks and a front wall, mostly hidden
-    # by the dashboard.
-    zs = sorted({z for _, z in WALL if z <= SILL_Z} | {SILL_Z})
-    for side in (-1, 1):
-        for i, (z0, z1) in enumerate(zip(zs, zs[1:])):
-            x0, x1 = side * wall_x(z0), side * wall_x(z1)
-            slab(f"cheek_{side}{i}", [(x0, Y_FRONT, z0), (x0, Y_NOSE, z0), (x1, Y_NOSE, z1),
-                                      (x1, Y_FRONT, z1)], 0.03, "paint", 0.004,
-                 inward=(side * 3.0, Y_FRONT, 0.5))
-    slab("nose_lower", [(-wall_x(0), Y_NOSE, 0), (wall_x(0), Y_NOSE, 0),
-                        (wall_x(SILL_Z), Y_NOSE, SILL_Z), (-wall_x(SILL_Z), Y_NOSE, SILL_Z)],
+    fb = [Vector((s * NOSE_HALF_W, Y_NOSE, SILL_Z)) for s in (-1, 1)]
+    ft = [Vector((s * TOP_HALF_W, TOP_Y, CEIL_Z)) for s in (-1, 1)]
+    sb = [Vector((s * WALL[1][0], Y_FRONT, SILL_Z)) for s in (-1, 1)]
+    st = [Vector((s * WALL[2][0], Y_FRONT, CEIL_Z)) for s in (-1, 1)]
+    centre = Vector((0, 0.5, 1.45))
+    # Below the sill: cheeks tapering to the nose, and the nose wall.
+    for k, side in enumerate((-1, 1)):
+        slab(f"cheek_{side}", [(sb[k].x, Y_FRONT, 0), (fb[k].x, Y_NOSE, 0), fb[k], sb[k]],
+             0.03, "paint", 0.004, inward=(side * 3.0, 1.5, 0.5))
+    slab("nose_lower", [(-NOSE_HALF_W, Y_NOSE, 0), (NOSE_HALF_W, Y_NOSE, 0), fb[1], fb[0]],
          0.04, "paint_dark", 0.004, inward=(0, 3.0, 0.5))
-    # The glareshield: a deck at the sill, from behind the screens out to the glass.
-    xs = wall_x(SILL_Z)
-    prism("glareshield", [(-xs - 0.02, 1.6), (xs + 0.02, 1.6), (xs + 0.02, Y_NOSE + 0.05),
-                          (CANOPY_HALF_W + 0.12, CANOPY_FRONT_Y + 0.1),
-                          (-CANOPY_HALF_W - 0.12, CANOPY_FRONT_Y + 0.1), (-xs - 0.02, Y_NOSE + 0.05)],
-          "y", 0, 1, "paint_dark", 0.006, 2)
-    g = ALL[-1]
-    # prism() extrudes along y from an (x, z) profile; here the profile is a plan outline,
-    # so stand it up: (x, y, z) <- (x, z, y scaled to the deck's thickness).
-    for v in g.data.vertices:
-        x, y, z = v.co
-        v.co = (x, z, SILL_Z - 0.05 + y * 0.05)
-    bm = bmesh.new()
-    bm.from_mesh(g.data)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(g.data)
-    bm.free()
-    lip = strut("glareshield_lip", (-xs, 1.6, SILL_Z + 0.01), (xs, 1.6, SILL_Z + 0.01), 0.04, 0.05,
-                "plastic", 0.012)
-
-    # The glass: one big raked windshield, and a corner pane each side joining it to the
-    # side windows.
-    fb = [Vector((s * CANOPY_HALF_W, CANOPY_FRONT_Y, SILL_Z)) for s in (-1, 1)]
-    ft = [Vector((s * CANOPY_TOP_HALF_W, CANOPY_TOP_Y, CEIL_Z)) for s in (-1, 1)]
+    # Glass.
     pane("glass_front", [fb[0], fb[1], ft[1], ft[0]])
-    strut("canopy_sill_front", fb[0], fb[1], 0.06, 0.05)
-    strut("canopy_top_front", ft[0], ft[1], 0.06, 0.06)
+    strut("canopy_sill_front", fb[0], fb[1], 0.09, 0.08)
+    strut("canopy_top_front", ft[0], ft[1], 0.12, 0.08)
+    box("canopy_sill_hump", (0.34, 0.1, 0.07), (0, Y_NOSE - 0.03, SILL_Z + 0.05),
+        material="paint_dark", bev=0.02, segs=3)
+    box("canopy_sill_hump_led", (0.05, 0.006, 0.008), (0, Y_NOSE - 0.081, SILL_Z + 0.05),
+        material="led_amber", bev=0)
+
+    def inset(a, b, d):
+        """The segment a-b moved d toward the cabin's centre and shortened."""
+        mid = (a + b) / 2
+        off = (centre - mid).normalized() * d
+        return a.lerp(b, 0.12) + off, a.lerp(b, 0.88) + off
+
     for k, side in enumerate((-1, 1)):
         s = "L" if side < 0 else "R"
-        wb = Vector((side * wall_x(SILL_Z), Y_FRONT, SILL_Z))
-        wm = Vector((side * WALL[2][0], Y_FRONT, WALL[2][1]))
-        wt = Vector((side * WALL[3][0], Y_FRONT, CEIL_Z))
-        # Split at the wall's bend so the corner glass meets the side window's two facets.
-        mid = fb[k].lerp(ft[k], (WALL[2][1] - SILL_Z) / (CEIL_Z - SILL_Z))
-        pane(f"glass_corner_{s}_lower", [wb, fb[k], mid, wm])
-        pane(f"glass_corner_{s}_upper", [wm, mid, ft[k], wt])
-        strut(f"canopy_pillar_{s}", fb[k], ft[k], 0.055, 0.06)
-        strut(f"canopy_sill_{s}", wb, fb[k], 0.06, 0.05)
-        strut(f"canopy_top_{s}", wt, ft[k], 0.06, 0.06)
-        strut(f"canopy_transom_{s}", wm, mid, 0.035, 0.04)
-        # The cheek's short glass strip between the side window's sill and the canopy's.
-        x0, x1 = side * wall_x(WALL[1][1]), side * wall_x(SILL_Z)
-    # The roof runs forward to the top of the windshield.
-    slab("roof_front", [(-WALL[3][0], Y_FRONT - 0.02, CEIL_Z), (WALL[3][0], Y_FRONT - 0.02, CEIL_Z),
-                        (CANOPY_TOP_HALF_W, CANOPY_TOP_Y, CEIL_Z),
-                        (-CANOPY_TOP_HALF_W, CANOPY_TOP_Y, CEIL_Z)], 0.04, "paint_dark", 0.004,
-         inward=(0, 1.3, 5.0))
+        pane(f"glass_side_{s}", [fb[k], sb[k], st[k], ft[k]])
+        strut(f"canopy_pillar_a_{s}", fb[k], ft[k], 0.13, 0.10, bev=0.02)
+        strut(f"canopy_pillar_b_{s}", sb[k], st[k], 0.14, 0.11, bev=0.02)
+        strut(f"canopy_sill_{s}", fb[k], sb[k], 0.10, 0.08)
+        strut(f"canopy_top_{s}", ft[k], st[k], 0.10, 0.08)
+        # Trim down the inside of each pillar, and an amber marker at its foot.
+        for nm, (a, b) in (("a", (fb[k], ft[k])), ("b", (sb[k], st[k]))):
+            p, q = inset(a, b, 0.055)
+            strut(f"canopy_trim_{nm}_{s}", p, q, 0.05, 0.03, "plastic", 0.008)
+            p2, q2 = inset(a, b, 0.075)
+            strut(f"canopy_led_{nm}_{s}", p2, p2.lerp(q2, 0.08), 0.012, 0.012, "led_amber", 0)
+    # The roof over the pilot, from the B-pillars forward to the top of the windshield.
+    slab("roof_front", [st[0], st[1], ft[1], ft[0]], 0.04, "paint_dark", 0.004,
+         inward=(0, 0.5, 5.0))
 
 
 DESK_ASPECT = 3 / 8  # the desk instrument's surface is 8:3
@@ -733,82 +679,128 @@ def frame_matrix(loc, rot):
         [math.radians(a) for a in rot], "XYZ").to_matrix().to_4x4()
 
 
+# The sloped button console under the monitors, as a (y, z) line.
+SLOPE_A, SLOPE_B = (0.50, 0.56), (1.37, 0.79)
+
+
+def slope_z(y):
+    (y0, z0), (y1, z1) = SLOPE_A, SLOPE_B
+    return z0 + (y - y0) * (z1 - z0) / (y1 - y0)
+
+
 def build_console():
     GROUP[0] = "dashboard"
-    # Main dashboard: an extruded profile across the cabin, (y, z).
-    xw = wall_x(0.7) - 0.02
-    prism("dash_body", [(Y_NOSE, 0), (1.18, 0), (1.18, 0.48), (1.04, 0.54), (1.04, 0.62),
-                        (1.22, 0.67), (Y_NOSE, 0.74)], "x", -xw, xw, "paint", 0.01, 3)
-    prism("dash_lip", [(1.0, 0.6), (1.06, 0.6), (1.06, 0.66), (1.0, 0.66)], "x", -xw + 0.05,
-          xw - 0.05, "plastic", 0.012, 3)
-    # Monitor deck behind the screens.
-    prism("dash_deck", [(1.3, 0.665), (Y_NOSE, 0.74), (Y_NOSE, 1.06), (1.74, 1.06), (1.6, 0.7)],
-          "x", -xw + 0.1, xw - 0.1, "paint_dark", 0.01, 2)
+    rnd = random.Random(12)
+    ang = math.degrees(math.atan2(SLOPE_B[1] - SLOPE_A[1], SLOPE_B[0] - SLOPE_A[0]))
+    # The monitor bank: three equal screens in a row right under the windshield.
+    box("monitor_bank", (1.9, 0.17, 0.24), (0, 1.53, 0.87), material="paint_dark", bev=0.01)
     for name, (w, loc, rot) in SCREENS.items():
         screen(name, w, loc, rot)
-    # The desk: a shelf reaching back from the dash toward the pilot, carrying the desk
-    # screen, on two arms so the floor under it stays clear.
+        if name in ("screen_center", "screen_left", "screen_right"):
+            # A chunky moulded hood over each monitor, standing up into the windshield,
+            # with an amber strip under its front edge.
+            h = w * 9 / 16
+            m = frame_matrix(loc, rot)
+            hood = box(f"{name}_hood", (w + 0.11, 0.2, 0.05), (0, 0, 0), material="plastic",
+                       bev=0.02, segs=4)
+            hood.matrix_world = m @ Matrix.Translation((0, 0.045, h / 2 + 0.05))
+            for side in (-1, 1):
+                ear = box(f"{name}_ear{side}", (0.035, 0.16, h + 0.09), (0, 0, 0),
+                          material="plastic", bev=0.014, segs=3)
+                ear.matrix_world = m @ Matrix.Translation((side * (w / 2 + 0.04), 0.06, 0.005))
+            led = box(f"{name}_hood_led", (w * 0.7, 0.006, 0.006), (0, 0, 0), material="led_amber",
+                      bev=0)
+            led.matrix_world = m @ Matrix.Translation((0, -0.05, h / 2 + 0.024))
+    # The sloped console: a centre section ahead of the desk, and a wing each side that
+    # reaches back past the desk toward the pilot.
+    y_c = 1.04
+    prism("console_centre", [(Y_NOSE, 0), (y_c, 0), (y_c, slope_z(y_c)), SLOPE_B,
+                             (Y_NOSE, SLOPE_B[1])], "x", -0.47, 0.47, "paint_dark", 0.008, 2)
+    slope = lambda x, y: frame_matrix((x, y, slope_z(y) + 0.002), (-90 + ang, 0, 0))
+    greeble("console_centre", slope(0, (y_c + SLOPE_B[0]) / 2), 0.9, 0.32, rnd)
+    for side in (-1, 1):
+        s = "L" if side < 0 else "R"
+        xa, xb = sorted((side * 0.47, side * 0.95))
+        prism(f"console_wing_{s}", [(Y_NOSE, 0), (SLOPE_A[0], 0), SLOPE_A, SLOPE_B,
+                                    (Y_NOSE, SLOPE_B[1])], "x", xa, xb, "paint_dark", 0.008, 2)
+        greeble(f"console_wing_{s}_fwd", slope(side * 0.71, 1.15), 0.46, 0.42, rnd)
+        greeble(f"console_wing_{s}_aft", slope(side * 0.71, 0.72), 0.46, 0.42, rnd)
+        box(f"console_wing_{s}_lip", (0.5, 0.03, 0.05), (side * 0.71, SLOPE_A[0], SLOPE_A[1] - 0.01),
+            material="plastic", bev=0.012, segs=3)
+        # The wing's face toward the pilot's knees.
+        box(f"console_vent_{s}", (0.4, 0.012, 0.22), (side * 0.71, SLOPE_A[0] - 0.004, 0.3),
+            material="hexpanel", bev=0.003)
+    decal("serial", 0.3, (0, y_c - 0.001, 0.3), (0, 0, 0))
+    decal("warn_eject", 0.24, (0, y_c - 0.001, 0.42), (0, 0, 0))
+    # The desk: a tray reaching back from the console toward the pilot, carrying the
+    # desk screen, on two arms so the floor under it stays clear.
     box("desk", (0.86, 0.6, 0.03), (0, 0.72, 0.6), (12, 0, 0), material="paint_dark", bev=0.01,
         segs=3)
     box("desk_edge", (0.9, 0.04, 0.05), (0, 0.415, 0.545), (12, 0, 0), material="plastic",
         bev=0.015, segs=3)
     for side in (-1, 1):
         strut(f"desk_arm_{side}", (side * 0.34, 0.5, 0.5), (side * 0.34, 1.18, 0.36), 0.05, 0.06)
-        for i in range(4):
-            box(f"desk_key_{side}{i}", (0.045, 0.03, 0.012), (side * 0.385, 0.52 + i * 0.07,
-                0.585 + i * 0.0148), (12, 0, 0), material="led_amber" if i % 2 else "plastic",
-                bev=0.003)
-    # Greebled banks across the dash top, between the lip and the screens.
-    rnd = random.Random(12)
-    for side in (-1, 1):
-        greeble(f"dash_top_{side}", frame_matrix((side * 0.78, 1.15, 0.648), (-75, 0, 0)), 0.76,
-                0.17, rnd)
-    greeble("dash_top_mid", frame_matrix((0, 1.15, 0.648), (-75, 0, 0)), 0.78, 0.17, rnd)
-    for side in (-1, 1):
-        box(f"dash_vent_{side}", (0.5, 0.012, 0.22), (side * 0.6, 1.18, 0.26), material="hexpanel",
-            bev=0.003)
-        bolts(f"dash_vent_{side}", [(side * 0.6 + sx * 0.25, 1.174, 0.26 + sz * 0.11)
-                                    for sx, sz in [(-1, -1), (1, -1), (1, 1), (-1, 1)]],
-              (0, -1, 0), inset=0.015, r=0.005)
-    decal("serial", 0.3, (0, 1.181, 0.3), (0, 0, 0))
-    decal("warn_eject", 0.24, (0, 1.181, 0.42), (0, 0, 0))
-    for side in (-1, 1):
-        decal("stripe", 0.5, (side * 0.6, 1.035, 0.58), (0, 0, 0), name=f"decal_stripe_lip_{side}",
-              repeat=2.5)
+        box(f"desk_led_{side}", (0.09, 0.006, 0.01), (side * 0.3, 0.392, 0.545), (12, 0, 0),
+            material="led_amber", bev=0)
+        # Arm rests either side of the tray's near edge.
+        box(f"arm_rest_{side}", (0.13, 0.26, 0.06), (side * 0.55, 0.40, 0.575), (12, 0, 0),
+            material="leather", bev=0.025, segs=4)
 
 
 def build_side_consoles():
     GROUP[0] = "side_consoles"
+    xo_abs, xi_abs = WALL[1][0] - 0.02, 0.80
+    rise = (0.78 - 0.66) / (xo_abs - 0.90)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
-        xo, xi = side * (wall_x(0.8) - 0.01), side * 0.62
-        prof = [(xo, 0), (xi, 0), (xi, 0.58), (side * 0.74, 0.66), (xo, 0.78)]
+        xo, xi = side * xo_abs, side * xi_abs
+        prof = [(xo, 0), (xi, 0), (xi, 0.58), (side * 0.90, 0.66), (xo, 0.78)]
         if side > 0:
             prof = list(reversed(prof))
-        prism(f"console_{s}", prof, "y", -0.75, 1.18, "paint", 0.01, 3)
-        # Top-panel tilt: rising toward the wall.
-        ang = math.degrees(math.atan2(0.78 - 0.66, abs(xo) - 0.74))
-        top = lambda x, y: frame_matrix((side * x, y, 0.66 + (x - 0.74) * math.tan(math.radians(ang)) + 0.002),
+        prism(f"console_{s}", prof, "y", -0.75, 0.50, "paint", 0.01, 3)
+        ang = math.degrees(math.atan(rise))
+        top = lambda x, y: frame_matrix((side * x, y, 0.66 + (x - 0.90) * rise + 0.002),
                                         (-90, side * -ang, 0))
-        # The top: greebled panels before and behind the throttle / stick, a label at the
-        # back. Each side gets its own pattern.
         rnd = random.Random(50 + side)
-        greeble(f"console_{s}_aft", top(1.03, -0.47) @ Matrix.Translation((0, -0.001, 0)),
-                0.5, 0.44, rnd)
-        greeble(f"console_{s}_fwd", top(1.03, 0.4) @ Matrix.Translation((0, -0.001, 0)),
-                0.5, 0.56, rnd)
-        decal("label_power" if side < 0 else "label_shields", 0.12, (0, 0, 0), (0, 0, 0),
-              name=f"decal_label_{s}")
-        ALL[-1].matrix_world = top(0.86, -0.15) @ Matrix.Translation((0, -0.003, 0))
+        greeble(f"console_{s}_aft", top(1.05, -0.5) @ Matrix.Translation((0, -0.001, 0)),
+                0.28, 0.44, rnd)
         # The console's inner face, toward the pilot's legs: greebled too.
-        greeble(f"console_{s}_face", frame_matrix((xi, 0.2, 0.3), (0, 0, -side * 90)), 1.7, 0.46,
+        greeble(f"console_{s}_face", frame_matrix((xi, -0.125, 0.3), (0, 0, -side * 90)), 1.2, 0.46,
                 rnd)
-        box(f"console_{s}_trim", (0.02, 1.9, 0.04), (xi + side * 0.005, 0.21, 0.56),
+        box(f"console_{s}_trim", (0.02, 1.25, 0.04), (xi + side * 0.005, -0.125, 0.56),
             material="plastic", bev=0.006)
+        # A ledge along the cheek under the side window, from the console to the monitors.
+        a = Vector((side * hull_x(0.47), 0.47, 0))
+        b = Vector((side * hull_x(1.25), 1.25, 0))
+        d = (b - a).normalized()
+        inward = Vector((-side * d.y, side * d.x, 0)) * 1.0
+        if inward.x * side > 0:
+            inward = -inward
+        c = (a + b) / 2 + inward * 0.06
+        ledge = box(f"ledge_{s}", (0.13, (b - a).length, SILL_Z - 0.08), (0, 0, 0), material="paint_dark",
+                    bev=0.012, segs=3)
+        ledge.matrix_world = Matrix.Translation((c.x, c.y, (SILL_Z - 0.08) / 2)) @ (
+            Vector((0, 1, 0)).rotation_difference(d).to_matrix().to_4x4())
+        for i in range(3):
+            p = a.lerp(b, 0.25 + i * 0.25) + inward * 0.06
+            slot = box(f"ledge_{s}_slot{i}", (0.05, 0.14, 0.012), (0, 0, 0), material="plastic",
+                       bev=0.004)
+            slot.matrix_world = Matrix.Translation((p.x, p.y, SILL_Z - 0.076)) @ (
+                Vector((0, 1, 0)).rotation_difference(d).to_matrix().to_4x4())
+            led = box(f"ledge_{s}_led{i}", (0.012, 0.05, 0.006), (0, 0, 0), material="led_amber",
+                      bev=0)
+            led.matrix_world = Matrix.Translation((p.x, p.y, SILL_Z - 0.068)) @ (
+                Vector((0, 1, 0)).rotation_difference(d).to_matrix().to_4x4())
+        # The ledge's inner face, above the console wing: a strip of greebles.
+        up = Vector((0, 0, 1))
+        fy = -inward
+        fx = fy.cross(up)
+        fm = Matrix((fx, fy, up)).transposed().to_4x4()
+        fm.translation = (a + b) / 2 + inward * 0.127 + up * (SILL_Z - 0.17)
+        greeble(f"ledge_{s}_face", fm, 0.72, 0.14, rnd)
     # Throttle (left) and side stick (right).
-    xo = wall_x(0.8) - 0.01
-    surface_z = lambda x: 0.66 + (x - 0.74) * (0.78 - 0.66) / (xo - 0.74)
-    tm = frame_matrix((-0.95, -0.1, surface_z(0.95) + 0.02), (0, 0, 0))
+    surface_z = lambda x: 0.66 + (x - 0.90) * rise
+    tm = frame_matrix((-1.02, -0.1, surface_z(1.02) + 0.02), (0, 0, 0))
     base = box("throttle_base", (0.16, 0.3, 0.05), (0, 0, 0), material="paint_dark", bev=0.01)
     base.matrix_world = tm
     box("throttle_slot", (0.03, 0.24, 0.01), (0, 0, 0), material="plastic", bev=0).matrix_world = (
@@ -822,7 +814,7 @@ def build_side_consoles():
     grip = box("throttle_grip", (0.12, 0.08, 0.06), (0, 0, 0), material="plastic", bev=0.025, segs=4)
     grip.matrix_world = tm @ Matrix.Translation((0, 0, 0.19))
     GROUP[0] = "side_consoles"
-    sm = frame_matrix((0.95, -0.1, surface_z(0.95) - 0.004), (0, 0, 0))
+    sm = frame_matrix((1.02, -0.1, surface_z(1.02) - 0.004), (0, 0, 0))
     b = cyl("stick_boot", 0.06, 0.05, (0, 0, 0), material="leather", segs=24)
     b.matrix_world = sm @ Matrix.Translation((0, 0, 0.025))
     sh = cyl("stick_shaft", 0.014, 0.18, (0, 0, 0), material="paint_dark", segs=16)
@@ -865,59 +857,54 @@ def cable(name, points, r=0.008, material="plastic"):
 
 
 def build_conduits():
-    """Used-future clutter: cable looms sagging along the roof edges and down the window
-    pillars, conduit runs on the roof, and greebled roof and lower-wall panels."""
+    """Used-future clutter behind the pilot: cable looms sagging along the roof edges,
+    conduit runs on the roof, and greebled roof and lower-wall panels."""
     GROUP[0] = "conduits"
     rnd = random.Random(91)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
-        # Looms along the roof edge, sagging between the ribs.
-        ribs = [Y_BACK + 0.05, -0.95, -0.15, 0.62, Y_FRONT - 0.05]
+        ribs = [Y_BACK + 0.05, -0.58, Y_FRONT - 0.08]
         for c, (dx, dz, r) in enumerate([(0.0, 0.0, 0.012), (0.03, -0.01, 0.008),
                                          (-0.02, -0.025, 0.01), (0.015, -0.03, 0.006)]):
-            x = side * (WALL[3][0] - 0.06 + dx)
+            x = side * (WALL[-1][0] - 0.07 + dx)
             pts = []
             for a, b in zip(ribs, ribs[1:]):
                 pts.append((x, a, CEIL_Z - 0.05 + dz))
                 pts.append((x - side * 0.01, (a + b) / 2, CEIL_Z - 0.1 + dz - rnd.uniform(0, 0.04)))
             pts.append((x, ribs[-1], CEIL_Z - 0.05 + dz))
             cable(f"loom_{s}{c}", pts, r, rnd.choice(["plastic", "plastic", "leather", "paint_dark"]))
-        # Cables down the pillar where the side glass meets the windshield.
-        for c in range(3):
-            x0 = side * (wall_x(2.0) - 0.05 - c * 0.018)
-            pts = [(x0, Y_FRONT - 0.06, 2.05), (side * (wall_x(1.5) - 0.06 - c * 0.018), Y_FRONT - 0.07, 1.5),
-                   (side * (wall_x(0.95) - 0.07 - c * 0.018), Y_FRONT - 0.06, 0.95)]
-            cable(f"pillar_{s}{c}", pts, 0.007, "plastic")
-        # Greebled lower walls behind the consoles' ends, and roof side panels.
-        # (Only behind the consoles: further forward they cover the wall.)
-        m = frame_matrix((side * (wall_x(0.6) - 0.03), (Y_BACK - 0.78) / 2, 0.6),
+        # Greebled lower walls behind the consoles' ends.
+        m = frame_matrix((side * (wall_x(0.6) - 0.03), (Y_BACK - 0.75) / 2, 0.55),
                          (0, 0, -side * 90))
-        greeble(f"lowwall_{s}", m, -0.78 - Y_BACK - 0.08, 0.45, rnd)
-    # Roof: two conduit runs down the middle with clamps, and greebled roof panels.
+        greeble(f"lowwall_{s}", m, -0.75 - Y_BACK - 0.08, 0.6, rnd)
     for k, (x, r) in enumerate([(-0.08, 0.022), (0.0, 0.016), (0.07, 0.026)]):
-        cyl(f"roof_conduit{k}", r, Y_FRONT - Y_BACK - 0.4, (x, (Y_FRONT + Y_BACK) / 2 - 0.1, CEIL_Z - 0.07),
+        cyl(f"roof_conduit{k}", r, Y_FRONT - Y_BACK - 0.2, (x, (Y_FRONT + Y_BACK) / 2 - 0.05, CEIL_Z - 0.07),
             (90, 0, 0), "paint_dark" if k != 1 else "plastic", 16)
-    for y in (-1.3, -0.55, 0.25, 0.95):
+    for y in (-1.05, -0.3):
         box(f"roof_clamp_{y}", (0.26, 0.04, 0.03), (0, y, CEIL_Z - 0.07), material="paint", bev=0.005)
-    for j, (ya, yb) in enumerate([(Y_BACK + 0.05, -0.98), (-0.92, -0.18), (-0.12, 0.59)]):
+    for j, (ya, yb) in enumerate([(Y_BACK + 0.05, -0.62), (-0.54, Y_FRONT - 0.05)]):
         for side in (-1, 1):
-            m = frame_matrix((side * 0.62, (ya + yb) / 2, CEIL_Z - 0.026), (90, 0, 0))
-            greeble(f"roof_{j}{side}", m, 0.42, yb - ya - 0.04, rnd)
+            m = frame_matrix((side * 0.55, (ya + yb) / 2, CEIL_Z - 0.026), (90, 0, 0))
+            greeble(f"roof_{j}{side}", m, 0.36, yb - ya - 0.04, rnd)
 
 
 def build_header():
-    """A lit header under the roof, just behind the top of the windshield."""
+    """The overhead console: a greebled panel under the roof, over the pilot's forehead,
+    with two amber strips and a lamp down its middle."""
     GROUP[0] = "header"
     rnd = random.Random(31)
-    y = CANOPY_TOP_Y - 0.16
-    prism("header", [(y - 0.2, CEIL_Z), (y + 0.12, CEIL_Z), (y + 0.06, CEIL_Z - 0.12),
-                     (y - 0.2, CEIL_Z - 0.09)], "x", -0.66, 0.66, "paint_dark", 0.008, 2)
-    m = frame_matrix((0, y - 0.07, CEIL_Z - 0.106), (-95, 0, 0))
+    z = CEIL_Z - 0.05
+    box("overhead", (1.0, 0.62, 0.09), (0, 0.52, z), material="paint_dark", bev=0.015, segs=3)
+    under = z - 0.046
     for side in (-1, 1):
-        greeble(f"header_{side}", m @ Matrix.Translation((side * 0.32, 0, 0)), 0.6, 0.14, rnd)
-    for side in (-1, 1):
-        box(f"header_light_{side}", (0.03, 0.012, 0.08), (side * 0.03, y + 0.09, CEIL_Z - 0.06),
-            (-60, 0, 0), material="led_amber", bev=0.003)
+        greeble(f"overhead_{side}", frame_matrix((side * 0.31, 0.52, under), (90, 0, 0)), 0.32,
+                0.54, rnd)
+        box(f"overhead_strip_{side}", (0.025, 0.36, 0.012), (side * 0.08, 0.56, under - 0.004),
+            material="led_amber", bev=0.003)
+    box("overhead_spine", (0.11, 0.56, 0.02), (0, 0.52, under - 0.006), material="plastic",
+        bev=0.006)
+    box("overhead_lamp", (0.06, 0.09, 0.02), (0, 0.72, under - 0.02), material="led_amber",
+        bev=0.006)
 
 
 # ---------------------------------------------------------------------------- finishing
