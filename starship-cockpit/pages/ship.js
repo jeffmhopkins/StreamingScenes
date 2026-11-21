@@ -38,6 +38,7 @@ function audio(s){
 // felt through the hull. Pixels and radians, about the canvas centre.
 // ?sway=0 keeps a page still, for a host that moves the layers itself (the JStream build).
 const SWAY=(()=>{try{const v=parseFloat(new URLSearchParams(location.search).get('sway'));return isFinite(v)?v:1}catch(e){return 1}})();
+const LAYER=(()=>{try{return new URLSearchParams(location.search).get('layer')||''}catch(e){return ''}})();
 function sway(s){if(!SWAY)return {x:0,y:0,r:0};const a=audio(s);
  return {x:2.6*Math.sin(s*2*Math.PI/7.3)+1.4*vnoise(s*.6)+.5*vnoise(s*2.1+4),
          y:2.0*Math.sin(s*2*Math.PI/5.9+.7)+1.1*vnoise(s*.5+9)+.4*vnoise(s*2.3+3)+.7*a.kick,
@@ -81,8 +82,11 @@ class Outside{
   if(sky)sky(ox);if(light){light(lx);ox.globalCompositeOperation='lighter';ox.drawImage(this.lt,0,0);ox.globalCompositeOperation='source-over'}
   x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.clearRect(0,0,W,H);x.globalCompositeOperation='source-over';
   if(alpha<=0)return;
-  x.globalAlpha=alpha;x.drawImage(this.out,0,0);x.globalAlpha=1;
-  x.globalCompositeOperation='destination-in';x.save();applySway(x,s);x.drawImage(this.win,0,0);x.restore();
+  // ?layer=sky draws only the sky, unmasked, for a host that puts it behind the plate's
+  // open windows (the 3D build); ?layer=cabin draws everything but the sky in the windows.
+  if(LAYER!=='cabin'){x.globalAlpha=alpha;x.drawImage(this.out,0,0);x.globalAlpha=1}
+  if(LAYER==='sky')return;
+  if(LAYER!=='cabin'){x.globalCompositeOperation='destination-in';x.save();applySway(x,s);x.drawImage(this.win,0,0);x.restore()}
   if(this.reflect>0){rx.setTransform(1,0,0,1,0,0);rx.globalCompositeOperation='source-over';rx.clearRect(0,0,W/2,H/2);
    rx.save();rx.scale(.5,.5);rx.filter='blur(5px)';rx.translate(0,1210);rx.scale(1,-1);rx.drawImage(this.reflectSky?this.out:this.lt,0,0);rx.restore();rx.filter='none';
    rx.globalCompositeOperation='destination-in';rx.save();rx.scale(.5,.5);applySway(rx,s);rx.drawImage(this.gloss,0,0);rx.restore();

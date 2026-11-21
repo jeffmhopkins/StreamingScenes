@@ -21,6 +21,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 PAGES = os.path.join(ROOT, "starship-cockpit", "pages")
 F = float(os.environ.get("SLOW", "1"))
+# PAGES_URL serves starship-cockpit/pages (its slowserve.py): the 2D cockpit's own space
+# and warp pages then fill the windows, on a card far past the windshield.
+PAGES_URL = os.environ.get("PAGES_URL", "")
 
 
 def geo(cx, cy, w, h, **kw):
@@ -84,18 +87,43 @@ must(op({"type": "source.create", "source_id": "feed_src", "name": "Monitor feed
 cam = SHOTS["cockpit"]
 must(batch([
     {"type": "scene.create", "scene_id": "cockpit", "name": "3D cockpit"},
-    src("space", "Space", "image", {"file": asset(f"{PAGES}/planet.jpg")}),
+    *([src("space", "Space", "browser", {"url": f"{PAGES_URL}/sky-deep.html?sway=0&layer=sky",
+                                         "width": 1920, "height": 1080, "fps": 30}),
+       src("warp_page", "Warp", "browser", {"url": f"{PAGES_URL}/warp-in-deep.html?sway=0&layer=sky",
+                                            "width": 1920, "height": 1080, "fps": 30,
+                                            "restart_on_show": True})]
+      if PAGES_URL else [src("space", "Space", "image", {"file": asset(f"{PAGES}/planet.jpg")})]),
     src("cockpit_model", "Cockpit", "model", {
         "file": asset(MODEL), "lighting": "scene",
         "texture": {"type": "source", "source_id": "feed_src"}, "texture_material": "screen_center"}),
 ], "cockpit sources"), "cockpit sources")
+
+# With PAGES_URL, the 2D cockpit's space and warp pages make one 2D scene, `outside`:
+# it fills the windows (on the plate below) and is the environment light's sky, so the
+# cockpit reflects and is lit by what is outside, the warp included.
+if PAGES_URL:
+    must(batch([
+        {"type": "scene.create", "scene_id": "outside", "name": "Outside", "role": "group"},
+        add("outside", "sky", "space", geo(960, 540, 1920, 1080)),
+        add("outside", "warp", "warp_page", geo(960, 540, 1920, 1080), visible=False),
+        {"type": "source.create", "source_id": "outside_src", "name": "Outside",
+         "kind": {"type": "scene", "scene_id": "outside"}},
+    ], "outside"), "outside")
+    # The warp as a keyframe of `outside` (scene.set_keyframe at the jump): a variant of
+    # `cockpit` can't reach into it through the far card.
+    must(batch([
+        {"type": "scene.create_variant", "scene_id": "outside_warp", "variant_of": "outside",
+         "name": "Outside · warp"},
+        {"type": "item.set_visible", "scene_id": "outside_warp", "item_id": "sky", "visible": False},
+        {"type": "item.set_visible", "scene_id": "outside_warp", "item_id": "warp", "visible": True},
+    ], "outside warp"), "outside warp")
 
 # The plate: 40 m past the windshield, big enough to fill any shot through it.
 far_z = -40.0
 plate_w = 64000
 must(batch([
     {"type": "scene.set_camera", "scene_id": "cockpit", "camera": cam},
-    add("cockpit", "space", "space",
+    add("cockpit", "space", "outside_src" if PAGES_URL else "space",
         geo(p(0, 6.0, 0)["x"], p(0, 6.0, 0)["y"], plate_w, plate_w * 9 / 16,
             depth_px=p(0, 0, far_z)["z"], fit_mode="stretch")),
     add("cockpit", "model", "cockpit_model",
@@ -133,7 +161,9 @@ edits += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8", "
 SKY = os.environ.get("SKY", "1") == "1"
 env = {"type": "environment", "intensity": 0.6,
        "sky_color": "#26385c", "horizon_color": "#6f86b0", "ground_color": "#0b0e14"}
-if SKY:
+if PAGES_URL:
+    env.update({"image": {"type": "source", "source_id": "outside_src"}, "intensity": 0.9})
+elif SKY:
     env.update({"backdrop": True, "sky_color": "#04060c", "horizon_color": "#070a14",
                 "ground_color": "#020306", "stars": 0.55, "star_brightness": 1.6,
                 "nebula": 0.45, "nebula_color": "#3a1460", "nebula_color_2": "#0d3a5c",
@@ -156,9 +186,9 @@ must(batch(edits, "lights"), "lights")
 must(batch([
     flt({"type": "scene", "scene_id": "cockpit"}, "ao", "ambient_occlusion",
         {"radius_px": 60, "strength": 0.8}),
-    flt({"type": "scene", "scene_id": "cockpit"}, "bloom", "depth_bloom",
-        {"threshold": 0.85, "strength": 0.9, "radius_px": 28, "depth_px": 300}),
-], "filters"), "filters")
+] + ([flt({"type": "scene", "scene_id": "cockpit"}, "bloom", "depth_bloom",
+          {"threshold": 0.85, "strength": 0.9, "radius_px": 28, "depth_px": 300})]
+     if os.environ.get("BLOOM", "0") == "1" else []), "filters"), "filters")
 
 # ---- the shots, as keyframe variants, and the glide between them ----
 for vid, shot in SHOTS.items():
@@ -175,7 +205,12 @@ for vid, shot in SHOTS.items():
         # strength is its intensity times its item's opacity, so the glide dims them.
         edits += [{"type": "item.set_opacity", "scene_id": vid, "item_id": i, "opacity": o}
                   for i, o in [("l_ambient", 0.0), ("l_sun", 0.0), ("l_cabin", 0.0),
-                               ("l_rear", 0.0), ("l_glow", 0.4), ("space", 0.0)]]
+                               ("l_rear", 0.0), ("l_glow", 0.4)]]
+        if PAGES_URL:
+            edits.append({"type": "item.set_visible", "scene_id": vid, "item_id": "warp", "visible": True})
+            edits.append({"type": "item.set_visible", "scene_id": vid, "item_id": "sky", "visible": False})
+        else:
+            edits.append({"type": "item.set_opacity", "scene_id": vid, "item_id": "space", "opacity": 0.0})
     must(batch(edits, vid), vid)
 
 for pid, ms in [("glide", 3200), ("glide_long", 4200), ("glide_short", 2400)]:

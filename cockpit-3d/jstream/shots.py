@@ -51,7 +51,9 @@ def camera(eye, look, fov, focus=None, blur=0.0):
     model metres, whose distance from the eye becomes the focus distance."""
     e, t = p(*eye), p(*look)
     cam = {"position": e, "target": t, "fov_deg": fov, "roll_deg": 0.0, "depth_sort": True}
-    if focus is not None:
+    # Depth of field only on request (DOF=1): looking out of a cockpit, everything from
+    # the dash to the stars should be sharp.
+    if focus is not None and os.environ.get("DOF", "0") == "1":
         f = p(*focus)
         # The focus distance runs along the viewing axis: project eye-to-focus onto it.
         axis = [t[k] - e[k] for k in "xyz"]
