@@ -17,15 +17,17 @@ from mcp import init, op
 F = float(os.environ.get("SLOW", "1"))
 OUT = os.path.abspath(os.environ.get("OUT", "cockpit-slow.mp4"))
 
-# (scene time in ms, variant, glide preset)
+# (scene time in ms, variant, glide preset, the sky's warp or None)
 EVENTS = [
-    (0, "cockpit", None),
-    (2500, "seat", "glide_long"),       # into the pilot's seat, the monitor in focus
-    (9000, "window", "glide"),          # look up and out: focus pulls to the planet
-    (15500, "monitor", "glide_long"),   # down and close on the live monitor
-    (23500, "cockpit", "glide_long"),   # back out behind the seat
+    (0, "cockpit", None, None),
+    (2500, "seat", "glide_long", None),      # into the pilot's seat, the monitor in focus
+    (9000, "window", "glide", None),         # look up and out: focus pulls to the planet
+    (15500, "warp", "glide_short", 0.85),    # cabin lights out, and jump to warp
+    (23000, "seat", "glide", 0.0),           # drop out of warp, lights back up
+    (28000, "monitor", "glide_long", None),  # down and close on the live monitor
+    (35000, "cockpit", "glide_long", None),  # back out behind the pilot
 ]
-END = float(os.environ.get("END", "30000"))
+END = float(os.environ.get("END", "41500"))
 
 init()
 op({"type": "scene.switch", "scene_id": "cockpit"})
@@ -43,7 +45,7 @@ if not ok:
     sys.exit("record did not start")
 t0 = time.time()
 log = []
-for at, vid, preset in EVENTS:
+for at, vid, preset, warp in EVENTS:
     while (time.time() - t0) * 1000 / F < at:
         time.sleep(0.05)
     if at:
@@ -51,6 +53,9 @@ for at, vid, preset in EVENTS:
         if preset:
             e["preset_id"] = preset
         op(e)
+    if warp is not None:
+        # The sky ramps itself to the new warp over its warp_ramp_s.
+        op({"type": "source.set_settings", "source_id": "l_env", "patch": {"warp": warp}})
     log.append((round(time.time() - t0, 2), at, vid))
     print("event", log[-1], flush=True)
 while (time.time() - t0) * 1000 / F < END:

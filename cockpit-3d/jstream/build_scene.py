@@ -128,9 +128,17 @@ edits = []
 edits += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8", "intensity": 0.25},
                (0, 1.2, 0))
 # The environment: a deep-space sky for reflections and ambient light.
-edits += light("l_env", "Space sky", {"type": "environment", "intensity": 0.6,
-                                      "sky_color": "#26385c", "horizon_color": "#6f86b0",
-                                      "ground_color": "#0b0e14"}, (0, 1.2, 0))
+# With SKY=1 (the default) it is also the backdrop behind everything, a deep-space sky
+# that can warp (JStream ADR-0167); SKY=0 for a JStream without it.
+SKY = os.environ.get("SKY", "1") == "1"
+env = {"type": "environment", "intensity": 0.6,
+       "sky_color": "#26385c", "horizon_color": "#6f86b0", "ground_color": "#0b0e14"}
+if SKY:
+    env.update({"backdrop": True, "sky_color": "#04060c", "horizon_color": "#070a14",
+                "ground_color": "#020306", "stars": 0.55, "star_brightness": 1.6,
+                "nebula": 0.45, "nebula_color": "#3a1460", "nebula_color_2": "#0d3a5c",
+                "galaxy": 0.35, "sky_seed": 4127, "warp": 0.0, "warp_ramp_s": 1.5})
+edits += light("l_env", "Space sky", env, (0, 1.2, 0))
 # Starlight through the windshield, casting the frame's shadows into the cabin.
 edits += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "intensity": 2.2,
                                       "shadows": True, "shadow_softness": 0.35},
@@ -156,11 +164,19 @@ must(batch([
 for vid, shot in SHOTS.items():
     if vid == "cockpit":
         continue
-    must(batch([
+    edits = [
         {"type": "scene.create_variant", "scene_id": vid, "variant_of": "cockpit",
          "name": f"Cockpit · {vid}"},
         {"type": "scene.set_camera", "scene_id": vid, "camera": shot},
-    ], vid), vid)
+    ]
+    if vid == "warp":
+        # Going to warp: the cabin lights go out, so only the screens, the LEDs and the
+        # streaking sky light the cabin, and the planet is left behind. A light's
+        # strength is its intensity times its item's opacity, so the glide dims them.
+        edits += [{"type": "item.set_opacity", "scene_id": vid, "item_id": i, "opacity": o}
+                  for i, o in [("l_ambient", 0.0), ("l_sun", 0.0), ("l_cabin", 0.0),
+                               ("l_rear", 0.0), ("l_glow", 0.4), ("space", 0.0)]]
+    must(batch(edits, vid), vid)
 
 for pid, ms in [("glide", 3200), ("glide_long", 4200), ("glide_short", 2400)]:
     must(op({"type": "transition.create", "preset_id": pid, "name": f"Glide {ms} ms",

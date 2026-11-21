@@ -140,6 +140,7 @@ over its MCP endpoint, and plays a camera tour of it.
 |---|---|
 | ![From the seat: the live monitor in focus](media/jstream-seat.jpg) | ![Out the window: the focus pulls to the planet and the dash goes soft](media/jstream-window.jpg) |
 | ![Close on the live monitor](media/jstream-monitor.jpg) | ![Behind the seat](media/jstream-cockpit.jpg) |
+| ![Out the window under the deep-space sky](media/jstream-sky.jpg) | ![At warp: the cabin lights out, the sky streaming past](media/jstream-warp.jpg) |
 
 What it shows:
 
@@ -160,12 +161,19 @@ What it shows:
 - **A plate far outside.** `starship-cockpit/pages/planet.jpg` as a card 40 m past the
   windshield, seen through the glass.
 - **A second model.** The throttle lever, `model/throttle.gltf`, placed at its hinge.
+- **A deep-space sky and the jump to warp.** The environment light is also the backdrop
+  (JStream ADR-0167): stars, nebulae and a galaxy band, infinitely far behind the
+  cabin, seen through every window and lighting the model. The `warp` shot dims the
+  cabin, sun, fill and rear lights to nothing through their items' opacity, so only the
+  screens, the LEDs and the streaking sky light the cockpit, and `drive.py` sets the
+  sky's `warp` as it switches, which the sky ramps to by itself. `SKY=0` builds without
+  the backdrop, for a JStream without it.
 
 | File | What it does |
 |---|---|
 | [`jstream/build_scene.py`](jstream/build_scene.py) | Builds the `feed` and `cockpit` scenes, the lights, filters, the shot variants and the glide presets. |
 | [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point and throttle hinge from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
-| [`jstream/drive.py`](jstream/drive.py) | Plays the tour live on program and records it (`record` output, H.264). |
+| [`jstream/drive.py`](jstream/drive.py) | Plays the tour live on program and records it (`record` output, H.264), with the jump to warp and back. |
 | [`jstream/render_frames.py`](jstream/render_frames.py) | Renders the tour frame by frame through `video.snapshot`, for a machine too slow to composite it live. |
 | [`jstream/snap_shot.py`](jstream/snap_shot.py) | Puts one shot on program and saves a snapshot. |
 | [`jstream/mcp.py`](jstream/mcp.py) | A small MCP client for the engine's HTTP endpoint. |
@@ -183,6 +191,10 @@ lavapipe software rasterizer, at a few seconds a frame with depth of field on th
 ease-in-out a `move` preset applies, and saved a snapshot a frame; ffmpeg joined them at
 30 fps. Snapshots are at most 1280 px wide, so the media is 1280 × 720; the canvas, and a
 recording, is 1920 × 1080. Every frame is a real JStream composite.
+
+The warp is in the stills but not the frame-by-frame tour: the sky advances its streaks
+by the engine's real time, a frame at a time, and a snapshot every two seconds is too
+far apart for it to stream. `drive.py` plays the jump live, on a machine that can.
 
 It needs a JStream with live model textures (ADR-0107's `texture`) and depth of field on
 models (ADR-0165).
