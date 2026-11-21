@@ -119,8 +119,8 @@ SHOTS = {
                       focus=(0.0, 1.0, (EYE[2] + SCREEN[2]) / 2), blur=6),
     # The pilot's seat, looking at the monitors; the centre one in focus.
     "seat": camera(EYE, (0.0, 1.05, SCREEN[2] - 0.1), 52, focus=SCREEN, blur=12),
-    # The same seat, looking out through the windshield: focus far, the dash goes soft.
-    "window": camera(EYE, (0.0, 1.42, -3.0), 54, focus=(0.0, 3.0, -9.0), blur=18),
+    # The same seat, looking up and out: the overhead screens face the pilot's eyes.
+    "window": camera(EYE, (0.0, 1.5, -1.0), 58, focus=(0.0, 3.0, -9.0), blur=18),
     # The jump to warp: from the seat, looking out through the windshield at the
     # streaking sky, focused on the canopy frame.
     "warp": camera(EYE, (0.0, 1.32, -3.0), 54, focus=(0.0, 1.3, SCREEN[2] - 0.2), blur=8),

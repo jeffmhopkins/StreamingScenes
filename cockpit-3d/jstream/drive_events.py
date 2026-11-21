@@ -13,3 +13,13 @@ EVENTS = [
     (35000, "cockpit", "glide_long", None),  # back out behind the pilot
 ]
 END = float(os.environ.get("END", "41500"))
+
+# The short final cut: into the seat, a look up at the overhead screens, then the jump.
+FINAL_EVENTS = [
+    (0, "cockpit", None, None),
+    (1500, "seat", "glide_long", None),
+    (7000, "window", "glide", None),
+    (11500, "warp", "glide_short", None),
+    (12500, None, None, 0.85),
+]
+FINAL_END = 21000

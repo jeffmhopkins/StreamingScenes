@@ -78,6 +78,42 @@ must(op({"type": "item.set_motion", "scene_id": "feed", "item_id": "bar", "motio
      "kind": "oscillate", "shape": "triangle", "amplitude": 520.0,
      "period_ms": int(4000 * F), "phase": 0.0}]}), "feed motion")
 
+# With PAGES_URL, every screen of the model shares one material, `screens`, mapped onto
+# a 1920 x 1080 atlas of 640 x 360 cells (the model's README). The atlas is a 2D scene:
+# the feed on the centre screen, the 2D cockpit's screen pages on the others.
+ATLAS = [  # (item, page or None for the feed, x, y, w, h)
+    ("a_left", "screen-radar", 0, 0, 640, 360),
+    ("a_center", None, 640, 0, 640, 360),
+    ("a_right", "screen-spectrum", 1280, 0, 640, 360),
+    ("a_ovl", "screen-nav", 0, 360, 640, 360),
+    ("a_ovr", "screen-shields", 640, 360, 640, 360),
+    ("a_side_l", "screen-telemetry", 1280, 360, 640, 360),
+    ("a_desk", "desk", 0, 720, 960, 360),
+    ("a_side_r", "screen-camhud-1", 1280, 720, 640, 360),
+]
+if PAGES_URL:
+    ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
+          src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
+          add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080)),
+          {"type": "source.create", "source_id": "feed_in_atlas", "name": "Feed",
+           "kind": {"type": "scene", "scene_id": "feed"}}]
+    for item, page, x, y, w, h in ATLAS:
+        if page is None:
+            ed.append(add("atlas", item, "feed_in_atlas", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch")))
+        elif page == "desk":
+            # The LinnStrument camera's cell, off: a dark pad grid.
+            ed += [src("desk_grid", "Desk pads", "shape", {"width": 960, "height": 360, "shape": "rectangle",
+                                                           "color": "#0b1016ff", "border_color": "#1d2a36ff",
+                                                           "border_width": 6.0, "radius": 8.0}),
+                   add("atlas", item, "desk_grid", geo(x + w / 2, y + h / 2, w, h))]
+        else:
+            ed += [src("p_" + item, page, "browser", {"url": f"{PAGES_URL}/{page}.html?sway=0",
+                                                      "width": 690, "height": 368, "fps": 30}),
+                   add("atlas", item, "p_" + item, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
+    ed.append({"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
+               "kind": {"type": "scene", "scene_id": "atlas"}})
+    must(batch(ed, "atlas"), "atlas")
+
 # The feed scene as a source, for the model's texture.
 must(op({"type": "source.create", "source_id": "feed_src", "name": "Monitor feed",
          "kind": {"type": "scene", "scene_id": "feed"}}),
@@ -95,7 +131,8 @@ must(batch([
       if PAGES_URL else [src("space", "Space", "image", {"file": asset(f"{PAGES}/planet.jpg")})]),
     src("cockpit_model", "Cockpit", "model", {
         "file": asset(MODEL), "lighting": "scene",
-        "texture": {"type": "source", "source_id": "feed_src"}, "texture_material": "screen_center"}),
+        "texture": {"type": "source", "source_id": "atlas_src" if PAGES_URL else "feed_src"},
+        "texture_material": "screens" if PAGES_URL else "screen_center"}),
 ], "cockpit sources"), "cockpit sources")
 
 # With PAGES_URL, the 2D cockpit's space and warp pages make one 2D scene, `outside`:

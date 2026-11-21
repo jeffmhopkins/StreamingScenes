@@ -17,7 +17,12 @@ import os
 import sys
 import time
 
-from drive_events import END, EVENTS
+from drive_events import END, EVENTS, FINAL_END, FINAL_EVENTS
+
+# PAGES=1 for a scene built with PAGES_URL; FINAL=1 plays the short final cut.
+PAGES = os.environ.get("PAGES", "0") == "1"
+if os.environ.get("FINAL", "0") == "1":
+    EVENTS, END = FINAL_EVENTS, FINAL_END
 from mcp import init, op, snap
 
 if len(sys.argv) < 2:
@@ -33,12 +38,21 @@ def fire(vid, preset, warp):
         if preset:
             e["preset_id"] = preset
         op(e)
-    if warp is not None:
+    if warp is not None and PAGES:
+        # The 2D cockpit's warp page, a keyframe of the outside scene (build_scene.py).
+        k = {"type": "scene.set_keyframe", "scene_id": "outside"}
+        if warp > 0:
+            k["keyframe_id"] = "outside_warp"
+        op(k)
+    elif warp is not None:
         op({"type": "source.set_settings", "source_id": "l_env", "patch": {"warp": warp}})
 
 
 init()
-op({"type": "source.set_settings", "source_id": "l_env", "patch": {"warp": 0.0}})
+if PAGES:
+    op({"type": "scene.set_keyframe", "scene_id": "outside"})
+else:
+    op({"type": "source.set_settings", "source_id": "l_env", "patch": {"warp": 0.0}})
 op({"type": "scene.switch", "scene_id": "cockpit"})
 time.sleep(2)
 _, ok = op({"type": "clock.hold"})
