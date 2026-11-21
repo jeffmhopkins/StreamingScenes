@@ -16,14 +16,14 @@ PATH = sys.argv[1]
 # Tiling sets: material -> (texture set, base colour factor, metallic, roughness, normal scale)
 TILED = {
     "paint": ("paint", [1, 1, 1, 1], 1.0, 1.0, 0.6),
-    "paint_dark": ("paint", [0.2, 0.2, 0.21, 1], 1.0, 1.0, 0.6),
+    "paint_dark": ("paint", [0.45, 0.45, 0.47, 1], 1.0, 1.0, 0.6),
     "floor": ("floor", [1, 1, 1, 1], 1.0, 1.0, 1.0),
     "leather": ("leather", [1, 1, 1, 1], 1.0, 1.0, 1.0),
     "plastic": ("plastic", [1, 1, 1, 1], 1.0, 1.0, 0.35),
     "hexpanel": ("hexpanel", [1, 1, 1, 1], 1.0, 1.0, 1.0),
 }
 SCREENS = ["screen_center", "screen_left", "screen_right", "screen_side_left",
-           "screen_side_right", "screen_overhead"]
+           "screen_side_right"]
 
 
 def main():
@@ -88,6 +88,21 @@ def main():
                 "alphaCutoff": 0.5,
                 # Each decal lies on a surface, so its back is never seen; drawing it
                 # anyway keeps a decal visible whichever way its quad was wound.
+                "doubleSided": True,
+            })
+        elif name == "readout":
+            # The small amber displays: dark glass lit by one cell of the readout atlas.
+            m.clear()
+            m.update({
+                "name": name,
+                "pbrMetallicRoughness": {
+                    "baseColorFactor": [0.01, 0.01, 0.01, 1],
+                    "metallicFactor": 0,
+                    "roughnessFactor": 0.2,
+                },
+                "emissiveTexture": texture("readouts.png"),
+                "emissiveFactor": [1, 1, 1],
+                "extensions": {"KHR_materials_emissive_strength": {"emissiveStrength": 3.0}},
                 "doubleSided": True,
             })
         elif name == "glass":

@@ -10,7 +10,7 @@
 The five tiling texture sets are made from these [ambientCG](https://ambientcg.com) materials, which are
 released under **CC0 1.0** (public domain, no attribution required). They are credited here anyway.
 [`../tools/make_textures.py`](../tools/make_textures.py) repacks them for glTF: an occlusion, roughness and
-metalness image per set, and the paint set is recoloured from near black to grey and made non-metallic.
+metalness image per set, and the paint set is recoloured from near black to gunmetal, with generated grime and scratches.
 
 | Set | ambientCG asset | Licence |
 |---|---|---|
@@ -22,6 +22,6 @@ metalness image per set, and the paint set is recoloured from near black to grey
 
 ambientCG's licence: <https://docs.ambientcg.com/license/>.
 
-`decals.png` and the six `screen_*.jpg` placeholder cards are drawn by `make_textures.py`. Their text is
+`decals.png`, `readouts.png` and the five `screen_*.jpg` placeholder cards are drawn by `make_textures.py`. The grime and scratches on the `paint` set are generated there too. Their text is
 set in [Inter](https://github.com/rsms/inter) (SIL Open Font License 1.1). Only rendered images of the
 glyphs are in the textures, not the font.

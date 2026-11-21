@@ -1,21 +1,29 @@
 # 3D cockpit model
 
-A single-seat starship cockpit as a real 3D model, for JStream's `model` source
-(ADR-0107): glTF 2.0, metallic-roughness materials, six screens that are each their own
+A starship flight deck as a real 3D model, for JStream's `model` source (ADR-0107):
+glTF 2.0, metallic-roughness materials, and five 16:9 screens that are each their own
 material so a live source can be mapped onto any of them. It is meant for camera moves
-and depth of field inside the cockpit, close enough to read the button labels.
+and depth of field inside the cockpit, close enough to read the readouts.
 
-![The cockpit from behind the seat](media/overview.jpg)
+The look follows the green-screen plate of [starship-cockpit](../starship-cockpit/)
+and the "used future" of working-ship sets: dark gunmetal paint with grime and scratches,
+glass that wraps from the windshield back along both sides, and every console covered in
+greebled sub-panels, amber readouts, button banks, switches, knobs and vents, with cable
+looms and conduits on the roof. There is no seat, so the camera can sit where a pilot
+would.
+
+![The cockpit from the back of the cabin](media/overview.jpg)
 
 | | |
 |---|---|
-| ![The pilot's view](media/pilot.jpg) | ![The seat](media/seat.jpg) |
-| ![The dashboard up close](media/dash-closeup.jpg) | ![The left console](media/left-console.jpg) |
+| ![The pilot's view](media/pilot.jpg) | ![The wraparound side glass](media/canopy.jpg) |
+| ![The centre console and its two sticks](media/center-console.jpg) | ![The left console](media/left-console.jpg) |
+| ![The dashboard up close](media/dash-closeup.jpg) | |
 
 ![A macro shot of the dashboard buttons: the texture stays sharp](media/button-macro.jpg)
 
 The stills are Blender Cycles renders of the same geometry and textures, lit with two area
-lights and the model's own light strips. JStream lights the model with its own rig or the
+lights, the model's own light strips and LEDs, and a starfield behind the glass. JStream lights the model with its own rig or the
 scene's lights, so it will not look exactly like this there.
 
 ## Files
@@ -23,9 +31,9 @@ scene's lights, so it will not look exactly like this there.
 | Path | What it is |
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
-| [`model/textures/`](model/textures/) | 22 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, and a placeholder card per screen. |
+| [`model/textures/`](model/textures/) | 22 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
-| [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads, and draws the decals and screen cards. |
+| [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set), and draws the decals, readouts and screen cards. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
@@ -37,9 +45,9 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 64,090 | 2,000,000 |
+| Triangles | 404,014 | 2,000,000 |
 | Textures | 22, all 2048 px or smaller | 64, 4096 px a side |
-| Memory (textures with mips) | 357 MiB | 512 MiB (with the mesh) |
+| Memory | 376 MiB of textures with mips, 37 MiB of mesh: 413 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
@@ -54,35 +62,42 @@ part is:
 
 | Set | Used for | Repeats every | Texels per cm |
 |---|---|---|---|
-| `paint` | walls, consoles, ceiling, frames (`paint_dark` is the same set darkened) | 50 cm | 41 |
+| `paint` | walls, consoles, ceiling, frames; gunmetal with baked grime, mottling and scratches (`paint_dark` is the same set darkened) | 50 cm | 41 |
 | `floor` | the deck | 60 cm | 34 |
-| `leather` | seat, armrests, stick boot | 30 cm | 68 |
+| `leather` | stick boots, some cable looms | 30 cm | 68 |
 | `plastic` | bezels, buttons, grips, trim | 40 cm | 51 |
-| `hexpanel` | vents, hatch, ceiling and wall insets | 50 cm | 41 |
+| `hexpanel` | vents, hatch, roof and wall insets | 50 cm | 41 |
 
 A 2 cm button fills a 1080p frame at a ~5 cm field of view and still has about 100 texels
 across it. Bevels, bolts, buttons and switches are real geometry, not normal-map detail,
 so their edges stay sharp at any distance. Labels and stripes come from one 2048 px decal
-atlas, at 3 to 6 texels per mm on the panels that carry them.
+atlas, at 3 to 6 texels per mm on the panels that carry them. Each amber readout is one
+256 × 128 px cell of the readout atlas on a display 4 to 25 cm wide.
 
 ## Layout
 
 The model is in metres, glTF axes: **+x right, +y up, +z toward the back of the cabin**.
 The pilot faces **−z**, toward the windshield. The deck is at y = 0. In JStream's model
-source, glTF +z is toward the viewer, so the default view looks at the back of the seat
-toward the windshield.
+source, glTF +z is toward the viewer, so the default view looks from the back of the
+cabin toward the windshield.
 
 | Part (node) | Where |
 |---|---|
 | Whole cabin | x −1.40 to 1.40, y 0 to 2.20, z −2.02 (windshield base) to 1.76 (rear bulkhead) |
 | Pilot's eye point | about (0, 1.22, 0.45), looking toward −z |
-| `seat` | centred on x = 0, from z −0.10 to 0.84; headrest top at y 1.56 |
-| `windshield` | three panes (material `glass`, alpha-blended) in a frame leaning back: the bottom edge at y 1.16, z −2.02; the top edge at y 2.16, z −1.25. The centre pane spans x −0.62 to 0.62; the side panes x ±0.70 to ±1.08. Whatever is behind the model in the scene shows through. |
-| `dashboard` | across the front, under the windshield; top at y ≈ 0.67 |
-| `side_consoles` | either side of the seat, x ±0.62 to ±1.35, z −1.18 to 0.75; throttle on the left, side stick on the right |
-| `overhead_panel` | hanging from the ceiling above the dashboard |
-| `rear_bulkhead` | behind the seat, with a hatch |
-| `cabin` | walls, ribs, ceiling with light strips, floor, pipes |
+| `windshield` | three front panes in a frame leaning back: the bottom edge at y 1.16, z −2.02; the top edge at y 2.16, z −1.25. The centre pane spans x −0.78 to 0.78; the side panes x ±0.84 to ±1.02. Also the glass cheeks that join it to the side windows. |
+| Side windows (in `cabin`) | glass on both walls from the console sill (y 0.85) to the roof (y 2.16), from z 0.15 forward to the windshield, split by ribs at z −0.62 and −1.25 and a transom at y 1.65 |
+| `header` | the lit, greebled header across the top of the windshield |
+| `dashboard` | across the front, under the windshield; top at y ≈ 0.67; greebled banks between the lip and the screens |
+| `center_console` | between the pilot's knees, x −0.36 to 0.36, z −1.18 to −0.35, top at y 0.60, with two sticks |
+| `side_consoles` | either side, x ±0.62 to ±1.35, z −1.18 to 0.75; throttle on the left, side stick on the right; greebled tops and inner faces |
+| `conduits` | cable looms along the roof edges and down the pillars, roof conduits, greebled roof and rear-wall panels |
+| `rear_bulkhead` | the back wall, with a hatch |
+| `cabin` | walls, ribs, roof with light strips, floor, pipes, the side windows |
+
+All glass is the one `glass` material (alpha-blended, nearly clear): whatever is behind the
+model in the scene shows through every window. There is no seat; the space where one
+would be (around x 0, z 0 to 0.8) is clear for the camera.
 
 ### Screens
 
@@ -100,7 +115,6 @@ card with its name.
 | `screen_right` | 0.500 × 0.281 | (0.461, 1.036, −1.514) | (0.894, 1.036, −1.264) | (0.426, 0.764, −1.456) | (0.859, 0.764, −1.206) | (−0.49, 0.24, 0.84) |
 | `screen_side_left` | 0.300 × 0.169 | (−1.114, 0.914, −0.767) | (−0.955, 0.914, −1.021) | (−1.005, 0.806, −0.699) | (−0.846, 0.806, −0.953) | (0.55, 0.77, 0.34) |
 | `screen_side_right` | 0.300 × 0.169 | (0.955, 0.914, −1.021) | (1.114, 0.914, −0.767) | (0.846, 0.806, −0.953) | (1.005, 0.806, −0.699) | (−0.55, 0.77, 0.34) |
-| `screen_overhead` | 0.340 × 0.191 | (−0.170, 1.991, −0.707) | (0.170, 1.991, −0.707) | (−0.170, 1.869, −0.853) | (0.170, 1.869, −0.853) | (0, −0.77, 0.64) |
 
 To put a live source on a screen, give the model source `texture` = that source and
 `texture_material` = the screen's material name (ADR-0107 decision 5). Where a model
@@ -109,9 +123,9 @@ source can't do that yet, a flat card placed on the corners above does the same 
 ### All materials
 
 `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
-`glass` (blended), `decals` (alpha-masked labels and stripes), `light_strip` and
-`led_green`, `led_amber`, `led_red`, `led_blue` (emissive), and the six `screen_*`
-materials above.
+`glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
+displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
+`led_green`, `led_blue` (emissive), and the five `screen_*` materials above.
 
 ## Rebuilding it
 
