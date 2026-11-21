@@ -105,7 +105,8 @@ if PAGES_URL:
     must(batch([
         {"type": "scene.create", "scene_id": "outside", "name": "Outside", "role": "group"},
         add("outside", "sky", "space", geo(960, 540, 1920, 1080)),
-        add("outside", "warp", "warp_page", geo(960, 540, 1920, 1080), visible=False),
+        add("outside", "warp", "warp_page", geo(960, 540, 1920, 1080)),
+        {"type": "item.set_visible", "item_id": "warp", "visible": False},
         {"type": "source.create", "source_id": "outside_src", "name": "Outside",
          "kind": {"type": "scene", "scene_id": "outside"}},
     ], "outside"), "outside")
@@ -162,7 +163,7 @@ SKY = os.environ.get("SKY", "1") == "1"
 env = {"type": "environment", "intensity": 0.6,
        "sky_color": "#26385c", "horizon_color": "#6f86b0", "ground_color": "#0b0e14"}
 if PAGES_URL:
-    env.update({"image": {"type": "source", "source_id": "outside_src"}, "intensity": 0.9})
+    env.update({"image": {"type": "source", "source_id": "outside_src"}, "intensity": 1.4})
 elif SKY:
     env.update({"backdrop": True, "sky_color": "#04060c", "horizon_color": "#070a14",
                 "ground_color": "#020306", "stars": 0.55, "star_brightness": 1.6,
@@ -174,7 +175,7 @@ edits += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4",
                                       "shadows": True, "shadow_softness": 0.35},
                (0.6, 3.2, -4.0), aim={"tilt_deg": float(os.environ.get("SUN_TILT", "-35")), "turn_deg": float(os.environ.get("SUN_TURN", "192"))})
 # Cool cabin lights overhead, and the monitors' glow on the dash.
-edits += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.4,
+edits += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 0.8,
                                     "range_px": 3200}, (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
 edits += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 0.9,
                                          "range_px": 1100}, (0.0, 1.0, -1.15))

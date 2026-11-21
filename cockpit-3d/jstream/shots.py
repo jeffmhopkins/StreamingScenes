@@ -118,12 +118,12 @@ SHOTS = {
     "cockpit": camera((0.42, 1.62, BACK), (0.0, 0.98, SCREEN[2] - 0.1), 66,
                       focus=(0.0, 1.0, (EYE[2] + SCREEN[2]) / 2), blur=6),
     # The pilot's seat, looking at the monitors; the centre one in focus.
-    "seat": camera(EYE, (0.0, 1.0, SCREEN[2] - 0.1), 62, focus=SCREEN, blur=12),
+    "seat": camera(EYE, (0.0, 1.05, SCREEN[2] - 0.1), 52, focus=SCREEN, blur=12),
     # The same seat, looking out through the windshield: focus far, the dash goes soft.
-    "window": camera(EYE, (0.05, 1.45, -3.0), 62, focus=(0.0, 3.0, -9.0), blur=18),
+    "window": camera(EYE, (0.0, 1.42, -3.0), 54, focus=(0.0, 3.0, -9.0), blur=18),
     # The jump to warp: from the seat, looking out through the windshield at the
     # streaking sky, focused on the canopy frame.
-    "warp": camera(EYE, (0.0, 1.32, -3.0), 64, focus=(0.0, 1.3, SCREEN[2] - 0.2), blur=8),
+    "warp": camera(EYE, (0.0, 1.32, -3.0), 54, focus=(0.0, 1.3, SCREEN[2] - 0.2), blur=8),
     # Close on the centre monitor, square to it.
     "monitor": camera(
         tuple(SCREEN[i] + 0.62 * SCREEN_N[i] for i in range(3)),
