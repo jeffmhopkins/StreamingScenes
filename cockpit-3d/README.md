@@ -33,6 +33,7 @@ scene's lights, so it will not look exactly like this there.
 | Path | What it is |
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
+| [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, so a scene can move it. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
 | [`model/textures/`](model/textures/) | 23 images: five tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and a placeholder card per screen. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set), and draws the decals, readouts and screen cards. |
@@ -47,13 +48,14 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 365,116 | 2,000,000 |
+| Triangles | 364,708 | 2,000,000 |
 | Textures | 23, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 380 MiB of textures with mips, 34 MiB of mesh: 414 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
-Nothing in the file was reported as ignored.
+Nothing in the file was reported as ignored. `throttle.gltf` loads the same way: 408
+triangles, and its own copy of the `paint` and `plastic` sets, 128 MiB.
 
 ## Why it stays sharp up close
 
@@ -91,7 +93,7 @@ cabin toward the windshield.
 | Side windows (in `cabin`) | glass on both walls from the console sill (y 0.85) to the roof (y 2.16), from z 0.15 forward to z −1.25, split by a rib at z −0.62 and a transom at y 1.65. The roof's outer panels between z −0.62 and −1.25 are glass too. |
 | `header` | the lit, greebled header under the roof behind the top of the windshield |
 | `dashboard` | across the front, under the canopy; top at y ≈ 0.67; greebled banks between the lip and the screens; the desk, reaching back to z −0.42 at y ≈ 0.55 to 0.68, on two arms |
-| `side_consoles` | either side, x ±0.62 to ±1.35, z −1.18 to 0.75; throttle on the left, side stick on the right; greebled tops and inner faces |
+| `side_consoles` | either side, x ±0.62 to ±1.35, z −1.18 to 0.75; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; greebled tops and inner faces |
 | `conduits` | cable looms along the roof edges and down the pillars, roof conduits, greebled roof and rear-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
 | `cabin` | walls, ribs, roof with light strips, floor, pipes, the side windows |
@@ -128,6 +130,23 @@ ADR-0107 says a named source that isn't drawing reads transparent, not as the pl
 To put a live source on a screen, give the model source `texture` = that source and
 `texture_material` = the screen's material name (ADR-0107 decision 5). Where a model
 source can't do that yet, a flat card placed on the corners above does the same job.
+
+### The throttle lever
+
+JStream can't move one node inside a model, so the lever (shaft and grip) is not in
+`cockpit.gltf`. It is `throttle.gltf`, a second model to place in the scene, with its
+origin at the hinge inside the base. It is modelled upright, at the middle of its travel.
+
+| | |
+|---|---|
+| Hinge (pivot), in the cockpit's coordinates | (−0.950, 0.721, 0.100) |
+| Hinge axis | the cockpit's x axis: the grip swings toward −z (forward) or +z (back) |
+| Travel | −25° to +25° from upright; the slot in the base is 24 cm long |
+| Size | 0.120 × 0.220 × 0.080 m (x, y, z) |
+| Bounds centre, from the pivot | (0, 0.110, 0): the lever stands on its pivot |
+
+To animate it, put the lever in a group whose centre is the pivot, offset the lever by
+its bounds centre, and tilt the group.
 
 ### All materials
 

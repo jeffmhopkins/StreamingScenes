@@ -175,6 +175,7 @@ def mat(name):
 
 ALL = []
 GROUP = ["cabin"]  # the node an object joins into at export (see finish)
+PIVOT = [0.0, 0.0, 0.0]  # the throttle lever's hinge, set in build_side_consoles
 
 
 def new_object(name, bm, material):
@@ -812,10 +813,15 @@ def build_side_consoles():
     base.matrix_world = tm
     box("throttle_slot", (0.03, 0.24, 0.01), (0, 0, 0), material="plastic", bev=0).matrix_world = (
         tm @ Matrix.Translation((0, 0, 0.027)))
-    arm = box("throttle_arm", (0.03, 0.04, 0.16), (0, 0, 0), material="paint_dark", bev=0.008)
-    arm.matrix_world = tm @ Matrix.Translation((0, 0.04, 0.1)) @ Matrix.Rotation(0.3, 4, "X")
+    # The lever is its own node and its own file (throttle.gltf), with its origin at the
+    # hinge inside the base, so a scene can tilt it. It is built upright, mid-travel.
+    GROUP[0] = "throttle"
+    PIVOT[:] = tm.translation
+    arm = box("throttle_arm", (0.03, 0.04, 0.17), (0, 0, 0), material="paint_dark", bev=0.008)
+    arm.matrix_world = tm @ Matrix.Translation((0, 0, 0.085))
     grip = box("throttle_grip", (0.12, 0.08, 0.06), (0, 0, 0), material="plastic", bev=0.025, segs=4)
-    grip.matrix_world = tm @ Matrix.Translation((0, 0.07, 0.19))
+    grip.matrix_world = tm @ Matrix.Translation((0, 0, 0.19))
+    GROUP[0] = "side_consoles"
     sm = frame_matrix((0.95, -0.1, surface_z(0.95) - 0.004), (0, 0, 0))
     b = cyl("stick_boot", 0.06, 0.05, (0, 0, 0), material="leather", segs=24)
     b.matrix_world = sm @ Matrix.Translation((0, 0, 0.025))
@@ -975,6 +981,15 @@ def finish():
         obs[0].data.name = name
         joined.append(obs[0])
     ALL[:] = joined
+    # The throttle lever: mesh moved so its origin is the hinge, object placed back there.
+    lever = next(o for o in ALL if o.name == "throttle")
+    lever.data.transform(Matrix.Translation(-Vector(PIVOT)))
+    lever.location = PIVOT
+    lo = [min(v.co[i] for v in lever.data.vertices) for i in range(3)]
+    hi = [max(v.co[i] for v in lever.data.vertices) for i in range(3)]
+    print("throttle pivot (blender)", [round(c, 4) for c in PIVOT],
+          "bounds centre from pivot", [round((a + b) / 2, 4) for a, b in zip(lo, hi)],
+          "size", [round(b - a, 4) for a, b in zip(lo, hi)])
 
 
 def main():
@@ -991,18 +1006,27 @@ def main():
     print(f"objects {len(ALL)}  triangles {tris}")
     if BLEND:
         bpy.ops.wm.save_as_mainfile(filepath=BLEND)
-    bpy.ops.export_scene.gltf(
-        filepath=OUT,
-        export_format="GLTF_SEPARATE",
-        export_image_format="NONE",
-        export_tangents=True,
-        export_apply=True,
-        export_yup=True,
-        export_cameras=False,
-        export_lights=False,
-        export_materials="EXPORT",
-        export_vertex_color="NONE",
-    )
+    lever = next(o for o in ALL if o.name == "throttle")
+    for path, obs in [(OUT, [o for o in ALL if o is not lever]),
+                      (os.path.join(os.path.dirname(OUT), "throttle.gltf"), [lever])]:
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in obs:
+            ob.select_set(True)
+        if obs == [lever]:
+            lever.location = (0, 0, 0)
+        bpy.ops.export_scene.gltf(
+            filepath=path,
+            use_selection=True,
+            export_format="GLTF_SEPARATE",
+            export_image_format="NONE",
+            export_tangents=True,
+            export_apply=True,
+            export_yup=True,
+            export_cameras=False,
+            export_lights=False,
+            export_materials="EXPORT",
+            export_vertex_color="NONE",
+        )
 
 
 main()
