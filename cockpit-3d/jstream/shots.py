@@ -110,6 +110,11 @@ def _cross(a, b):
 
 EYE = _readme_point("Pilot's eye point")
 SCREEN, SCREEN_N = _screen("screen_center")
+SCREEN_L, SCREEN_L_N = _screen("screen_left")
+SCREEN_R, SCREEN_R_N = _screen("screen_right")
+# How far a side monitor's close-up sits across from square to it, toward the cabin's
+# middle, in metres: the camera crosses the cabin between them, for parallax.
+ACROSS = float(os.environ.get("ACROSS", "0.4"))
 # The back of the cabin, for the establishing shot: 0.25 m in from the rear bulkhead.
 BACK = BOUNDS_MAX[2] - 0.25
 
@@ -128,6 +133,14 @@ SHOTS = {
     "monitor": camera(
         tuple(SCREEN[i] + 0.62 * SCREEN_N[i] for i in range(3)),
         SCREEN, 44, focus=SCREEN, blur=10),
+    # Close on the left monitor, from across to its right; then the right monitor, from
+    # across to its left.
+    "monitor_l": camera(
+        tuple(SCREEN_L[i] + 0.6 * SCREEN_L_N[i] + (ACROSS if i == 0 else 0) for i in range(3)),
+        SCREEN_L, 46, focus=SCREEN_L, blur=10),
+    "monitor_r": camera(
+        tuple(SCREEN_R[i] + 0.6 * SCREEN_R_N[i] - (ACROSS if i == 0 else 0) for i in range(3)),
+        SCREEN_R, 46, focus=SCREEN_R, blur=10),
 }
 
 # The throttle lever, a second model with its origin at the hinge.

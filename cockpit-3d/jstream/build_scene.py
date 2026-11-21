@@ -24,6 +24,10 @@ F = float(os.environ.get("SLOW", "1"))
 # PAGES_URL serves starship-cockpit/pages (its slowserve.py): the 2D cockpit's own space
 # and warp pages then fill the windows, on a card far past the windshield.
 PAGES_URL = os.environ.get("PAGES_URL", "")
+# SKY3D=1 with PAGES_URL: JStream's own 3D sky backdrop (stars, nebulae, warp) fills the
+# windows and lights the cabin, and the pages only drive the screens.
+SKY3D = bool(PAGES_URL) and os.environ.get("SKY3D", "0") == "1"
+OUTSIDE = bool(PAGES_URL) and not SKY3D
 
 
 def geo(cx, cy, w, h, **kw):
@@ -138,7 +142,7 @@ must(batch([
 # With PAGES_URL, the 2D cockpit's space and warp pages make one 2D scene, `outside`:
 # it fills the windows (on the plate below) and is the environment light's sky, so the
 # cockpit reflects and is lit by what is outside, the warp included.
-if PAGES_URL:
+if OUTSIDE:
     must(batch([
         {"type": "scene.create", "scene_id": "outside", "name": "Outside", "role": "group"},
         add("outside", "sky", "space", geo(960, 540, 1920, 1080)),
@@ -161,9 +165,10 @@ far_z = -40.0
 plate_w = 64000
 must(batch([
     {"type": "scene.set_camera", "scene_id": "cockpit", "camera": cam},
+] + ([] if SKY3D else [
     add("cockpit", "space", "outside_src" if PAGES_URL else "space",
         geo(p(0, 6.0, 0)["x"], p(0, 6.0, 0)["y"], plate_w, plate_w * 9 / 16,
-            depth_px=p(0, 0, far_z)["z"], fit_mode="stretch")),
+            depth_px=p(0, 0, far_z)["z"], fit_mode="stretch"))]) + [
     add("cockpit", "model", "cockpit_model",
         geo(CX, CY, S * (BOUNDS_MAX[0] - BOUNDS_MIN[0]), S * (BOUNDS_MAX[1] - BOUNDS_MIN[1]),
             depth_px=0.0)),
@@ -191,7 +196,8 @@ def light(lid, name, settings, at, aim=None, size=60):
 
 edits = []
 # Soft fill so nothing goes black.
-edits += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8", "intensity": 0.25},
+edits += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8",
+                                        "intensity": 0.45 if SKY3D else 0.25},
                (0, 1.2, 0))
 # The environment: a deep-space sky for reflections and ambient light.
 # With SKY=1 (the default) it is also the backdrop behind everything, a deep-space sky
@@ -199,20 +205,27 @@ edits += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8", "
 SKY = os.environ.get("SKY", "1") == "1"
 env = {"type": "environment", "intensity": 0.6,
        "sky_color": "#26385c", "horizon_color": "#6f86b0", "ground_color": "#0b0e14"}
-if PAGES_URL:
+if OUTSIDE:
     env.update({"image": {"type": "source", "source_id": "outside_src"}, "intensity": 1.4})
-elif SKY:
+elif SKY or SKY3D:
     env.update({"backdrop": True, "sky_color": "#04060c", "horizon_color": "#070a14",
                 "ground_color": "#020306", "stars": 0.55, "star_brightness": 1.6,
                 "nebula": 0.45, "nebula_color": "#3a1460", "nebula_color_2": "#0d3a5c",
                 "galaxy": 0.35, "sky_seed": 4127, "warp": 0.0, "warp_ramp_s": 1.5})
-edits += light("l_env", "Space sky", env, (0, 1.2, 0))
+if SKY3D:
+    # The sky lights the whole cabin here, with no outside picture: a little brighter,
+    # fewer stars so the warp streaks don't wash the windows out, and more nebula.
+    env.update({"intensity": 1.0, "sky_color": "#070b15", "horizon_color": "#131b2c",
+                "stars": 0.35, "star_brightness": 1.2, "nebula": 0.75, "galaxy": 0.8})
+edits += light("l_env", "Space sky", env, (0, 1.2, 0),
+               aim={"turn_deg": float(os.environ.get("SKY_TURN", "0"))})
 # Starlight through the windshield, casting the frame's shadows into the cabin.
 edits += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "intensity": 2.2,
                                       "shadows": True, "shadow_softness": 0.35},
                (0.6, 3.2, -4.0), aim={"tilt_deg": float(os.environ.get("SUN_TILT", "-35")), "turn_deg": float(os.environ.get("SUN_TURN", "192"))})
 # Cool cabin lights overhead, and the monitors' glow on the dash.
-edits += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 0.8,
+edits += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff",
+                                    "intensity": 1.3 if SKY3D else 0.8,
                                     "range_px": 3200}, (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
 edits += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 0.9,
                                          "range_px": 1100}, (0.0, 1.0, -1.15))
@@ -225,7 +238,10 @@ must(batch([
     flt({"type": "scene", "scene_id": "cockpit"}, "ao", "ambient_occlusion",
         {"radius_px": 60, "strength": 0.8}),
 ] + ([flt({"type": "scene", "scene_id": "cockpit"}, "bloom", "depth_bloom",
-          {"threshold": 0.85, "strength": 0.9, "radius_px": 28, "depth_px": 300})]
+          # Subtle: only the lamps, LEDs and light strips glow a little.
+          {"threshold": float(os.environ.get("BLOOM_THRESHOLD", "0.92")),
+           "strength": float(os.environ.get("BLOOM_STRENGTH", "0.25")),
+           "radius_px": float(os.environ.get("BLOOM_RADIUS", "10")), "depth_px": 300})]
      if os.environ.get("BLOOM", "0") == "1" else []), "filters"), "filters")
 
 # ---- the shots, as keyframe variants, and the glide between them ----
@@ -244,7 +260,9 @@ for vid, shot in SHOTS.items():
         edits += [{"type": "item.set_opacity", "scene_id": vid, "item_id": i, "opacity": o}
                   for i, o in [("l_ambient", 0.0), ("l_sun", 0.0), ("l_cabin", 0.0),
                                ("l_rear", 0.0), ("l_glow", 0.4)]]
-        if PAGES_URL:
+        if SKY3D:
+            pass
+        elif PAGES_URL:
             edits.append({"type": "item.set_visible", "scene_id": vid, "item_id": "warp", "visible": True})
             edits.append({"type": "item.set_visible", "scene_id": vid, "item_id": "sky", "visible": False})
         else:

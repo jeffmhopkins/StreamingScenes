@@ -230,6 +230,30 @@ far apart for it to stream. `drive.py` plays the jump live, on a machine that ca
 It needs a JStream with live model textures (ADR-0107's `texture`) and depth of field on
 models (ADR-0165).
 
+### The final cut
+
+[The final cut (MP4)](media/jstream-final.mp4), 37 s at 1080p, rendered by
+`jstream/render_final.py` a frame at a time on JStream's held clock (`clock.hold` and
+`clock.step`). The camera eases along straight lines between the shots: into the seat,
+up at the overhead screens, out through the windshield as JStream's 3D sky backdrop jumps
+to warp and drops back out, then in to the centre monitor, and across the cabin from the
+left monitor to the right one so the dash moves against the screens. The cabin lights dim
+for the warp. Every screen shows a 2D atlas scene of live pages through the model's
+shared `screens` material, and only the lamps, LEDs and light strips bloom, faintly.
+
+| | |
+|---|---|
+| ![At warp, from the seat](media/jstream-final-warp.jpg) | ![The left monitor, from across the cabin](media/jstream-final-left.jpg) |
+
+```sh
+(cd ../starship-cockpit/jstream && SLOW=95 python3 slowserve.py ../pages) &   # the 2D pages, slowed
+PAGES_URL=http://cockpit.test:8767 SKY3D=1 BLOOM=1 python3 jstream/build_scene.py
+SKY3D=1 python3 jstream/render_final.py frames/
+ffmpeg -framerate 30 -i frames/f%04d.png -c:v libx264 -crf 17 -pix_fmt yuv420p final.mp4
+```
+
+It needs a JStream with the held clock (ADR-0169) and the sky backdrop (ADR-0167).
+
 ## Rebuilding it
 
 ```sh
@@ -237,6 +261,7 @@ pip install bpy pillow numpy        # Blender as a Python module (5.x), and Pill
 # Download the 2K-JPG zip of each ambientCG asset in model/CREDITS.md and unpack each
 # into its own folder named after the asset, under dl/.
 python tools/make_textures.py dl model/textures
+python tools/make_textures.py --grunge model/textures   # panel: grungy metal, no rivets
 python tools/build_cockpit.py model/textures model/cockpit.gltf --blend cockpit.blend
 python tools/finish_gltf.py model/cockpit.gltf
 python tools/render_previews.py cockpit.blend media 48 1280
