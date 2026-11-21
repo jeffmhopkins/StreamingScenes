@@ -51,9 +51,9 @@ SCREENS = {
     # Lying on the tray in front of the pilot, its far edge raised a little and butted
     # against the console. The instrument's playing surface: 8:3 (see DESK_ASPECT).
     "screen_desk": (0.72, (0.0, 0.92, 0.69), (-78, 0, 0)),
-    # Hanging from the overhead console, each aimed at the pilot's eyes.
-    "screen_overhead_left": (0.3, (-0.4, 0.76, 1.70), (32, 0, 24)),
-    "screen_overhead_right": (0.3, (0.4, 0.76, 1.70), (32, 0, -24)),
+    # Set flush into the face of the overhead console, which is tilted at the pilot's eyes.
+    "screen_overhead_left": (0.3, (-0.38, 0.62, 1.70), (31, 0, 0)),
+    "screen_overhead_right": (0.3, (0.38, 0.62, 1.70), (31, 0, 0)),
 }
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
@@ -551,9 +551,10 @@ def screen(name, width, loc, rot):
     bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
              bev=0.008, segs=3)
     bz.matrix_world = m @ Matrix.Translation((0, 0.017, 0))
-    hs = box(f"{name}_housing", (width + 0.08, 0.08, h + 0.08), (0, 0, 0),
-             material="paint_dark", bev=0.012, segs=2)
-    hs.matrix_world = m @ Matrix.Translation((0, 0.07, 0))
+    if "overhead" not in name:
+        hs = box(f"{name}_housing", (width + 0.08, 0.08, h + 0.08), (0, 0, 0),
+                 material="paint_dark", bev=0.012, segs=2)
+        hs.matrix_world = m @ Matrix.Translation((0, 0.07, 0))
     # A row of small soft keys under the screen.
     for i in range(5):
         k = box(f"{name}_key{i}", (width * 0.12, 0.012, 0.016), (0, 0, 0), material="plastic",
@@ -899,17 +900,15 @@ def build_conduits():
 
 
 def build_header():
-    """The overhead console under the roof: a screen each side, facing back and down at
-    the pilot, a switch panel between them and a lamp housing under it."""
+    """The overhead console: a wedge across the top of the windshield whose face is
+    tilted at the pilot's eyes, with a screen set into it each side, a switch panel
+    between them and a lamp under it."""
     GROUP[0] = "header"
     rnd = random.Random(31)
-    box("overhead", (0.5, 0.2, 0.22), (0, 0.84, CEIL_Z - 0.1), (-58, 0, 0), material="paint",
-        bev=0.03, segs=3)
-    greeble("overhead_mid", frame_matrix((0, 0.775, 1.71), (32, 0, 0)), 0.4, 0.16, rnd)
-    box("overhead_lamp_housing", (0.2, 0.06, 0.05), (0, 0.75, 1.6), (-58, 0, 0), material="plastic",
-        bev=0.02, segs=3)
-    box("overhead_lamp", (0.12, 0.012, 0.02), (0, 0.722, 1.585), (-58, 0, 0), material="led_amber",
-        bev=0.004)
+    prism("overhead", [(0.58, CEIL_Z + 0.01), (0.58, 1.83), (0.714, 1.607), (0.86, 1.607),
+                       (0.92, CEIL_Z + 0.01)], "x", -0.68, 0.68, "paint", 0.012, 3)
+    greeble("overhead_mid", frame_matrix((0, 0.645, 1.72), (31, 0, 0)), 0.34, 0.2, rnd)
+    box("overhead_lamp", (0.16, 0.05, 0.012), (0, 0.79, 1.603), material="led_amber", bev=0.004)
 
 
 # ---------------------------------------------------------------------------- finishing
