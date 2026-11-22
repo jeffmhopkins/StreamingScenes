@@ -12,6 +12,9 @@ screen and many of its lights following a Bitwig session that arrives as JTunnel
   the screens' glow on the beat, the cabin lights up while the transport plays and down
   through the break, and the sky brighter while a chorus clip plays. The model's own
   LEDs and light strips follow the tracks and the beat by material name.
+- Each screen has a glowing lit card over it, so the screens and the desk grid bloom and
+  show bright in the reflections, and a small light per launcher column throws its
+  track's colour on the desk.
 - Reflection probes make the cabin's surfaces reflect the screens and lights.
 
     PAGES=http://127.0.0.1:8765 python3 build_daw.py
@@ -32,6 +35,17 @@ PAGES = os.environ.get("PAGES", "http://127.0.0.1:8765")
 INPUT = os.environ.get("DAW_INPUT", "Bitwig")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
+GLOW = os.environ.get("GLOW", "1") == "1"
+# The cards only show where the engine sorts them after the model (ADR-0107 decision 7:
+# items composite by their centres' depth, and the cockpit's centre is nearer than its
+# screens), so they are off until cards have depth of their own; the bloom does the glow.
+GLOW_CARDS = os.environ.get("GLOW_CARDS", "0") == "1"
+GLOW_SCREENS = float(os.environ.get("GLOW_SCREENS", "1.6"))
+GLOW_DESK = float(os.environ.get("GLOW_DESK", "4.0"))
+PAD_INTENSITY = float(os.environ.get("PAD_INTENSITY", "2.2"))
+PAD_RANGE = float(os.environ.get("PAD_RANGE", "1200"))
+BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.4" if GLOW else "0.85"))
+BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 
 
 def geo(cx, cy, w, h, **kw):
@@ -140,6 +154,26 @@ must(batch([
         geo(CX, CY, S * (BOUNDS_MAX[0] - BOUNDS_MIN[0]), S * (BOUNDS_MAX[1] - BOUNDS_MIN[1]), depth_px=0.0)),
 ], "cockpit"), "cockpit")
 
+# ---- glowing screens: a lit card over each picture on the screens ----
+# The model's `screens` material is unlit, so it shows the atlas at most white: the bloom
+# never catches it and the probe sees it no brighter than a white wall. A lit card's
+# `emissive` adds its picture back up to 4 times, so the screens glow, bloom and light
+# the reflections; the desk's grid most of all. Each card shows its picture's own source
+# (the engine lights a card only when it shows a source's own frame, not a scene: observed
+# behaviour, not an ADR's promise).
+if GLOW and GLOW_CARDS:
+    from glow import card_at
+    ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
+    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("meters", 612, 720, 290, 360, GLOW_DESK),
+                   ("master", 904, 720, 56, 360, GLOW_DESK)]
+    cards = []
+    for sid, x, y, w, h, glow in ON_SCREENS:
+        g = card_at(x, y, x + w, y + h)
+        g["surface"] = {"lit": True, "roughness": 0.2, "metalness": 0.0, "emissive": glow,
+                        "back": "hide", "shadows": False}
+        cards.append(add("cockpit", "g_" + sid, sid, g))
+    must(batch(cards, "glow"), "glow")
+
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
 if os.path.exists(THROTTLE):
     from shots import THROTTLE_PIVOT, _bounds
@@ -172,12 +206,17 @@ L += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "in
            (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0})
 L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.2, "range_px": 3200},
            (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
-L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
-           (0.0, 1.0, -1.15))
+# A model is lit by at most 8 lights (the ambient and the environment aside), the first
+# in stacking order. With GLOW the 8 are the sun, the cabin and the launcher's six pad
+# lights, which light the cabin in the band's colours from the desk; without it, the
+# screens' glow, a light a track around the cabin and the desk's glow.
+if not GLOW:
+    L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
+               (0.0, 1.0, -1.15))
 # The band's lights, each over its track's meter: the kick under the dash, the bass and
 # keys on the side consoles, the lead overhead, the echo behind the seat, and the desk's
 # glow over the launcher with the master.
-TRACK_LIGHTS = [
+TRACK_LIGHTS = [] if GLOW else [
     ("l_kick", "Drums light", "#ff7a1a", (0.0, 0.5, -1.15), 0, 2.6, 1300),
     ("l_hats", "Hats light", "#ffc23d", (-0.55, 1.62, -0.55), 1, 1.2, 900),
     ("l_bass", "Bass light", "#2fd27a", (-0.86, 0.98, -0.25), 2, 2.2, 1100),
@@ -187,16 +226,36 @@ TRACK_LIGHTS = [
 ]
 for lid, name, color, at, _, inten, rng in TRACK_LIGHTS:
     L += light(lid, name, {"type": "point", "color": color, "intensity": inten, "range_px": rng}, at)
-L += light("l_desk", "Desk glow", {"type": "point", "color": "#6ee0ff", "intensity": 1.4, "range_px": 700},
-           (0.0, 0.92, -0.86))
+if not GLOW:
+    L += light("l_desk", "Desk glow", {"type": "point", "color": "#6ee0ff", "intensity": 1.4, "range_px": 700},
+               (0.0, 0.92, -0.86))
+# The launcher throws its pads' colours on the desk and the screens above it: a small
+# light a track over its column, in the track's colour (the launcher's first 600 px of the
+# desk's 960 px cell, the desk 0.72 m wide, so a column is 75 px, 56 mm).
+PAD_LIGHTS = []
+if GLOW:
+    for ti, (_, color) in enumerate([("Drums", "#ff7a1a"), ("Hats", "#ffc23d"), ("Bass", "#2fd27a"),
+                                     ("Keys", "#3aa0ff"), ("Lead", "#c45cff"), ("Lead Echo", "#ff4f9a")]):
+        x = -0.36 + (ti + 0.5) * 0.05625
+        lid = f"l_pad{ti}"
+        PAD_LIGHTS.append((lid, ti))
+        L += light(lid, f"Pad light {ti + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
+                                                 "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
 
 # ---- the data moves the lights ----
-motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -1.0, 0.0, smoothing=70, curve="ease_out")]
+# A meter falls to nothing between a drum's hits, eight or sixteen times a bar, so a
+# light that follows it fast and all the way down strobes: each light keeps a floor and
+# follows the meter over LEVEL_MS, so it swells with the band instead.
+LEVEL_MS = int(os.environ.get("LEVEL_MS", "220"))
+motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.5, 0.0, smoothing=LEVEL_MS)]
           for lid, _, _, _, ti, _, _ in TRACK_LIGHTS}
-motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
-# The screens' glow pulses on every beat: brightest on it, fading through it.
-motion["l_glow"] = [data("beat", "opacity", "clock", "beatPhase", 0.0, -0.6, smoothing=0)]
+for lid, ti in PAD_LIGHTS:
+    motion[lid] = [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.45, 0.0, smoothing=LEVEL_MS)]
+if not GLOW:
+    motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
+    # The screens' glow pulses on every beat: brightest on it, fading through it.
+    motion["l_glow"] = [data("beat", "opacity", "clock", "beatPhase", 0.0, -0.6, smoothing=0)]
 # The cabin lights come up while the transport plays and go down through the break,
 # when only the echo track's clip plays.
 motion["l_cabin"] = [data("play", "opacity", "transport", "playing", -0.6, 0.0, smoothing=1200),
@@ -208,14 +267,18 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
                         smoothing=1800, states={"playing": 1.0}, source={"param": "intensity"}) for s in (2, 5)]
 # The model's own LEDs and light strips follow the band, by material name: the red LEDs
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
-# accent strips the lead, and the cabin's light strips pulse on the beat.
+# accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
+# and the orange accents' ranges end below 0, a fraction of the file's strength, so they
+# don't flare under the bloom's low threshold.
 LEDS = [("led_red", "meters", "tracks.0.0", -0.85, 1.6), ("led_green", "meters", "tracks.2.0", -0.85, 1.6),
-        ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.6, 1.0),
-        ("glow_amber", "meters", "tracks.4.0", -0.7, 1.4)]
-motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=70, curve="ease_out",
+        ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.8, -0.45),
+        ("glow_amber", "meters", "tracks.4.0", -0.7, -0.1)]
+motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=LEVEL_MS * 2 // 3,
                         source={"param": "emissive_strength", "material": mat})
                    for mat, key, field, frm, to in LEDS]
-motion["model"].append(data("m_strip", "source", "clock", "beatPhase", 0.9, -0.35, smoothing=0,
+# The cabin's yellow strips stay a soft glow under the low bloom threshold: from 0.45 of
+# their own strength on the beat to 0.25 (the file's 2.5 would flare).
+motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=120,
                             source={"param": "emissive_strength", "material": "light_strip"}))
 for lid, mods in motion.items():
     must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": lid, "motion": mods}), f"motion {lid}")
@@ -234,6 +297,6 @@ if PROBE:
 must(batch([flt({"type": "scene", "scene_id": "cockpit"}, "ao", "ambient_occlusion",
                 {"radius_px": 60, "strength": 0.8}),
             flt({"type": "scene", "scene_id": "cockpit"}, "bloom", "depth_bloom",
-                {"threshold": 0.85, "strength": 0.35, "radius_px": 14, "depth_px": 300})], "filters"), "filters")
+                {"threshold": BLOOM_AT, "strength": BLOOM, "radius_px": 16, "depth_px": 300})], "filters"), "filters")
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
 print("built")

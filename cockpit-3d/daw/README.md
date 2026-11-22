@@ -16,6 +16,8 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. |
+| `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
+| `serve_pages.py` | Serves `pages/` with threads and a deep accept queue: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -25,13 +27,19 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's pad surface: the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
-| A coloured light per track (kick under the dash, bass and keys on the side consoles, lead overhead, echo behind the seat) | `meters.tracks.N.0` | `data` modifier on the light's opacity |
-| The desk's glow | `meters.master.0` | `data` modifier |
-| The screens' glow, pulsing on each beat | `clock.beatPhase` | `data` modifier |
+| The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
+| A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
 | The model's red, green, blue and amber LEDs and orange strips | the drums', bass's, keys', master's and lead's meters | `data` modifiers on the materials' `emissive_strength`, by material name |
 | The cabin's light strips, on the beat | `clock.beatPhase` | the same, on `light_strip` |
+
+A model is lit by at most 8 lights besides the ambient and the environment, so with the
+glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
+the earlier set: no cards, a light per track around the cabin, the desk's and the
+screens' glow. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
+`BLOOM` and `LEVEL_MS` tune it. The bloom's radius is 16 px. `render_daw.py` waits
+`WARM_S` seconds (3) at the first frame for the pages, the data and the probe. Its frames smooth the band's lights only on a JStream with ADR-0173 (#1620): an engine without it draws each snapshot with no output running at the meters' raw levels, so the lights strobe on every hit whatever `LEVEL_MS` says.
 
 The camera is the one thing the render script moves: it follows the song's sections. Its
 focus is close to infinite on every shot, with a slight depth of field only where it sits
@@ -45,14 +53,16 @@ with its `cef` feature and the browser helper beside it.
 
 ```sh
 jstream-daemon --port 4455 --token-file ~/jstream-token --jtunnel-accept Bitwig@127.0.0.1:47251
-python3 -m http.server 8765 --bind 127.0.0.1 --directory pages &
+python3 serve_pages.py 8765 &
 PAGES=http://127.0.0.1:8765 python3 build_daw.py
 python3 render_daw.py session.json frames/   # or: … frames/ <first s> <last s>
 ffmpeg -framerate 30 -i frames/f%04d.png -itsoffset 2 -i funk-song-v42.mp3 \
   -map 0:v -map 1:a -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 256k -shortest daw-cockpit.mp4
 ```
 
-The session starts with 2 s of stopped transport (the first scene queued and blinking),
+`RELOAD_PAGES=1` makes the render load each screen's page again, one at a time
+(`source.restart`), before it starts; it's off by default, since a reload can be refused
+by the page's request policy and leave that screen blank. The session starts with 2 s of stopped transport (the first scene queued and blinking),
 so the song goes in 2 s late. The render resends every key each frame: a frame takes
 longer than a second of wall time, and JStream lets a key go stale 3 s after it was last
 sent, as it should for a live sender.

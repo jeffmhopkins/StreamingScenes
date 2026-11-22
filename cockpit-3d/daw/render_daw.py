@@ -109,13 +109,21 @@ if not tunnel.wait_for_receiver(10):
 end = LAST if LAST is not None else session.end
 first = int(FIRST * FPS)
 n = int(end * FPS)
+# With RELOAD_PAGES=1, load every screen's page again, one at a time, so a load that
+# failed while the scene was built doesn't stay blank for the whole render. Off by
+# default: a reload can itself be refused by the page's request policy.
+VIEWS = ["transport", "arrange", "device", "mixer", "scenes", "clip", "notes"]
+if os.environ.get("RELOAD_PAGES", "0") == "1":
+    for view in VIEWS:
+        op({"type": "source.restart", "source_id": "p_" + view})
+        time.sleep(0.3)
 # Warm up at the first frame: the pages load, the data arrives, the probe captures.
 t = first / FPS
 for _ in range(40):
     tunnel.send(session.state(t), everything=True)
     time.sleep(0.05)
 op({"type": "scene.set_camera", "scene_id": "cockpit", "camera": camera_at(t)})
-time.sleep(2.0)
+time.sleep(float(os.environ.get("WARM_S", "3")))
 warm = os.path.join(OUT, "warmup.png")
 snap(warm)
 os.remove(warm)
