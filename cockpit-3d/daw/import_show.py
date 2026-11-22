@@ -21,8 +21,8 @@ variables tune the cockpit.
 Bitwig's state reaches the scene once the app receives from the JTunnel sender named
 `Bitwig` (the app's own setting, "Receive from JTunnel senders", which only a person
 changes). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
-views with notes 36 (C1) up on channel 16, in VIEWS order, once "Use this sender's MIDI"
-is on for it.
+views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
+plugin's sender too: an accepted sender's MIDI reaches the bindings.
 """
 import os
 import runpy
