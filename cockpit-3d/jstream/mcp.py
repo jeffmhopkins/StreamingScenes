@@ -1,12 +1,30 @@
 """A small client for JStream's MCP endpoint (streamable HTTP), for the scripts beside it.
 
-JS_MCP is the endpoint (default http://127.0.0.1:4455/mcp) and JS_TOKEN the daemon's
-token file. The session is closed on exit, since the daemon allows only a few at once.
+JS_MCP is the endpoint (default http://127.0.0.1:4455/mcp) and JS_TOKEN the engine's
+token file. Left out, it is the first that exists of `~/jstream-token` (the daemon as these
+READMEs start it) and the desktop app's `token` in its data folder (`%APPDATA%\\JStream` on
+Windows, as `jstream.exe --mcp` writes it). The session is closed on exit, since the daemon allows only a few at once.
 """
 import atexit, base64, json, os, sys, urllib.request
 
 URL = os.environ.get("JS_MCP", "http://127.0.0.1:4455/mcp")
-TOKEN = open(os.environ.get("JS_TOKEN", os.path.expanduser("~/jstream-token"))).read().strip()
+
+
+def _token_file():
+    if os.environ.get("JS_TOKEN"):
+        return os.environ["JS_TOKEN"]
+    tries = [os.path.expanduser("~/jstream-token")]
+    if os.environ.get("APPDATA"):
+        tries.append(os.path.join(os.environ["APPDATA"], "JStream", "token"))
+    tries.append(os.path.expanduser("~/.local/share/jstream/token"))
+    tries.append(os.path.expanduser("~/Library/Application Support/JStream/token"))
+    for path in tries:
+        if os.path.exists(path):
+            return path
+    sys.exit("no token file: set JS_TOKEN to the engine's token file (start the app with --mcp)")
+
+
+TOKEN = open(_token_file()).read().strip()
 S = {"sid": None, "id": 0}
 W, H = 1920, 1080
 

@@ -17,10 +17,12 @@ screen and many of its lights following a Bitwig session that arrives as JTunnel
   track's colour on the desk.
 - Reflection probes make the cabin's surfaces reflect the screens and lights.
 
-    PAGES=http://127.0.0.1:8765 python3 build_daw.py
+    python3 build_daw.py
 
-PAGES serves this folder's pages/ (any static server). JS_TOKEN and JS_MCP are as for
-../jstream/mcp.py.
+The screens' pages are given to JStream inline (`html`), so nothing needs to serve them
+and the collection holds them. PAGES=http://127.0.0.1:8765 loads them from a server of
+this folder's pages/ instead (serve_pages.py), to try an edited page without building
+again. JS_TOKEN and JS_MCP are as for ../jstream/mcp.py.
 """
 import os
 import sys
@@ -31,7 +33,8 @@ sys.path.insert(0, os.path.join(HERE, "..", "jstream"))
 from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 
-PAGES = os.environ.get("PAGES", "http://127.0.0.1:8765")
+PAGES = os.environ.get("PAGES", "")
+DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
 INPUT = os.environ.get("DAW_INPUT", "Bitwig")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
@@ -114,9 +117,19 @@ PAGES_AT = [  # (item, view, x, y, w, h): the model's atlas cells (its README)
 ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
       src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
       add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080))]
+
+
+def page(view):
+    """Where a screen's page comes from: inline, with its view set ahead of the page's
+    script, or from PAGES."""
+    if PAGES:
+        return {"url": f"{PAGES}/daw.html?view={view}"}
+    return {"html": DAW_HTML.replace("<head>", f'<head><script>window.DAW_VIEW="{view}"</script>', 1)}
+
+
 for item, view, x, y, w, h in PAGES_AT:
     ed += [src("p_" + view, f"DAW {view}", "browser", {
-        "url": f"{PAGES}/daw.html?view={view}", "width": 640, "height": 360, "fps": 30,
+        **page(view), "width": 640, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
 # The desk: the launcher, the tracks' meters and the master's, as JStream draws them.
@@ -286,13 +299,16 @@ for lid, mods in motion.items():
 # ---- reflections: the cabin reflects its screens and lights ----
 if PROBE:
     c = p(0.0, 1.0, -0.4)
-    must(batch([
+    # An engine without reflection probes (ADR-0170) refuses the kind: build without them.
+    _, ok = batch([
         {"type": "scene.set_options", "scene_id": "cockpit", "reflections": True},
         src("probe", "Cabin reflections", "reflection_probe", {
             "width_px": S * 2.4, "height_px": S * 2.1, "depth_px": S * 3.2, "fade_px": 120,
             "resolution": os.environ.get("PROBE_RES", "256"), "refresh_frames": PROBE_EVERY}),
         add("cockpit", "probe", "probe", geo(c["x"], c["y"], 60, 60, depth_px=c["z"])),
-    ], "probe"), "probe")
+    ], "probe")
+    if not ok:
+        print("no reflection probes in this JStream: built without reflections", file=sys.stderr)
 
 must(batch([flt({"type": "scene", "scene_id": "cockpit"}, "ao", "ambient_occlusion",
                 {"radius_px": 60, "strength": 0.8}),
