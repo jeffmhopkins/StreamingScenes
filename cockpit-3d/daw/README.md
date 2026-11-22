@@ -17,6 +17,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
+| `serve_pages.py` | Serves `pages/` with threads and a deep accept queue: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -51,14 +52,16 @@ with its `cef` feature and the browser helper beside it.
 
 ```sh
 jstream-daemon --port 4455 --token-file ~/jstream-token --jtunnel-accept Bitwig@127.0.0.1:47251
-python3 -m http.server 8765 --bind 127.0.0.1 --directory pages &
+python3 serve_pages.py 8765 &
 PAGES=http://127.0.0.1:8765 python3 build_daw.py
 python3 render_daw.py session.json frames/   # or: … frames/ <first s> <last s>
 ffmpeg -framerate 30 -i frames/f%04d.png -itsoffset 2 -i funk-song-v42.mp3 \
   -map 0:v -map 1:a -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 256k -shortest daw-cockpit.mp4
 ```
 
-The session starts with 2 s of stopped transport (the first scene queued and blinking),
+`RELOAD_PAGES=1` makes the render load each screen's page again, one at a time
+(`source.restart`), before it starts; it's off by default, since a reload can be refused
+by the page's request policy and leave that screen blank. The session starts with 2 s of stopped transport (the first scene queued and blinking),
 so the song goes in 2 s late. The render resends every key each frame: a frame takes
 longer than a second of wall time, and JStream lets a key go stale 3 s after it was last
 sent, as it should for a live sender.
