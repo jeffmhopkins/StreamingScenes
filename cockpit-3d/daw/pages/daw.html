@@ -1,0 +1,251 @@
+<!doctype html><html><head><meta charset="utf-8"><title>DAW screen</title>
+<style>html,body{margin:0;width:640px;height:360px;overflow:hidden;background:#050709}canvas{display:block}</style></head>
+<body><canvas id="c" width="640" height="360"></canvas><script>
+// One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
+// granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
+// transport, arrange, device, notes, mixer, clip or scenes. Everything that moves or
+// blinks follows the data (the clock key's beats), never the page's own clock, so a
+// render on a held clock draws the same picture every time.
+const VIEW = new URLSearchParams(location.search).get('view') || 'transport';
+const x = document.getElementById('c').getContext('2d');
+const W = 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
+const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';
+let D = {}, dirty = true;
+const history = [];  // notes view: [beat start, beat end or null, pitch, track]
+const steps = {};    // clip view: steps a note started on, per clip
+let lastBeats = -1;
+
+function txt(t, px, py, size, col, al = 'left', wt = 600, face = MONO) {
+  x.font = `${wt} ${size}px ${face}`; x.textAlign = al; x.fillStyle = col; x.fillText(t, px, py);
+}
+function rgba(hex, a) {
+  const n = parseInt((hex || '#888888').slice(1, 7), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+function frame(title, right) {
+  x.fillStyle = '#050709'; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * .6);
+  g.addColorStop(0, 'rgba(20,40,60,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = `rgba(${AMBER},.12)`; x.fillRect(0, 0, W, 34);
+  x.fillStyle = `rgba(${AMBER},.8)`; x.fillRect(0, 33, W, 2);
+  txt(title, 16, 24, 16, `rgba(${AMBER},.95)`, 'left', 700);
+  if (right) txt(right, W - 16, 24, 13, `rgba(${CYAN},.8)`, 'right', 500);
+}
+function scan() { for (let y = 0; y < H; y += 3) { x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, y, W, 1); } }
+function clock() { return D.clock || { beats: 0, bar: 1, beat: 1, beatPhase: 0, playing: false, tempo: 0 }; }
+function blinkOn() { return Math.floor((clock().beats || 0) * 2) % 2 === 0; }
+function tracks() {
+  const out = [];
+  for (let i = 0; i < 8; i++) { const t = D['track/' + i]; if (t && t.exists) out.push(t); }
+  return out;
+}
+function section() {
+  const m = (D.markers && D.markers.items) || [], b = clock().beats || 0;
+  let cur = null, next = null;
+  for (const it of m) { if (it.position <= b) cur = it; else if (!next) next = it; }
+  return { cur, next, all: m };
+}
+function bar(px, py, w, h, v, col) {
+  x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(px, py, w, h);
+  x.fillStyle = col; x.fillRect(px, py, w * Math.max(0, Math.min(1, v)), h);
+}
+
+const views = {
+  transport() {
+    const c = clock(), t = D.transport || {};
+    frame('TRANSPORT', 'BITWIG · JTUNNEL');
+    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
+    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
+    // play / stop
+    x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
+    x.beginPath();
+    if (c.playing) { x.moveTo(560, 70); x.lineTo(605, 95); x.lineTo(560, 120); } else x.rect(562, 74, 42, 42);
+    x.fill();
+    txt(c.playing ? 'PLAY' : 'STOP', 582, 142, 13, x.fillStyle, 'center', 700);
+    // beat lamps
+    for (let i = 0; i < 4; i++) {
+      const on = c.playing && c.beat === i + 1, k = on ? 1 - c.beatPhase * .7 : .12;
+      x.fillStyle = i === 0 ? `rgba(${AMBER},${k})` : `rgba(${CYAN},${k})`;
+      x.beginPath(); x.arc(52 + i * 62, 192, 18, 0, 7); x.fill();
+      x.strokeStyle = `rgba(${CYAN},.4)`; x.lineWidth = 2; x.stroke();
+    }
+    txt((t.tempoText || `${(c.tempo || 0).toFixed(2)} BPM`).toUpperCase(), 300, 186, 26, `rgba(${AMBER},.95)`, 'left', 700);
+    txt(`${(c.timeSignature || [4, 4]).join('/')}  ·  Q ${t.launchQuantization || '1'} BAR`, 300, 210, 14, `rgba(${CYAN},.7)`);
+    const s = section(), secs = c.seconds || 0;
+    txt(`${String(Math.floor(secs / 60)).padStart(2, '0')}:${(secs % 60).toFixed(1).padStart(4, '0')}`, 610, 210, 20, `rgba(${CYAN},.8)`, 'right');
+    if (s.cur) {
+      const end = s.next ? s.next.position : (s.cur.position + 12), p = ((c.beats || 0) - s.cur.position) / (end - s.cur.position);
+      txt(s.cur.name.toUpperCase(), 30, 268, 30, 'rgba(255,255,255,.95)', 'left', 700, SANS);
+      if (s.next) txt('NEXT  ' + s.next.name.toUpperCase(), 610, 268, 15, `rgba(${AMBER},.8)`, 'right', 600);
+      bar(30, 286, 580, 10, p, `rgba(${AMBER},.85)`);
+      for (let b = 0; b < (end - s.cur.position) / 4; b++) {
+        x.fillStyle = 'rgba(0,0,0,.7)'; x.fillRect(30 + 580 * b * 4 / (end - s.cur.position), 286, 2, 10);
+      }
+    } else txt('READY', 30, 268, 30, 'rgba(255,255,255,.6)', 'left', 700, SANS);
+    txt(`${(D.project && D.project.name) || ''}`.toUpperCase(), 30, 335, 13, `rgba(${CYAN},.6)`);
+    txt(t.fill ? 'FILL' : '', 610, 335, 13, `rgba(${AMBER},.9)`, 'right', 700);
+  },
+  arrange() {
+    const c = clock(), s = section(), tr = tracks();
+    frame('ARRANGEMENT', `BAR ${c.bar}`);
+    const total = s.all.length ? s.all[s.all.length - 1].position + 12 : 196, L = 92, R = W - 54, w = R - L;
+    const X = b => L + w * b / total;
+    s.all.forEach((m, i) => {
+      const end = i + 1 < s.all.length ? s.all[i + 1].position : total, cur = s.cur === m;
+      x.fillStyle = cur ? `rgba(${AMBER},.35)` : 'rgba(127,142,163,.14)';
+      x.fillRect(X(m.position) + 1, 46, X(end) - X(m.position) - 2, 26);
+      txt(m.name.replace('Chorus', 'Ch').replace('Verse', 'V').replace('Pre-tag', 'Pre').toUpperCase(),
+          X(m.position) + 4, 64, 11, cur ? '#fff' : `rgba(${CYAN},.75)`, 'left', 700);
+    });
+    tr.forEach((t, ti) => {
+      const y = 86 + ti * 38;
+      txt(t.name.toUpperCase(), 14, y + 21, 11, rgba(t.color, .95), 'left', 700);
+      s.all.forEach((m, i) => {
+        const sl = t.slots[i]; if (!sl || !sl.hasContent) return;
+        const end = i + 1 < s.all.length ? s.all[i + 1].position : total, on = sl.state === 'playing';
+        x.fillStyle = rgba(t.color, on ? .85 : .3); x.fillRect(X(m.position) + 1, y + 4, X(end) - X(m.position) - 2, 26);
+        if (sl.queued === 'play' && blinkOn()) { x.strokeStyle = rgba(t.color, 1); x.lineWidth = 2; x.strokeRect(X(m.position) + 2, y + 5, X(end) - X(m.position) - 4, 24); }
+      });
+      // its notes as ticks while it plays
+      const ns = (D.notes && D.notes.tracks[ti]) || [];
+      if (ns.length) { x.fillStyle = '#fff'; x.fillRect(X(c.beats) - 1, y + 4, 3, 26); }
+    });
+    x.fillStyle = `rgba(${CYAN},.95)`; x.fillRect(X(c.beats || 0) - 1, 42, 2, 86 + tr.length * 38 - 42);
+    const ms = (D.meters && D.meters.master) || [0, 0];
+    ms.forEach((v, i) => {
+      x.fillStyle = 'rgba(255,255,255,.07)'; x.fillRect(R + 14 + i * 16, 46, 12, H - 64);
+      const g = x.createLinearGradient(0, H - 18, 0, 46); g.addColorStop(0, `rgba(${GREEN},.95)`); g.addColorStop(.75, `rgba(${AMBER},.95)`); g.addColorStop(1, `rgba(${RED},.95)`);
+      x.fillStyle = g; const hh = (H - 64) * v; x.fillRect(R + 14 + i * 16, H - 18 - hh, 12, hh);
+    });
+  },
+  device() {
+    const d = D.device || {}, ps = d.params || [];
+    frame('DEVICE', (d.page && d.page.name || '').toUpperCase() + ' PAGE');
+    x.fillStyle = rgba(d.trackColor, .9); x.fillRect(16, 48, 8, 46);
+    txt((d.track || '').toUpperCase(), 34, 66, 14, rgba(d.trackColor, 1), 'left', 700);
+    txt(`${d.name || ''}  ·  ${d.preset || ''}`, 34, 90, 20, 'rgba(255,255,255,.95)', 'left', 700, SANS);
+    ps.slice(0, 8).forEach((p, i) => {
+      const cx = 80 + (i % 4) * 160, cy = 160 + Math.floor(i / 4) * 112, r = 30, a0 = Math.PI * .75, span = Math.PI * 1.5;
+      x.lineCap = 'round';
+      x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 7; x.beginPath(); x.arc(cx, cy, r, a0, a0 + span); x.stroke();
+      x.strokeStyle = rgba(d.trackColor, .95); x.beginPath(); x.arc(cx, cy, r, a0, a0 + span * p.value); x.stroke();
+      if (Math.abs(p.modulated - p.value) > .005) {
+        x.strokeStyle = `rgba(${CYAN},.9)`; x.lineWidth = 3; x.beginPath(); x.arc(cx, cy, r + 8, a0 + span * Math.min(p.value, p.modulated), a0 + span * Math.max(p.value, p.modulated)); x.stroke();
+      }
+      const a = a0 + span * p.modulated; x.strokeStyle = '#fff'; x.lineWidth = 3;
+      x.beginPath(); x.moveTo(cx + Math.cos(a) * 10, cy + Math.sin(a) * 10); x.lineTo(cx + Math.cos(a) * (r - 6), cy + Math.sin(a) * (r - 6)); x.stroke();
+      txt(p.name.toUpperCase(), cx, cy + r + 18, 11, `rgba(${CYAN},.85)`, 'center', 700);
+      txt(p.text, cx, cy + r + 33, 11, 'rgba(255,255,255,.6)', 'center', 500);
+    });
+    const ch = (d.chain || []).map(c => c.name).join('  ›  ');
+    txt(ch, W - 16, 66, 12, `rgba(${AMBER},.7)`, 'right', 500);
+  },
+  notes() {
+    const c = clock(), b = c.beats || 0, tr = tracks();
+    frame('NOTES', '');
+    const span = 16, L = 16, R = W - 16, X = v => R - (b - v) / span * (R - L);
+    const top = 44, low = 38, high = 82, ph = 236, Y = p => top + ph - (p - low) / (high - low) * ph;
+    for (let k = Math.ceil(b - span); k <= b; k++) {
+      x.fillStyle = k % 4 === 0 ? `rgba(${AMBER},.22)` : 'rgba(255,255,255,.05)'; x.fillRect(X(k), top, 1, H - top - 10);
+    }
+    for (const n of history) {
+      if (n[1] !== null && n[1] < b - span) continue;
+      const t = tr[n[3]] || {}, x0 = X(n[0]), x1 = X(n[1] === null ? b : n[1]);
+      if (n[2] < 0) { // drums: a lane each at the foot
+        const y = 296 + (-n[2] - 1) * 18; x.fillStyle = rgba(t.color, .9); x.fillRect(x0, y, Math.max(3, x1 - x0), 12);
+      } else { x.fillStyle = rgba(t.color, n[1] === null ? 1 : .75); x.fillRect(x0, Y(n[2]) - 3, Math.max(3, x1 - x0), 6); }
+    }
+    ['KICK', 'SNARE', 'HAT'].forEach((s, i) => txt(s, 20, 306 + i * 18, 10, 'rgba(255,255,255,.45)', 'left', 700));
+    x.fillStyle = `rgba(${CYAN},.9)`; x.fillRect(R - 1, top, 2, H - top - 10);
+    tr.forEach((t, i) => txt(t.name.toUpperCase(), 100 + i * 84, 24, 10, rgba(t.color, 1), 'left', 700));
+  },
+  mixer() {
+    const tr = tracks(), m = (D.meters && D.meters.tracks) || [];
+    frame('MIXER', '');
+    const n = tr.length + 1, sw = (W - 32) / n;
+    tr.concat([{ name: 'Master', color: '#c0c0c0', master: true }]).forEach((t, i) => {
+      const px = 16 + i * sw, v = t.master ? ((D.meters && D.meters.master) || [0, 0]) : (m[i] || [0, 0]);
+      x.fillStyle = rgba(t.color, .9); x.fillRect(px + 4, 44, sw - 8, 6);
+      txt(t.name.toUpperCase().slice(0, 9), px + sw / 2, 68, 11, rgba(t.color, 1), 'center', 700);
+      v.forEach((lv, j) => {
+        const bx = px + sw / 2 - 14 + j * 16, top = 82, hh = 220, seg = 22;
+        for (let k = 0; k < seg; k++) {
+          const lit = (k + .5) / seg <= lv, col = k >= seg - 2 ? RED : k >= seg - 6 ? AMBER : GREEN;
+          x.fillStyle = `rgba(${col},${lit ? .95 : .08})`; x.fillRect(bx, top + hh - (k + 1) * hh / seg + 1, 12, hh / seg - 2);
+        }
+      });
+      if (!t.master) {
+        const sl = t.slots && t.slots[t.playing];
+        txt(t.playing >= 0 ? '▶' : '■', px + sw / 2, 326, 14, t.playing >= 0 ? `rgba(${GREEN},.95)` : 'rgba(255,255,255,.3)', 'center', 700, SANS);
+        if (t.selected) { x.strokeStyle = `rgba(${CYAN},.8)`; x.lineWidth = 2; x.strokeRect(px + 2, 38, sw - 4, 300); }
+      }
+    });
+  },
+  clip() {
+    const cl = D.clip || {}, c = clock(), key = `${cl.track}/${cl.scene}`;
+    frame('CLIP', cl.loop ? 'LOOP' : '');
+    x.fillStyle = rgba(cl.color, .9); x.fillRect(16, 48, 8, 46);
+    txt((cl.name || '').toUpperCase(), 34, 78, 22, 'rgba(255,255,255,.95)', 'left', 700, SANS);
+    const bars = Math.max(1, Math.round((cl.loopLength || 16) / 4)), rows = Math.min(8, bars), step = cl.playingStep;
+    const L = 34, T = 112, cw = (W - 34 - 24) / 16, rh = Math.min(26, (H - T - 20) / rows);
+    const hit = steps[key] || {};
+    for (let r = 0; r < rows; r++) for (let s = 0; s < 16; s++) {
+      const i = r * 16 + s, past = cl.playing && step >= 0 && i < step, now = cl.playing && i === step;
+      x.fillStyle = now ? '#fff' : hit[i] ? rgba(cl.color, past ? .95 : .4) : past ? rgba(cl.color, .18) : 'rgba(255,255,255,.05)';
+      x.fillRect(L + s * cw + 2, T + r * rh + 2, cw - 4, rh - 4);
+    }
+    txt(`${bars} BARS  ·  STEP ${step >= 0 ? step + 1 : '-'}`, W - 24, 78, 13, `rgba(${CYAN},.8)`, 'right', 600);
+  },
+  scenes() {
+    const sc = (D.scenes && D.scenes.items) || [], g = D.grid || {}, tr = tracks();
+    frame('SCENES', `${g.trackCount || 0} TRACKS`);
+    let cur = -1, queued = -1;
+    for (const t of tr) for (const sl of t.slots) { if (sl.state === 'playing') cur = sl.scene; if (sl.queued === 'play') queued = sl.scene; }
+    sc.forEach((s, i) => {
+      const y = 44 + i * 38, on = i === cur, q = i === queued;
+      x.fillStyle = on ? `rgba(${GREEN},.22)` : 'rgba(255,255,255,.04)'; x.fillRect(16, y, W - 32, 32);
+      x.fillStyle = on ? `rgba(${GREEN},.95)` : q && blinkOn() ? `rgba(${GREEN},.95)` : 'rgba(255,255,255,.2)';
+      x.beginPath(); x.moveTo(30, y + 7); x.lineTo(48, y + 16); x.lineTo(30, y + 25); x.fill();
+      txt(s.name.toUpperCase(), 62, y + 22, 15, on ? '#fff' : `rgba(${CYAN},.8)`, 'left', 700);
+      txt(`${s.clips} CLIPS`, W - 28, y + 22, 12, 'rgba(255,255,255,.45)', 'right', 500);
+      tr.forEach((t, ti) => {
+        const sl = t.slots[i]; if (!sl || !sl.hasContent) return;
+        x.fillStyle = rgba(t.color, sl.state === 'playing' ? 1 : .35); x.fillRect(300 + ti * 34, y + 9, 26, 14);
+      });
+    });
+  },
+};
+
+function take() {
+  D = jstream.data();
+  const c = clock(), b = c.beats || 0;
+  if (b < lastBeats - 1) { history.length = 0; }
+  lastBeats = b;
+  // keep a short history of the notes for the piano roll and the clip's steps
+  const ns = (D.notes && D.notes.tracks) || [];
+  const open = new Map();
+  history.forEach((n, i) => { if (n[1] === null) open.set(`${n[3]}:${n[2]}`, i); });
+  const seen = new Set();
+  ns.forEach((list, ti) => list.forEach(([p, v]) => {
+    const pitch = ti === 0 ? -({ 36: 1, 38: 2, 42: 3 }[p] || 3) : p, k = `${ti}:${pitch}`;
+    seen.add(k);
+    if (!open.has(k)) {
+      history.push([b, null, pitch, ti]);
+      const cl = D.clip || {}, t = D['track/' + ti];
+      if (cl.playing && t && t.name === cl.track && cl.playingStep >= 0) {
+        const key = `${cl.track}/${cl.scene}`; (steps[key] = steps[key] || {})[cl.playingStep] = 1;
+      }
+    }
+  }));
+  open.forEach((i, k) => { if (!seen.has(k)) history[i][1] = b; });
+  while (history.length > 1500) history.shift();
+  dirty = true;
+}
+function draw() {
+  if (window.jstream && jstream.data) { if (dirty) { views[VIEW](); scan(); dirty = false; } }
+  else { frame('DAW', 'NO PAGE API'); scan(); }
+  requestAnimationFrame(draw);
+}
+if (window.jstream && jstream.addEventListener) jstream.addEventListener('data', take);
+requestAnimationFrame(draw);
+</script></body></html>
