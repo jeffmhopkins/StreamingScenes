@@ -7,8 +7,9 @@ as a light source.
 `card_at(x0, y0, x1, y1)` returns the geometry (centre, size, and the `rotation_deg`,
 `turn_deg` and `tilt_deg` that lay it on the screen) of a card showing that rectangle of
 the 1920 x 1080 screens atlas. The corners are the model README's. A card shows a source
-of its own, not a crop of the atlas scene: only a card showing a source's own frame is
-lit (ADR-0151 decision 10), so only that one glows.
+of its own, not a crop of the atlas scene: the engine lights a card only when it shows a
+source's own frame (observed in its lit-card path, not something an ADR promises), so
+only that one glows.
 """
 import math
 import os

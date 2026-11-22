@@ -159,7 +159,8 @@ must(batch([
 # never catches it and the probe sees it no brighter than a white wall. A lit card's
 # `emissive` adds its picture back up to 4 times, so the screens glow, bloom and light
 # the reflections; the desk's grid most of all. Each card shows its picture's own source
-# (a card is lit only when it shows a source's own frame, not a scene).
+# (the engine lights a card only when it shows a source's own frame, not a scene: observed
+# behaviour, not an ADR's promise).
 if GLOW and GLOW_CARDS:
     from glow import card_at
     ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
@@ -209,15 +210,13 @@ L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity"
 # in stacking order. With GLOW the 8 are the sun, the cabin and the launcher's six pad
 # lights, which light the cabin in the band's colours from the desk; without it, the
 # screens' glow, a light a track around the cabin and the desk's glow.
-if GLOW:
-    TRACK_LIGHTS = []
-else:
+if not GLOW:
     L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
                (0.0, 1.0, -1.15))
 # The band's lights, each over its track's meter: the kick under the dash, the bass and
 # keys on the side consoles, the lead overhead, the echo behind the seat, and the desk's
 # glow over the launcher with the master.
-TRACK_LIGHTS = TRACK_LIGHTS if GLOW else [
+TRACK_LIGHTS = [] if GLOW else [
     ("l_kick", "Drums light", "#ff7a1a", (0.0, 0.5, -1.15), 0, 2.6, 1300),
     ("l_hats", "Hats light", "#ffc23d", (-0.55, 1.62, -0.55), 1, 1.2, 900),
     ("l_bass", "Bass light", "#2fd27a", (-0.86, 0.98, -0.25), 2, 2.2, 1100),
@@ -268,7 +267,9 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
                         smoothing=1800, states={"playing": 1.0}, source={"param": "intensity"}) for s in (2, 5)]
 # The model's own LEDs and light strips follow the band, by material name: the red LEDs
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
-# accent strips the lead, and the cabin's light strips pulse on the beat.
+# accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
+# and the orange accents' ranges end below 0, a fraction of the file's strength, so they
+# don't flare under the bloom's low threshold.
 LEDS = [("led_red", "meters", "tracks.0.0", -0.85, 1.6), ("led_green", "meters", "tracks.2.0", -0.85, 1.6),
         ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.8, -0.45),
         ("glow_amber", "meters", "tracks.4.0", -0.7, -0.1)]
