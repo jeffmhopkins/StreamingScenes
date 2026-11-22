@@ -36,8 +36,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
 the earlier set: no cards, a light per track around the cabin, the desk's and the
-screens' glow. `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY` and `PAD_RANGE` tune it. The
-probe is 128 px (`PROBE_RES`) so the reflected stars stay soft.
+screens' glow. `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY` and `PAD_RANGE` tune it.
 
 The camera is the one thing the render script moves: it follows the song's sections. Its
 focus is close to infinite on every shot, with a slight depth of field only where it sits

@@ -279,7 +279,7 @@ if PROBE:
         {"type": "scene.set_options", "scene_id": "cockpit", "reflections": True},
         src("probe", "Cabin reflections", "reflection_probe", {
             "width_px": S * 2.4, "height_px": S * 2.1, "depth_px": S * 3.2, "fade_px": 120,
-            "resolution": os.environ.get("PROBE_RES", "128"), "refresh_frames": PROBE_EVERY}),
+            "resolution": os.environ.get("PROBE_RES", "256"), "refresh_frames": PROBE_EVERY}),
         add("cockpit", "probe", "probe", geo(c["x"], c["y"], 60, 60, depth_px=c["z"])),
     ], "probe"), "probe")
 
