@@ -266,12 +266,14 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
 # accent strips the lead, and the cabin's light strips pulse on the beat.
 LEDS = [("led_red", "meters", "tracks.0.0", -0.85, 1.6), ("led_green", "meters", "tracks.2.0", -0.85, 1.6),
-        ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.6, 1.0),
-        ("glow_amber", "meters", "tracks.4.0", -0.7, 1.4)]
+        ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.8, -0.45),
+        ("glow_amber", "meters", "tracks.4.0", -0.7, -0.1)]
 motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=70, curve="ease_out",
                         source={"param": "emissive_strength", "material": mat})
                    for mat, key, field, frm, to in LEDS]
-motion["model"].append(data("m_strip", "source", "clock", "beatPhase", 0.9, -0.35, smoothing=0,
+# The cabin's yellow strips stay a soft glow under the low bloom threshold: from 0.45 of
+# their own strength on the beat to 0.25 (the file's 2.5 would flare).
+motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=0,
                             source={"param": "emissive_strength", "material": "light_strip"}))
 for lid, mods in motion.items():
     must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": lid, "motion": mods}), f"motion {lid}")
