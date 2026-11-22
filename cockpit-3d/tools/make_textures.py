@@ -203,6 +203,60 @@ def build_panel_set(src, out, n=2048):
         os.path.join(out, "panel-orm.jpg"), quality=95)
 
 
+def build_grunge_set(out, n=2048):
+    """Replaces the `panel` set with grungy metal: no seams or rivets, just worn gunmetal
+    built over the paint set already in `out` (its grain, grime and scratches). Heavier
+    weathering on top: broad stains, dirt streaked downward, patches worn through to bare
+    metal with dark edges, pitting and fine dents. It tiles.
+
+        python make_textures.py --grunge <textures dir>
+    """
+    paint = np.asarray(load(os.path.join(out, "paint-color.jpg"), "RGB").resize((n, n))
+                       ).astype(np.float32)
+    p_orm = np.asarray(load(os.path.join(out, "paint-orm.jpg"), "RGB").resize((n, n))
+                       ).astype(np.float32)
+    p_nrm = np.asarray(load(os.path.join(out, "paint-normal.jpg"), "RGB").resize((n, n))
+                       ).astype(np.float32) / 127.5 - 1
+    # Broad stains, and dirt run down the surface: noise stretched tall, so it streaks.
+    stains = np.clip(tile_noise(n, 4, 51) * 0.7 + tile_noise(n, 16, 52) * 0.3, -1, 1)
+    rng = np.random.default_rng(53)
+    f = np.fft.fft2(rng.standard_normal((n, n)))
+    k = np.fft.fftfreq(n) * n
+    streak = np.real(np.fft.ifft2(f * np.exp(-(k[None, :] / 40) ** 2 - (k[:, None] / 3) ** 2)))
+    streak = streak / (np.abs(streak).max() + 1e-9)
+    dirt = np.clip(stains * 0.6 + streak * 0.7 + grime_mask(n, 54) * 0.6 - 0.15, 0, 1)
+    # Wear: patches through the paint to bare metal, ragged at their edges.
+    wear_v = tile_noise(n, 7, 55) * 0.6 + tile_noise(n, 70, 56) * 0.3 + tile_noise(n, 260, 57) * 0.25
+    wear = np.clip((wear_v - 0.42) * 7, 0, 1)
+    rim = np.clip(1 - np.abs(wear_v - 0.36) * 22, 0, 1) * (1 - wear)
+    # Pitting: small dark pocks, and soft dents.
+    pits = np.clip((tile_noise(n, 500, 58) - 0.55) * 6, 0, 1) * np.clip(dirt * 1.5 + 0.2, 0, 1)
+    dents = tile_noise(n, 25, 59)
+    scratches = scratch_mask(n, seed=60) * 0.8
+    bare = np.array([112.0, 115.0, 120.0]) + (paint.mean(2, keepdims=True) - paint.mean()) * 0.8
+    color = paint * (1 - dirt[..., None] * 0.55) + np.array([24.0, 22.0, 19.0]) * dirt[..., None] * 0.55
+    color = color * (1 - rim[..., None] * 0.45)
+    m = np.clip(wear * 0.85 + scratches * (1 - dirt * 0.6), 0, 1)
+    color = color * (1 - m[..., None]) + bare * m[..., None]
+    color = color * (1 - pits[..., None] * 0.6)
+    Image.fromarray(np.clip(color, 0, 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-color.jpg"), quality=92)
+    height = dents * 0.4 - pits * 1.2 - rim * 0.4 + wear * -0.25
+    gx = (np.roll(height, -1, 1) - np.roll(height, 1, 1)) * 2.0
+    gy = (np.roll(height, -1, 0) - np.roll(height, 1, 0)) * 2.0
+    nx, ny = -gx * 3 + p_nrm[..., 0] * 0.6, gy * 3 + p_nrm[..., 1] * 0.6
+    nz = np.ones_like(nx)
+    ln = np.sqrt(nx * nx + ny * ny + nz * nz)
+    normal = np.stack([nx / ln, ny / ln, nz / ln], -1)
+    Image.fromarray(((normal * 0.5 + 0.5) * 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-normal.jpg"), quality=95)
+    rough = p_orm[..., 1] * 0.5 + 95 + dirt * 70 - m * 60 + pits * 40
+    ao = p_orm[..., 0] * (1 - dirt * 0.25) * (1 - pits * 0.4)
+    metal = np.maximum(p_orm[..., 2], m * 255)
+    Image.fromarray(np.clip(np.stack([ao, rough, metal], -1), 0, 255).astype(np.uint8)).save(
+        os.path.join(out, "panel-orm.jpg"), quality=95)
+
+
 # The decal atlas: 2048 x 2048, eight rows of 256 px. Each entry is a rectangle in pixels;
 # build_cockpit.py reads the same table to map its decal planes.
 ATLAS = 2048
@@ -451,6 +505,9 @@ def draw_screens(out):
 
 
 def main():
+    if sys.argv[1] == "--grunge":
+        build_grunge_set(sys.argv[2])
+        return
     src, out = sys.argv[1], sys.argv[2]
     os.makedirs(out, exist_ok=True)
     for name, (asset, remap) in SETS.items():

@@ -110,6 +110,11 @@ def _cross(a, b):
 
 EYE = _readme_point("Pilot's eye point")
 SCREEN, SCREEN_N = _screen("screen_center")
+SCREEN_L, SCREEN_L_N = _screen("screen_left")
+SCREEN_R, SCREEN_R_N = _screen("screen_right")
+# How far a side monitor's close-up sits across from square to it, toward the cabin's
+# middle, in metres: the camera crosses the cabin between them, for parallax.
+ACROSS = float(os.environ.get("ACROSS", "0.4"))
 # The back of the cabin, for the establishing shot: 0.25 m in from the rear bulkhead.
 BACK = BOUNDS_MAX[2] - 0.25
 
@@ -119,8 +124,8 @@ SHOTS = {
                       focus=(0.0, 1.0, (EYE[2] + SCREEN[2]) / 2), blur=6),
     # The pilot's seat, looking at the monitors; the centre one in focus.
     "seat": camera(EYE, (0.0, 1.05, SCREEN[2] - 0.1), 52, focus=SCREEN, blur=12),
-    # The same seat, looking out through the windshield: focus far, the dash goes soft.
-    "window": camera(EYE, (0.0, 1.42, -3.0), 54, focus=(0.0, 3.0, -9.0), blur=18),
+    # The same seat, looking up and out: the overhead screens face the pilot's eyes.
+    "window": camera(EYE, (0.0, 1.5, -1.0), 58, focus=(0.0, 3.0, -9.0), blur=18),
     # The jump to warp: from the seat, looking out through the windshield at the
     # streaking sky, focused on the canopy frame.
     "warp": camera(EYE, (0.0, 1.32, -3.0), 54, focus=(0.0, 1.3, SCREEN[2] - 0.2), blur=8),
@@ -128,6 +133,14 @@ SHOTS = {
     "monitor": camera(
         tuple(SCREEN[i] + 0.62 * SCREEN_N[i] for i in range(3)),
         SCREEN, 44, focus=SCREEN, blur=10),
+    # Close on the left monitor, from across to its right; then the right monitor, from
+    # across to its left.
+    "monitor_l": camera(
+        tuple(SCREEN_L[i] + 0.6 * SCREEN_L_N[i] + (ACROSS if i == 0 else 0) for i in range(3)),
+        SCREEN_L, 46, focus=SCREEN_L, blur=10),
+    "monitor_r": camera(
+        tuple(SCREEN_R[i] + 0.6 * SCREEN_R_N[i] - (ACROSS if i == 0 else 0) for i in range(3)),
+        SCREEN_R, 46, focus=SCREEN_R, blur=10),
 }
 
 # The throttle lever, a second model with its origin at the hinge.

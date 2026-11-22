@@ -19,7 +19,7 @@ metalness image per set, and the paint set is recoloured from near black to a da
 | `leather` | [Leather034C](https://ambientcg.com/view?id=Leather034C) | CC0 1.0 |
 | `plastic` | [Plastic012B](https://ambientcg.com/view?id=Plastic012B) | CC0 1.0 |
 | `hexpanel` | [MetalPlates015B](https://ambientcg.com/view?id=MetalPlates015B) | CC0 1.0 |
-| `panel` | drawn by `make_textures.py` over the grain of [Metal029](https://ambientcg.com/view?id=Metal029) | CC0 1.0 |
+| `panel` | grungy metal drawn by `make_textures.py --grunge` over the `paint` set (grain of [Metal029](https://ambientcg.com/view?id=Metal029)) | CC0 1.0 |
 
 ambientCG's licence: <https://docs.ambientcg.com/license/>.
 
