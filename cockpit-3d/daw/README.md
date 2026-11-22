@@ -26,7 +26,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's pad surface: the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
-| The screens and the launcher glowing (they bloom, and show bright in the reflections) | every key, through the atlas | a lit card over each page and grid, showing the same source, with `surface.emissive` (`glow.py`); it needs the depth between models and cards (JStream #1600) |
+| The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
 | A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
@@ -36,7 +36,8 @@ scene follows a real Bitwig with the JTunnel plugin.
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
 the earlier set: no cards, a light per track around the cabin, the desk's and the
-screens' glow. `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY` and `PAD_RANGE` tune it.
+screens' glow. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT` and
+`BLOOM` tune it.
 
 The camera is the one thing the render script moves: it follows the song's sections. Its
 focus is close to infinite on every shot, with a slight depth of field only where it sits

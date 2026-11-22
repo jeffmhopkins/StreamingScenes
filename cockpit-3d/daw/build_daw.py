@@ -36,12 +36,16 @@ INPUT = os.environ.get("DAW_INPUT", "Bitwig")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
+# The cards only show where the engine sorts them after the model (ADR-0107 decision 7:
+# items composite by their centres' depth, and the cockpit's centre is nearer than its
+# screens), so they are off until cards have depth of their own; the bloom does the glow.
+GLOW_CARDS = os.environ.get("GLOW_CARDS", "0") == "1"
 GLOW_SCREENS = float(os.environ.get("GLOW_SCREENS", "1.6"))
 GLOW_DESK = float(os.environ.get("GLOW_DESK", "4.0"))
 PAD_INTENSITY = float(os.environ.get("PAD_INTENSITY", "2.2"))
 PAD_RANGE = float(os.environ.get("PAD_RANGE", "1200"))
-BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.75" if GLOW else "0.85"))
-BLOOM = float(os.environ.get("BLOOM", "0.5" if GLOW else "0.35"))
+BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.4" if GLOW else "0.85"))
+BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 
 
 def geo(cx, cy, w, h, **kw):
@@ -156,7 +160,7 @@ must(batch([
 # `emissive` adds its picture back up to 4 times, so the screens glow, bloom and light
 # the reflections; the desk's grid most of all. Each card shows its picture's own source
 # (a card is lit only when it shows a source's own frame, not a scene).
-if GLOW:
+if GLOW and GLOW_CARDS:
     from glow import card_at
     ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
     ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("meters", 612, 720, 290, 360, GLOW_DESK),
@@ -167,7 +171,7 @@ if GLOW:
         g["surface"] = {"lit": True, "roughness": 0.2, "metalness": 0.0, "emissive": glow,
                         "back": "hide", "shadows": False}
         cards.append(add("cockpit", "g_" + sid, sid, g))
-must(batch(cards, "glow"), "glow")
+    must(batch(cards, "glow"), "glow")
 
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
 if os.path.exists(THROTTLE):
