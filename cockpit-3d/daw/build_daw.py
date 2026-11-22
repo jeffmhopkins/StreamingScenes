@@ -36,10 +36,12 @@ INPUT = os.environ.get("DAW_INPUT", "Bitwig")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
-GLOW_SCREENS = float(os.environ.get("GLOW_SCREENS", "1.4"))
-GLOW_DESK = float(os.environ.get("GLOW_DESK", "2.6"))
+GLOW_SCREENS = float(os.environ.get("GLOW_SCREENS", "1.6"))
+GLOW_DESK = float(os.environ.get("GLOW_DESK", "4.0"))
 PAD_INTENSITY = float(os.environ.get("PAD_INTENSITY", "2.2"))
 PAD_RANGE = float(os.environ.get("PAD_RANGE", "1200"))
+BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.75" if GLOW else "0.85"))
+BLOOM = float(os.environ.get("BLOOM", "0.5" if GLOW else "0.35"))
 
 
 def geo(cx, cy, w, h, **kw):
@@ -148,22 +150,24 @@ must(batch([
         geo(CX, CY, S * (BOUNDS_MAX[0] - BOUNDS_MIN[0]), S * (BOUNDS_MAX[1] - BOUNDS_MIN[1]), depth_px=0.0)),
 ], "cockpit"), "cockpit")
 
-# ---- glowing screens: a lit card over each screen, from the same atlas ----
+# ---- glowing screens: a lit card over each picture on the screens ----
 # The model's `screens` material is unlit, so it shows the atlas at most white: the bloom
 # never catches it and the probe sees it no brighter than a white wall. A lit card's
 # `emissive` adds its picture back up to 4 times, so the screens glow, bloom and light
-# the reflections; the desk's grid most of all.
+# the reflections; the desk's grid most of all. Each card shows its picture's own source
+# (a card is lit only when it shows a source's own frame, not a scene).
 if GLOW:
-    from glow import screen_cards
+    from glow import card_at
+    ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
+    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("meters", 612, 720, 290, 360, GLOW_DESK),
+                   ("master", 904, 720, 56, 360, GLOW_DESK)]
     cards = []
-    for name, card in screen_cards().items():
-        g = dict(card["geometry"])
-        desk = name == "screen_desk"
-        g["surface"] = {"lit": True, "roughness": 0.2, "metalness": 0.0,
-                        "emissive": GLOW_DESK if desk else GLOW_SCREENS, "back": "hide", "shadows": False}
-        cards += [add("cockpit", "g_" + name, "atlas_src", g),
-                  {"type": "item.set_crop", "scene_id": "cockpit", "item_id": "g_" + name, "crop": card["crop"]}]
-    must(batch(cards, "glow"), "glow")
+    for sid, x, y, w, h, glow in ON_SCREENS:
+        g = card_at(x, y, x + w, y + h)
+        g["surface"] = {"lit": True, "roughness": 0.2, "metalness": 0.0, "emissive": glow,
+                        "back": "hide", "shadows": False}
+        cards.append(add("cockpit", "g_" + sid, sid, g))
+must(batch(cards, "glow"), "glow")
 
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
 if os.path.exists(THROTTLE):
@@ -282,6 +286,6 @@ if PROBE:
 must(batch([flt({"type": "scene", "scene_id": "cockpit"}, "ao", "ambient_occlusion",
                 {"radius_px": 60, "strength": 0.8}),
             flt({"type": "scene", "scene_id": "cockpit"}, "bloom", "depth_bloom",
-                {"threshold": 0.85, "strength": 0.35, "radius_px": 14, "depth_px": 300})], "filters"), "filters")
+                {"threshold": BLOOM_AT, "strength": BLOOM, "radius_px": 16, "depth_px": 300})], "filters"), "filters")
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
 print("built")

@@ -16,7 +16,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. |
-| `glow.py` | Lays a card over each of the model's screens, from the corners in the model's README, so `build_daw.py` can make them glow. |
+| `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -26,7 +26,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's pad surface: the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
-| The screens and the launcher glowing (they bloom, and show bright in the reflections) | every key, through the atlas | a lit card over each screen with `surface.emissive` (`glow.py`) |
+| The screens and the launcher glowing (they bloom, and show bright in the reflections) | every key, through the atlas | a lit card over each page and grid, showing the same source, with `surface.emissive` (`glow.py`); it needs the depth between models and cards (JStream #1600) |
 | A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
