@@ -245,10 +245,14 @@ if GLOW:
 must(batch(L, "lights"), "lights")
 
 # ---- the data moves the lights ----
-motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -1.0, 0.0, smoothing=70, curve="ease_out")]
+# A meter falls to nothing between a drum's hits, eight or sixteen times a bar, so a
+# light that follows it fast and all the way down strobes: each light keeps a floor and
+# follows the meter over LEVEL_MS, so it swells with the band instead.
+LEVEL_MS = int(os.environ.get("LEVEL_MS", "220"))
+motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.5, 0.0, smoothing=LEVEL_MS)]
           for lid, _, _, _, ti, _, _ in TRACK_LIGHTS}
 for lid, ti in PAD_LIGHTS:
-    motion[lid] = [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.8, 0.0, smoothing=60, curve="ease_out")]
+    motion[lid] = [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.45, 0.0, smoothing=LEVEL_MS)]
 if not GLOW:
     motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
     # The screens' glow pulses on every beat: brightest on it, fading through it.
@@ -268,12 +272,12 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
 LEDS = [("led_red", "meters", "tracks.0.0", -0.85, 1.6), ("led_green", "meters", "tracks.2.0", -0.85, 1.6),
         ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.8, -0.45),
         ("glow_amber", "meters", "tracks.4.0", -0.7, -0.1)]
-motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=70, curve="ease_out",
+motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=LEVEL_MS * 2 // 3,
                         source={"param": "emissive_strength", "material": mat})
                    for mat, key, field, frm, to in LEDS]
 # The cabin's yellow strips stay a soft glow under the low bloom threshold: from 0.45 of
 # their own strength on the beat to 0.25 (the file's 2.5 would flare).
-motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=0,
+motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=120,
                             source={"param": "emissive_strength", "material": "light_strip"}))
 for lid, mods in motion.items():
     must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": lid, "motion": mods}), f"motion {lid}")

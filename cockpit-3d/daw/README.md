@@ -28,7 +28,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
 | The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
-| A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity |
+| A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
 | The model's red, green, blue and amber LEDs and orange strips | the drums', bass's, keys', master's and lead's meters | `data` modifiers on the materials' `emissive_strength`, by material name |
