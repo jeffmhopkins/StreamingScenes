@@ -16,6 +16,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. |
+| `glow.py` | Lays a card over each of the model's screens, from the corners in the model's README, so `build_daw.py` can make them glow. |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -25,13 +26,18 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's pad surface: the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
-| A coloured light per track (kick under the dash, bass and keys on the side consoles, lead overhead, echo behind the seat) | `meters.tracks.N.0` | `data` modifier on the light's opacity |
-| The desk's glow | `meters.master.0` | `data` modifier |
-| The screens' glow, pulsing on each beat | `clock.beatPhase` | `data` modifier |
+| The screens and the launcher glowing (they bloom, and show bright in the reflections) | every key, through the atlas | a lit card over each screen with `surface.emissive` (`glow.py`) |
+| A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
 | The model's red, green, blue and amber LEDs and orange strips | the drums', bass's, keys', master's and lead's meters | `data` modifiers on the materials' `emissive_strength`, by material name |
 | The cabin's light strips, on the beat | `clock.beatPhase` | the same, on `light_strip` |
+
+A model is lit by at most 8 lights besides the ambient and the environment, so with the
+glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
+the earlier set: no cards, a light per track around the cabin, the desk's and the
+screens' glow. `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY` and `PAD_RANGE` tune it. The
+probe is 128 px (`PROBE_RES`) so the reflected stars stay soft.
 
 The camera is the one thing the render script moves: it follows the song's sections. Its
 focus is close to infinite on every shot, with a slight depth of field only where it sits
