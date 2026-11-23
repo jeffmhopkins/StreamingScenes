@@ -72,7 +72,7 @@ takes out what costs time and shows nothing:
 |---|---|---|
 | Models a scene places | 2 (the cockpit and a throttle lever) | 1 |
 | Triangles | 171,210 and the lever's 408 | 141,783 |
-| Surface area | 109.2 m² | 94.5 m² |
+| Surface area | 109.2 m² | 94.4 m² |
 | Surfaces under a pixel, over the DAW show's twelve views | 4.6 to 8.2 | 3.7 to 6.6 |
 | Glass | lit by every light, then shown at 5% | unlit, at the same 5% |
 
