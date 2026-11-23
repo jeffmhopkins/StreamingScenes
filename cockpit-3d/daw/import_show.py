@@ -131,9 +131,9 @@ import hologram  # noqa: E402
 try:
     hologram.add("cockpit", {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS})
     HOLOGRAM = True
-except SystemExit:
-    print("no hologram: this JStream has no `hologram` filter (see FAIL above); importing the rest",
-          file=sys.stderr)
+except SystemExit as e:
+    # Most likely a JStream without the `hologram` filter; the reason says which.
+    print(f"no hologram ({e}); importing the rest", file=sys.stderr)
     HOLOGRAM = False
 
 
