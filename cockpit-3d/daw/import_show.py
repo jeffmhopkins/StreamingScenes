@@ -12,7 +12,7 @@
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
 - with CC=1, Bitwig CCs 20 to 27 on channel 16 that move, turn, zoom and focus the
-  cockpit's camera in every view (CAMERA_CCS below; needs JStream protocol 0.164);
+  cockpit's camera in every view (CAMERA_CCS below; needs a JStream whose cameras take MIDI, alpha.8 on);
 - and the studio keeps the scenes warm, so switching between 2D and 3D starts nothing.
 
     python3 import_show.py [project file]
@@ -126,7 +126,15 @@ def view_scene(shot):
 # Ctrl+Alt+Shift+H; every view's camera draws in stacking order so it shows ----
 import hologram  # noqa: E402
 
-hologram.add("cockpit", {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS})
+# Its edits go in as one batch, so a JStream without the `hologram` filter (before alpha.8)
+# gets none of it, and the rest of the show still imports.
+try:
+    hologram.add("cockpit", {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS})
+    HOLOGRAM = True
+except SystemExit:
+    print("no hologram: this JStream has no `hologram` filter (see FAIL above); importing the rest",
+          file=sys.stderr)
+    HOLOGRAM = False
 
 
 # ---- two 2D scenes from the same live data ----
@@ -191,7 +199,7 @@ if CC:
                "from": 0, "to": to, "smoothing_ms": CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
     must(op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion}),
-         "camera CCs (needs JStream protocol 0.164)")
+         "camera CCs (needs a JStream whose cameras take MIDI, alpha.8 on)")
 
 # ---- the screens atlas is a picture for the model, not a scene to show: a group, out of
 # the scene list, and last, since opening the project puts its first scene on program ----
@@ -203,6 +211,6 @@ text, ok = op({"type": "studio.set_warm", "scenes": WARM})
 if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
-print("imported: views Ctrl+Alt+1..0, -, =; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back;"
-      " hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off")
+print("imported: views Ctrl+Alt+1..0, -, =; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
+      + ("; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off" if HOLOGRAM else "; no hologram"))
 print("saved to", PROJECT)
