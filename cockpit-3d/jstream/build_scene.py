@@ -15,7 +15,8 @@ import os
 import sys
 
 from mcp import init, op, batch, asset
-from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, THROTTLE_PIVOT, _bounds, p
+from shots import (BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, LEVER_IN_MODEL, MODEL, S, SHOTS, THROTTLE_PIVOT,
+                   _bounds, p)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -174,9 +175,11 @@ must(batch([
             depth_px=0.0)),
 ], "cockpit items"), "cockpit items")
 
-# The throttle lever, where the model ships one: a second model placed at its hinge.
+# The throttle lever, where the cockpit model doesn't hold it: a second model placed at
+# its hinge. A second model costs a full-screen layer of its own, so the cockpit as
+# shipped holds the lever (tools/optimize_gltf.py).
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
+if os.path.exists(THROTTLE) and not LEVER_IN_MODEL:
     lo, hi = _bounds(THROTTLE)
     mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
     must(batch([

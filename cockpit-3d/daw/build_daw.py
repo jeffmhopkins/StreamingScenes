@@ -264,8 +264,11 @@ if GLOW and GLOW_CARDS:
             must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
                      "motion": gates("screens")}), "screens switch")
 
+# The throttle lever, where the cockpit model doesn't hold it (tools/optimize_gltf.py
+# puts it there, since a second model costs a full-screen layer of its own).
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
+from shots import LEVER_IN_MODEL  # noqa: E402
+if os.path.exists(THROTTLE) and not LEVER_IN_MODEL:
     from shots import THROTTLE_PIVOT, _bounds
     lo, hi = _bounds(THROTTLE)
     mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
