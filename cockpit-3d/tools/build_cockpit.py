@@ -23,6 +23,10 @@ import bpy  # first: it makes bmesh and mathutils importable
 import bmesh
 from mathutils import Euler, Matrix, Vector
 
+import os  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import live_panels  # noqa: E402  the console's live displays, shared with add_live_panels.py
+
 # Texture tile sizes in metres per repeat, per tiling material.
 TILE = {
     "paint": 0.5,
@@ -639,6 +643,17 @@ def readout(name, w, h, m, cell):
     q.matrix_world = m @ Matrix.Translation((0, -0.0065, 0))
 
 
+def live_panel(name, m, size):
+    """A live display over leaf `name`, if live_panels.py lists it: a quad on the `screens`
+    material showing its cell of the atlas, just in front of the readout or buttons, in its
+    own node, `live_panels`. add_live_panels.py makes the same quads without Blender."""
+    if name not in live_panels.PANELS:
+        return
+    q = quad(f"{name}_live", size[0], size[1], (0, 0, 0), (0, 0, 0), "screens", live_panels.uv(name))
+    q["group"] = "live_panels"
+    q.matrix_world = m @ Matrix.Translation((0, -live_panels.PANELS[name][2], 0))
+
+
 def knob_row(name, m, w, n, rnd):
     for i in range(n):
         x = (i - (n - 1) / 2) * w / n
@@ -684,11 +699,13 @@ def greeble(name, m, w, h, rnd, depth=0):
     if kind < 0.38:
         rw = min(iw, ih * 2.0)
         readout(f"{name}_ro", rw, rw / 2, top, rnd.randrange(READOUT_COLS * READOUT_ROWS))
+        live_panel(name, top, (rw, rw / 2))
     elif kind < 0.66:
         pitch = rnd.choice([0.022, 0.026, 0.03])
         nx, ny = max(1, int(iw / pitch)), max(1, int(ih / pitch))
         button_grid(f"{name}_bt", top, nx, ny, pitch, size=pitch * 0.62,
                     seed=rnd.randrange(10 ** 6))
+        live_panel(name, top, live_panels.button_size(nx, ny, pitch))
     elif kind < 0.78:
         pitch = 0.03
         nx, ny = max(1, int(iw / pitch)), max(1, int(ih / 0.05))

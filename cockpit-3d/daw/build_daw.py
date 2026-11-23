@@ -32,6 +32,8 @@ sys.path.insert(0, os.path.join(HERE, "..", "jstream"))
 
 from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", "tools"))
+from live_panels import PANELS_AT  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -39,6 +41,9 @@ INPUT = os.environ.get("DAW_INPUT", "Bitwig")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
+# The desk's 8 x 8 pads: `notes` (the default) plays the selected track as an isomorphic
+# note grid, rows a fourth apart, from the page's `iso` view; `clips` is the clip launcher.
+DESK_GRID = os.environ.get("DESK_GRID", "notes")
 # The cards only show where the engine sorts them after the model (ADR-0107 decision 7:
 # items composite by their centres' depth, and the cockpit's centre is nearer than its
 # screens), so they are off until cards have depth of their own; the bloom does the glow.
@@ -119,12 +124,13 @@ ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
       add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080))]
 
 
-def page(view):
-    """Where a screen's page comes from: inline, with its view set ahead of the page's
-    script, or from PAGES."""
+def page(view, width=640):
+    """Where a screen's page comes from: inline, with its view and width set ahead of the
+    page's script, or from PAGES."""
     if PAGES:
-        return {"url": f"{PAGES}/daw.html?view={view}"}
-    return {"html": DAW_HTML.replace("<head>", f'<head><script>window.DAW_VIEW="{view}"</script>', 1)}
+        return {"url": f"{PAGES}/daw.html?view={view}&w={width}"}
+    head = f'<head><script>window.DAW_VIEW="{view}";window.DAW_W={width}</script>'
+    return {"html": DAW_HTML.replace("<head>", head, 1)}
 
 
 for item, view, x, y, w, h in PAGES_AT:
@@ -132,13 +138,27 @@ for item, view, x, y, w, h in PAGES_AT:
         **page(view), "width": 640, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
-# The desk: the launcher, the tracks' meters and the master's, as JStream draws them.
-ed += [
-    src("launcher", "Clip launcher", "grid", {
+# The desk: the pads (the selected track's notes, or the clip launcher), the tracks' meters
+# and the master's.
+if DESK_GRID == "notes":
+    ed += [src("launcher", "Note grid", "browser", {
+        **page("iso", 600), "width": 600, "height": 360, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT})]
+else:
+    ed += [src("launcher", "Clip launcher", "grid", {
         "input": INPUT, "mode": "cells", "width": 600, "height": 360, "columns": 8, "rows": 8,
         "columns_key": "track/{column}", "cells_field": "slots", "state_field": "queued,state",
         "color_field": "color", "looks": LAUNCHER_LOOKS, "dim": 0.2, "gap": 6, "radius": 5,
-        "background": "#05080cff"}),
+        "background": "#05080cff"})]
+# The console's small displays (the launcher panel, the note and bend readouts, ...): one
+# page, `panels`, in the atlas's free strip right of the desk; the model's live-panel quads
+# map its cells (tools/live_panels.py).
+PX, PY, PW, PH = PANELS_AT
+ed += [src("panels", "Console panels", "browser", {
+        **page("panels", PW), "width": PW, "height": PH, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
+ed += [
     src("meters", "Track meters", "grid", {
         "input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",
         "field": "tracks", "segments": 18, "gap": 8, "radius": 2, "pad": "#11161dff",
