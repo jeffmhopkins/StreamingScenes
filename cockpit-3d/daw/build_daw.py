@@ -448,6 +448,19 @@ if GLOW:
         L += light(lid, f"Pad light {ti + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
                                                  "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
+# The warp goes where the ship points (JStream ADR-0186): each jump travels straight ahead
+# from wherever the heading, pitch and roll have turned the sky, and at warp they swing it
+# at most WARP_LOOK_DEG; out of warp the sky stays put and they turn it from there.
+# WARP_AIM=sky streams along the sky's own axis, as before. An engine without the setting
+# keeps the sky's axis.
+WARP_AIM = os.environ.get("WARP_AIM", "ahead")
+WARP_LOOK_DEG = float(os.environ.get("WARP_LOOK_DEG", "10"))
+if WARP_AIM == "ahead":
+    _, ok = op({"type": "source.set_settings", "source_id": "l_env",
+                "patch": {"warp_aim": "ahead", "warp_look_deg": WARP_LOOK_DEG}})
+    if not ok:
+        print("this JStream has no warp_aim (ADR-0186): the warp streams along the sky's axis",
+              file=sys.stderr)
 
 # ---- the data moves the lights ----
 # A meter falls to nothing between a drum's hits, eight or sixteen times a bar, so a
