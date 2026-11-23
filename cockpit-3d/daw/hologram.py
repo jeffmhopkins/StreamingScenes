@@ -9,7 +9,9 @@ on the dash, over MCP. A module import_show.py calls, and a command line:
 
 Everything is generic JStream: cards in the 3D scene with the built-in `hologram` effect
 and the `additive` blend, shown and hidden by timelines of `item.show`, `item.hide` and
-`item.toggle` cues. `add` binds Ctrl+Alt+H to toggle it and Ctrl+Alt+Shift+H to hide it.
+`item.toggle` cues. The beam and the panel materialise as they are shown: a motion
+modifier on the `shown` clock drives each one's `reveal` from 0 to 1. `add` binds
+Ctrl+Alt+H to toggle it and Ctrl+Alt+Shift+H to hide it.
 
 The rig, in the model's metres (glTF: +y up, the pilot faces -z):
 - the projector's lens, a small glow on the dash, below the monitors, dim while off, and a
@@ -50,6 +52,8 @@ TOGGLE_KEY, HIDE_KEY = "Ctrl+Alt+KeyH", "Ctrl+Alt+Shift+KeyH"
 LENS_AT = (0.0, 0.79, -1.28)
 PANEL_AT = (0.0, 1.42, -1.28)
 PANEL_W, PANEL_H = 0.70, 0.39375
+# How long the beam and then the panel take to materialise, from the bottom up.
+BEAM_REVEAL_S, PANEL_REVEAL_S = 0.25, 0.5
 BEAM_TOP = PANEL_AT[1] - PANEL_H / 2
 
 # Each card's effect. The same kind on both keyframes, so a Move glides its numbers.
@@ -78,6 +82,14 @@ def _geo(at, w, h, **kw):
          "depth_px": q["z"]}
     g.update(kw)
     return g
+
+
+def _pop(seconds):
+    """A modifier that raises the hologram effect's `reveal` from 0 to 1 over `seconds`
+    from when the item is shown (the `shown` clock); the kind keeps it at 1 after."""
+    return {"modifier_id": "pop", "property": "effect", "enabled": True, "clock": "shown",
+            "effect": {"filter_id": "holo_fx", "param": "reveal"},
+            "kind": "drift", "rate_per_s": 1.0 / seconds}
 
 
 def _fx(reveal, look):
@@ -126,20 +138,24 @@ def edits(scene="cockpit"):
              "fade", visible=True, opacity=0.35)
     e += add(FLARE, "holo_lens_art", _geo(LENS_AT, 0.14, 0.14, billboard=True), LENS_FX, 1.0,
              "fade", opacity=1.4)
+    # The beam, the panel and the haze start unrevealed: each shows by its `reveal`
+    # rising from 0 from the moment it is shown (see `_pop`).
     e += add(BEAM, "holo_beam_art", _geo(beam_at, PANEL_W, beam_h, fit_mode="stretch"),
-             BEAM_FX, 1.0, "fade")
-    e += add(CARD, FEED, _geo(PANEL_AT, PANEL_W, PANEL_H, fit_mode="fill"), CARD_FX, 1.0,
+             BEAM_FX, 0.0, "fade")
+    e += add(CARD, FEED, _geo(PANEL_AT, PANEL_W, PANEL_H, fit_mode="fill"), CARD_FX, 0.0,
              "scale", delay=150)
     # A faint sheet of light 6 cm in front of the panel, so the projection reads as light
     # in the air and the two layers part as the camera moves.
     e += add(HAZE, "holo_haze_art", _geo((PANEL_AT[0], PANEL_AT[1], PANEL_AT[2] + 0.06),
                                          PANEL_W * 1.08, PANEL_H * 1.08, fit_mode="stretch"),
-             HAZE_FX, 1.0, "fade", delay=150, opacity=0.35)
+             HAZE_FX, 0.0, "fade", delay=150, opacity=0.35)
     e += [
+        {"type": "item.set_motion", "item_id": BEAM, "motion": [_pop(BEAM_REVEAL_S)]},
         {"type": "item.set_motion", "item_id": CARD, "motion": [
             {"modifier_id": "bob", "property": "y", "enabled": True, "clock": "engine",
              "kind": "oscillate", "shape": "sine", "amplitude": 4.0, "period_ms": 3200,
-             "phase": 0.0}]},
+             "phase": 0.0}, _pop(PANEL_REVEAL_S)]},
+        {"type": "item.set_motion", "item_id": HAZE, "motion": [_pop(PANEL_REVEAL_S)]},
         {"type": "timeline.set", "scene_id": scene, "timeline": _timeline(
             SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
                                   (120, "item.show", CARD),
