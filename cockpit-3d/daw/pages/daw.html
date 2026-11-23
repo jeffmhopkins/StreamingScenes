@@ -21,6 +21,7 @@ const steps = {};    // clip view: steps a note started on, per clip
 let lastBeats = -1;
 const last = {};     // panels view: the last note each track started, [pitch, velocity]
 const waves = { master: [], sel: [] }; // panels view: recent levels, newest last
+const onsets = {};   // panels view: the beats each track started a note on, the last bar's
 
 function txt(t, px, py, size, col, al = 'left', wt = 600, face = MONO) {
   x.font = `${wt} ${size}px ${face}`; x.textAlign = al; x.fillStyle = col; x.fillText(t, px, py);
@@ -62,7 +63,7 @@ function bar(px, py, w, h, v, col) {
 // Each panel's cell in the picture, [x, y, w, h]: keep in step with tools/live_panels.py.
 const PANEL_AT = {
   launcher: [0, 0, 160, 160], status: [160, 0, 160, 80], note: [160, 80, 160, 80],
-  bend: [0, 160, 160, 80], levels: [160, 160, 160, 80], masterWave: [0, 240, 160, 80],
+  density: [0, 160, 160, 80], levels: [160, 160, 160, 80], masterWave: [0, 240, 160, 80],
   trackWave: [160, 240, 160, 80], activity: [0, 320, 80, 40], position: [80, 320, 80, 40],
   beats: [160, 320, 80, 40], strips: [240, 320, 80, 40],
 };
@@ -129,18 +130,21 @@ const panel = {
       bar(8, h - 18, w - 16, 8, v / 127, AMB);
     } else { segs('---', 8, 10, 30, 40, 3); bar(8, h - 18, w - 16, 8, 0, AMB); }
   },
-  // The selected track's pitch bend (from the centre) and pressure, when the feed sends them:
-  // `expression.tracks[i]` as {bend: -1..1, pressure: 0..1}. JTunnel's Bitwig feed doesn't yet.
-  bend(w, h) {
-    const e = ((D.expression && D.expression.tracks) || [])[selected()];
-    txt('BEND', 8, 22, 11, AMB, 'left', 700); txt('PRES', 8, 58, 11, AMB, 'left', 700);
-    const bx = 46, bw = w - bx - 8;
-    x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(bx, 12, bw, 12); x.fillRect(bx, 48, bw, 12);
-    x.fillStyle = AMB_DIM; x.fillRect(bx + bw / 2 - 1, 8, 2, 20);
-    if (!e) { txt('NO DATA', bx + bw / 2, 42, 9, AMB_DIM, 'center', 600); return; }
-    const b = Math.max(-1, Math.min(1, e.bend || 0)), pr = Math.max(0, Math.min(1, e.pressure || 0));
-    x.fillStyle = AMB; x.fillRect(bx + bw / 2 + Math.min(0, b) * bw / 2, 12, Math.abs(b) * bw / 2, 12);
-    x.fillRect(bx, 48, pr * bw, 12);
+  // How busy the selected track is: RATE, the notes it started over the last bar (4 beats),
+  // as segments and a number; POLY, the notes it holds now, a segment each up to 8.
+  density(w, h) {
+    const sel = selected(), b = clock().beats || 0;
+    const rate = (onsets[sel] || []).filter(t => t > b - 4).length;
+    const held = (((D.notes && D.notes.tracks) || [])[sel] || []).length;
+    txt('RATE', 8, 24, 11, AMB, 'left', 700); txt('POLY', 8, 60, 11, AMB, 'left', 700);
+    const cells = (py, n, lit, of) => {
+      const cw = (w - 46 - 44) / of;
+      for (let i = 0; i < of; i++) { x.fillStyle = i < lit ? AMB : AMB_DIM; x.fillRect(46 + i * cw, py, cw - 2, 14); }
+    };
+    cells(12, 12, Math.ceil(Math.min(32, rate) / 32 * 12), 12);
+    cells(48, 8, Math.min(8, held), 8);
+    segs(Math.min(99, rate), w - 40, 10, 16, 18, 2);
+    segs(Math.min(99, held), w - 40, 46, 16, 18, 2);
   },
   // Every track's level and the master's, as a bar graph.
   levels(w, h) {
@@ -390,7 +394,7 @@ const views = {
 function take() {
   D = jstream.data();
   const c = clock(), b = c.beats || 0;
-  if (b < lastBeats - 1) { history.length = 0; }
+  if (b < lastBeats - 1) { history.length = 0; for (const k in onsets) delete onsets[k]; }
   lastBeats = b;
   // keep a short history of the notes for the piano roll and the clip's steps
   const ns = (D.notes && D.notes.tracks) || [];
@@ -403,6 +407,7 @@ function take() {
     seen.add(k);
     if (!open.has(k)) {
       last[ti] = [p, v];
+      (onsets[ti] = onsets[ti] || []).push(b);
       history.push([b, null, pitch, ti]);
       const cl = D.clip || {}, t = D['track/' + ti];
       if (cl.playing && t && t.name === cl.track && cl.playingStep >= 0) {
@@ -415,6 +420,7 @@ function take() {
   const lvl = m => m ? Math.max(m[0] || 0, m[1] || 0) : 0, mt = (D.meters && D.meters.tracks) || [];
   waves.master.push(lvl(D.meters && D.meters.master)); waves.sel.push(lvl(mt[selected()]));
   for (const k in waves) while (waves[k].length > 120) waves[k].shift();
+  for (const k in onsets) onsets[k] = onsets[k].filter(t => t > b - 4);
   dirty = true;
 }
 function draw() {

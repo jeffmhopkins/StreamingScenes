@@ -27,7 +27,7 @@ PANELS = {
     "console_centrebb": ("launcher", (0, 0, 160, 160), BUTTON_DEPTH),
     "console_wing_L_fwdb": ("status", (160, 0, 160, 80), READOUT_DEPTH),
     "console_centreaab": ("note", (160, 80, 160, 80), READOUT_DEPTH),
-    "console_centrebab": ("bend", (0, 160, 160, 80), READOUT_DEPTH),
+    "console_centrebab": ("density", (0, 160, 160, 80), READOUT_DEPTH),
     "overhead_midbab": ("levels", (160, 160, 160, 80), READOUT_DEPTH),
     "console_wing_R_fwdbbb": ("masterWave", (0, 240, 160, 80), READOUT_DEPTH),
     "overhead_midaa": ("trackWave", (160, 240, 160, 80), READOUT_DEPTH),
