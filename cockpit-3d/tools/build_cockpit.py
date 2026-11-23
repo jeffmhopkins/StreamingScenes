@@ -22,6 +22,7 @@ import sys
 import bpy  # first: it makes bmesh and mathutils importable
 import bmesh
 from mathutils import Euler, Matrix, Vector
+from mathutils.geometry import intersect_line_line
 
 import os  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -661,16 +662,13 @@ def fillet(profile, radii, step=15):
 
 
 def sweep(name, frames, ends, profile, material):
-    """Sweeps a closed (s, z) profile through a chain of monitor frames, as one closed
-    solid. Each frame is a matrix whose local x runs along the monitor, local y is depth
-    (+ away from the pilot) and local z is up the screen; a profile point (s, z) runs along
-    local x at (y, z) = (s, z). Neighbouring frames differ only by a turn about their
-    shared up axis (local z) and a shift across it, so the same profile point traces a line
-    at the same height along that axis in each, and the two lines meet: their crossing is
-    the mitre. `ends` is the local x where the chain starts in the first frame and stops in
-    the last."""
-    base = frames[len(frames) // 2]
-    to_base = base.inverted()
+    """Sweeps a closed (s, z) profile through a chain of frames, as one closed solid. Each
+    frame is a matrix whose local x runs along the path, local y is depth (+ away from the
+    pilot) and local z is up; a profile point (s, z) runs along local x at (y, z) = (s, z).
+    Neighbouring frames differ by a turn about an axis they share (their up axis where the
+    bank turns a corner, their depth axis where the ledge climbs), so the same profile point
+    traces a line in each and the two lines meet: their crossing is the mitre. `ends` is the
+    local x where the chain starts in the first frame and stops in the last."""
     bm = bmesh.new()
     rings = []
     for k in range(len(frames) + 1):
@@ -681,15 +679,10 @@ def sweep(name, frames, ends, profile, material):
                 co = f @ Vector((ends[0] if k == 0 else ends[1], s, z))
             else:
                 a, b = frames[k - 1], frames[k]
-                a, b = to_base @ a, to_base @ b  # in the middle frame, the up axis is z
-                pa, da = a @ Vector((0, s, z)), (a.to_3x3() @ Vector((1, 0, 0)))
-                pb, db = b @ Vector((0, s, z)), (b.to_3x3() @ Vector((1, 0, 0)))
-                # 2D crossing of pa + t da and pb + q db, across the up axis.
-                det = da.x * -db.y - da.y * -db.x
-                t = ((pb.x - pa.x) * -db.y - (pb.y - pa.y) * -db.x) / det
-                co = pa + da * t
-                co.z = (pa.z + pb.z) / 2
-                co = base @ co
+                pa, pb = a @ Vector((0, s, z)), b @ Vector((0, s, z))
+                qa, qb = a @ Vector((1, s, z)), b @ Vector((1, s, z))
+                ca, cb = intersect_line_line(pa, qa, pb, qb)
+                co = (ca + cb) / 2
             ring.append(bm.verts.new(co))
         rings.append(ring)
     m = len(profile)
@@ -709,74 +702,113 @@ def sweep(name, frames, ends, profile, material):
     return new_object(name, bm, material)
 
 
+def operand(ob, name, bm, matrix, operation):
+    """Adds a hidden helper mesh as a boolean operand of `ob` (removed after finish)."""
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    helper = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(helper)
+    helper.matrix_world = matrix
+    helper.hide_render = True
+    helper.display_type = "WIRE"
+    CUTTERS.append(helper)
+    mod = ob.modifiers.new(name, "BOOLEAN")
+    mod.operation = operation
+    mod.solver = "EXACT"
+    mod.object = helper
+
+
+def prism_bm(outline, s0, s1):
+    """A bmesh prism: a convex (x, z) outline extruded along y from s0 to s1."""
+    bm = bmesh.new()
+    front = [bm.verts.new((x, s0, z)) for x, z in outline]
+    back = [bm.verts.new((x, s1, z)) for x, z in outline]
+    bm.faces.new(front)
+    bm.faces.new(back[::-1])
+    n = len(outline)
+    for k in range(n):
+        bm.faces.new((front[k], back[k], back[(k + 1) % n], front[(k + 1) % n]))
+    return bm
+
+
+# The ledge over the bank: how far its nose stands out from the face, and how far it
+# climbs over the centre monitor, and over what width.
+LEDGE_NOSE, CROWN_RISE, CROWN_RUN = 0.07, 0.09, 0.09
+
+
 def build_monitor_surround():
-    """One moulded surround for the three main monitors, in place of a bezel, housing,
-    hood and two ears per monitor that overlapped where the monitors meet. Its profile
-    (a face with a window per screen, a hood over the top and a housing behind) is swept
-    through the three monitors' frames with a mitre at each join, and the windows are
-    cut through the face down to just behind the screens, which do not move."""
+    """One moulded case for the three main monitors. The body (a face with a window per
+    screen, and a slim back) is swept through the three monitors' frames with a mitre at
+    each join and wrapped round each end. Over it runs one ledge, standing LEDGE_NOSE out
+    toward the pilot, that climbs into a trapezoid crown over the centre monitor, with an
+    amber light bar along its whole edge. The side screens sit back in deeper chamfered
+    frames under it. The windows are cut through the face down to just behind the screens,
+    which do not move."""
     w = SCREENS[MAIN_MONITORS[0]][0]
     h = w * 9 / 16
     H, F = h / 2, MONITOR_FACE
+    top = H + 0.02  # the ledge's underside over the side monitors
     frames = [frame_matrix(*SCREENS[n][1:]) for n in MAIN_MONITORS]
     ends = (-(w / 2 + 0.022), w / 2 + 0.022)
-    # Past each outer monitor the surround turns a further WING_TURN toward the pilot
-    # for WING_LENGTH, so it wraps round the ends of the bank: each wing is its monitor's
+    # Past each outer monitor the case turns a further WING_TURN toward the pilot for
+    # WING_LENGTH, so it wraps round the ends of the bank: each wing is its monitor's
     # frame turned about its own up axis at the end of that monitor's segment.
     wings = []
     for f, u, turn in ((frames[0], ends[0], WING_TURN), (frames[-1], ends[1], -WING_TURN)):
         hinge = Matrix.Translation((u, 0, 0))
         wings.append(f @ hinge @ Matrix.Rotation(math.radians(turn), 4, "Z") @ hinge.inverted())
-    shell_frames = [wings[0]] + frames + [wings[1]]
-    shell_ends = (ends[0] - WING_LENGTH, ends[1] + WING_LENGTH)
-    shell = [  # thin, like a computer monitor's case
+    body_frames = [wings[0]] + frames + [wings[1]]
+    body_ends = (ends[0] - WING_LENGTH, ends[1] + WING_LENGTH)
+    body = fillet([
         (F, -H - 0.03),         # the face's bottom edge, room for the soft keys
         (0.035, -H - 0.022),    # the case's back, under
-        (0.035, H + 0.034),     # the case's back, over
-        (-0.03, H + 0.04),      # a slim hood over the screens, its nose toward the pilot
-        (-0.03, H + 0.022),     # under the nose
-        (F, H + 0.018),         # where the hood meets the face
-    ]
-    # A rounded nose on the hood, the rest softened.
-    profile = fillet(shell, [0.006, 0.01, 0.012, 0.009, 0.006, 0.004])
-    ob = sweep("monitor_surround", shell_frames, shell_ends, profile, "plastic")
-    # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
-    # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
-    floor = 0.004
-    # A raised cap over the centre monitor, like an instrument binnacle: a trapezoid
-    # standing up from the hood, from the hood's nose back to the case's back, joined
-    # into the case so the bevel runs round it in one piece.
+        (0.035, top + 0.004),   # up into the ledge
+        (F, top + 0.004),
+    ], [0.006, 0.01, 0, 0])
+    ob = sweep("monitor_surround", body_frames, body_ends, body, "plastic")
+    # The crown: the face carried up under the ledge where it climbs over the centre.
     cf = frames[1]
-    lo, hi = H + 0.03, H + 0.12             # its foot (inside the hood) and its top
-    bw, tw = w / 2 + 0.005, w / 2 - 0.09    # half-widths at the foot and the top
-    bm = bmesh.new()
-    pts = [(-bw, lo), (bw, lo), (tw, hi), (-tw, hi)]
-    front = [bm.verts.new((x, -0.03, z)) for x, z in pts]
-    back = [bm.verts.new((x, 0.035, z)) for x, z in pts]
-    bm.faces.new(front)
-    bm.faces.new(back[::-1])
-    for k in range(4):
-        bm.faces.new((front[k], back[k], back[(k + 1) % 4], front[(k + 1) % 4]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    me = bpy.data.meshes.new("monitor_cap")
-    bm.to_mesh(me)
-    bm.free()
-    cap = bpy.data.objects.new("monitor_cap", me)
-    bpy.context.collection.objects.link(cap)
-    cap.matrix_world = cf
-    cap.hide_render = True
-    cap.display_type = "WIRE"
-    CUTTERS.append(cap)
-    mod = ob.modifiers.new("cap", "BOOLEAN")
+    run_a, run_b = w / 2, w / 2 - CROWN_RUN  # half-widths at the foot and the top
+    operand(ob, "monitor_crown", prism_bm(
+        [(-run_a, top - 0.004), (run_a, top - 0.004), (run_b, top + CROWN_RISE + 0.004),
+         (-run_b, top + CROWN_RISE + 0.004)], F, 0.034), cf, "UNION")
+    # The ledge's path: flat over the wings and side monitors, then up and over the
+    # crown and down again, all in the frames the body uses plus the climb, whose frames
+    # are the centre frame turned about its depth axis.
+    climb = math.atan2(CROWN_RISE, run_a - run_b)
+
+    def at(u, z, angle=0.0):
+        return cf @ Matrix.Translation((u, 0, z)) @ Matrix.Rotation(-angle, 4, "Y")
+    lift = Matrix.Translation((0, 0, top))
+    path = [wings[0] @ lift, frames[0] @ lift, at(-run_a, top), at(-run_a, top, climb),
+            at(-run_b, top + CROWN_RISE), at(run_a, top, -climb), at(run_a, top),
+            frames[2] @ lift, wings[1] @ lift]
+    ledge = fillet([
+        (0.037, 0.0),           # its underside, at the back
+        (-LEDGE_NOSE, 0.0),     # under its nose
+        (-LEDGE_NOSE, 0.024),   # over its nose
+        (0.037, 0.024),         # its top, at the back
+    ], [0, 0.006, 0.011, 0.008])
+    lb = sweep("monitor_ledge", path, body_ends, ledge, "plastic")
+    me = lb.data
+    ALL.remove(lb)
+    bpy.data.objects.remove(lb)
+    helper = bpy.data.objects.new("monitor_ledge", me)
+    bpy.context.collection.objects.link(helper)
+    helper.hide_render = True
+    helper.display_type = "WIRE"
+    CUTTERS.append(helper)
+    mod = ob.modifiers.new("ledge", "BOOLEAN")
     mod.operation = "UNION"
     mod.solver = "EXACT"
-    mod.object = cap
+    mod.object = helper
     # The side screens sit back in a deeper frame: a ring standing SIDE_RECESS proud of
-    # the face round each, its inner walls splayed out toward the pilot, joined into the
-    # case. The screens do not move; the frame comes forward.
+    # the face round each, its inner walls splayed out toward the pilot, under the ledge.
+    # The screens do not move; the frame comes forward.
     for n in (MAIN_MONITORS[0], MAIN_MONITORS[2]):
-        f = frame_matrix(*SCREENS[n][1:])
-        x0, z0, z1 = w / 2 + 0.02, -H - 0.03, H + 0.012   # outside: under the hood's strip
+        x0, z0, z1 = w / 2 + 0.02, -H - 0.03, top + 0.002
         back, front = F + 0.002, F - SIDE_RECESS           # into the face, and proud of it
         ib, ifr = 0.002, 0.02                              # inner margin, back and front
         rects = [  # outer front, outer back, inner back, inner front: (half-width, z lo, z hi, s)
@@ -789,47 +821,25 @@ def build_monitor_surround():
         for a, b in zip(loops, loops[1:] + loops[:1]):
             for k in range(4):
                 bm.faces.new((a[k], a[(k + 1) % 4], b[(k + 1) % 4], b[k]))
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-        me = bpy.data.meshes.new(f"{n}_frame")
-        bm.to_mesh(me)
-        bm.free()
-        ring = bpy.data.objects.new(f"{n}_frame", me)
-        bpy.context.collection.objects.link(ring)
-        ring.matrix_world = f
-        ring.hide_render = True
-        ring.display_type = "WIRE"
-        CUTTERS.append(ring)
-        mod = ob.modifiers.new(f"{n}_frame", "BOOLEAN")
-        mod.operation = "UNION"
-        mod.solver = "EXACT"
-        mod.object = ring
-    for i, n in enumerate(MAIN_MONITORS):
-        f = frame_matrix(*SCREENS[n][1:])  # the screen's own frame: the floor is behind it
-        bm = bmesh.new()
-        bmesh.ops.create_cube(bm, size=1.0)
-        bmesh.ops.scale(bm, vec=Vector((w + 0.002, 0.08, (w + 0.002) * 9 / 16)), verts=bm.verts)
-        me = bpy.data.meshes.new(f"{n}_window")
-        bm.to_mesh(me)
-        bm.free()
-        cut = bpy.data.objects.new(f"{n}_window", me)
-        bpy.context.collection.objects.link(cut)
-        cut.matrix_world = f @ Matrix.Translation((0, floor - 0.04, 0))
-        cut.hide_render = True
-        cut.display_type = "WIRE"
-        CUTTERS.append(cut)
-        mod = ob.modifiers.new(f"window{i}", "BOOLEAN")
-        mod.operation = "DIFFERENCE"
-        mod.solver = "EXACT"
-        mod.object = cut
+        operand(ob, f"{n}_frame", bm, frame_matrix(*SCREENS[n][1:]), "UNION")
+    # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
+    # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
+    floor = 0.004
+    for n in MAIN_MONITORS:
+        hw, hh = w / 2 + 0.001, (w + 0.002) * 9 / 32
+        operand(ob, f"{n}_window", prism_bm([(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)],
+                                            floor - 0.08, floor), frame_matrix(*SCREENS[n][1:]),
+                "DIFFERENCE")
     bev = ob.modifiers.new("bevel", "BEVEL")
     bev.width = 0.003
     bev.segments = 3
     bev.limit_method = "ANGLE"
     bev.angle_limit = math.radians(40)
-    # An amber strip under the hood's nose, the length of the bank, mitred with it.
-    led = fillet([(-0.022, H + 0.014), (-0.016, H + 0.014), (-0.016, H + 0.0215),
-                  (-0.022, H + 0.0215)], [0, 0, 0, 0])
-    sweep("monitor_surround_led", frames, (ends[0] + 0.06, ends[1] - 0.06), led, "led_amber")
+    # The light bar: an amber strip along the underside of the ledge's nose, all the way
+    # round, climbing over the crown with it.
+    bar = [(-LEDGE_NOSE + 0.006, -0.005), (-LEDGE_NOSE + 0.014, -0.005),
+           (-LEDGE_NOSE + 0.014, 0.001), (-LEDGE_NOSE + 0.006, 0.001)]
+    sweep("monitor_light_bar", path, (body_ends[0] + 0.01, body_ends[1] - 0.01), bar, "led_amber")
     return ob
 
 
