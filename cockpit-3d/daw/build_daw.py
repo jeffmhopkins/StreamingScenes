@@ -32,6 +32,8 @@ sys.path.insert(0, os.path.join(HERE, "..", "jstream"))
 
 from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", "tools"))
+from live_panels import PANELS_AT  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -148,6 +150,14 @@ else:
         "columns_key": "track/{column}", "cells_field": "slots", "state_field": "queued,state",
         "color_field": "color", "looks": LAUNCHER_LOOKS, "dim": 0.2, "gap": 6, "radius": 5,
         "background": "#05080cff"})]
+# The console's small displays (the launcher panel, the note and bend readouts, ...): one
+# page, `panels`, in the atlas's free strip right of the desk; the model's live-panel quads
+# map its cells (tools/live_panels.py).
+PX, PY, PW, PH = PANELS_AT
+ed += [src("panels", "Console panels", "browser", {
+        **page("panels", PW), "width": PW, "height": PH, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
 ed += [
     src("meters", "Track meters", "grid", {
         "input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",

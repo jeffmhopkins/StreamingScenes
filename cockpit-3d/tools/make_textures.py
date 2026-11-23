@@ -501,6 +501,10 @@ def draw_screens(out):
         d.polygon([(12, 12), (72, 12), (12, 72)], fill=(255, 80, 60))
         c, r = SCREEN_CELLS[name]
         atlas.paste(im.resize((640, 360), Image.LANCZOS), (c * 640, r * 360))
+    # The console's live panels (live_panels.py) show the strip right of the desk's cell:
+    # until a live source fills it, it holds what those panels showed before.
+    from live_panels import draw_placeholders
+    draw_placeholders(atlas, Image.open(os.path.join(out, "readouts.png")).convert("RGB"))
     atlas.save(os.path.join(out, "screens.jpg"), quality=92)
 
 
@@ -514,8 +518,8 @@ def main():
         build_set(src, out, name, asset, remap)
     build_panel_set(src, out)
     draw_atlas(out)
-    draw_screens(out)
     draw_readouts(out)
+    draw_screens(out)  # after the readouts: the live panels' placeholders copy them
 
 
 if __name__ == "__main__":
