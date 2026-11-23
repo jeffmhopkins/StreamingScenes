@@ -296,10 +296,12 @@ if os.path.exists(LIGHT_BAR):
         add("cockpit", "light_bar", "light_bar_model",
             geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
     ], "light bar"), "light bar")
-    # In the DAW cockpit the master's level drives it (ids starting `level`).
+    # In the DAW cockpit the master's level drives it (ids starting `level`), and the desk
+    # and master switches fade it out like the desk lights.
     must(op({"type": "item.set_motion", "scene_id": "ledge_bar", "item_id": "ledge_bar_fill",
              "motion": [data("level", "scale", "meters", "master.0", -1.0, 0.0,
-                             smoothing=int(os.environ.get("LEVEL_MS", "220")))]}), "light bar level")
+                             smoothing=int(os.environ.get("LEVEL_MS", "220"))),
+                        *gates("desk")]}), "light bar level")
 
 
 def light(lid, name, settings, at, aim=None, size=60):

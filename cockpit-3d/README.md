@@ -178,7 +178,7 @@ background (`ledge_bar_bg`) under a white full-frame box (`ledge_bar_fill`). The
 `scale` motion is the bar's level: −1 is dark, 0 lights the whole bar, and in between the
 box covers the middle of the picture, so the bar lights from the centre outward. The DAW
 build drives it from the master meter (`data` modifier `level`, `LEVEL_MS` smoothing,
-default 220 ms). The box's opacity is left free, for switches to dim the bar.
+default 220 ms). The desk and master light switches fade the box's opacity, so the bar goes dark with the desk lights.
 
 ### All materials
 
