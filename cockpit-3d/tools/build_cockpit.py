@@ -46,9 +46,8 @@ NORMAL_SCALE = {"plastic": 0.35, "paint": 0.6, "paint_dark": 0.6}
 SCREENS = {
     # name: (width m, centre, euler degrees (x tilt, y, z yaw))
     # Three equal monitors wrapped around the pilot: one ahead, one angled in each side.
+    # The outer two are placed from the centre one below (BANK_TURN, BANK_GAP).
     "screen_center": (0.52, (0.0, 1.44, 0.97), (-10, 0, 0)),
-    "screen_left": (0.52, (-0.56, 1.335, 0.97), (-10, 0, 22)),
-    "screen_right": (0.52, (0.56, 1.335, 0.97), (-10, 0, -22)),
     "screen_side_left": (0.22, (-0.95, 0.5, 0.86), (-50, 0, 75)),
     "screen_side_right": (0.22, (0.95, 0.5, 0.86), (-50, 0, -75)),
     # Lying on the tray in front of the pilot, its far edge raised a little and butted
@@ -58,6 +57,24 @@ SCREENS = {
     "screen_overhead_left": (0.3, (-0.38, 0.62, 1.70), (31, 0, 0)),
     "screen_overhead_right": (0.3, (0.38, 0.62, 1.70), (31, 0, 0)),
 }
+# The outer monitors are the centre one turned BANK_TURN degrees toward the pilot about
+# the centre screen's own up axis (leaned back with it), hinged on a line BANK_GAP past
+# its edge, so each pair of neighbouring edges is parallel and the gap between them is
+# BANK_GAP * 2 wide from top to bottom, with the hinge right in the middle of it.
+BANK_TURN, BANK_GAP = 22, 0.028
+
+
+def _bank():
+    w, loc, rot = SCREENS["screen_center"]
+    c = Matrix.Translation(Vector(loc)) @ Euler([math.radians(a) for a in rot], "XYZ").to_matrix().to_4x4()
+    for name, side in (("screen_left", -1), ("screen_right", 1)):
+        hinge = Matrix.Translation((side * (w / 2 + BANK_GAP), 0, 0))
+        m = c @ hinge @ Matrix.Rotation(math.radians(-side * BANK_TURN), 4, "Z") @ hinge
+        SCREENS[name] = (w, tuple(m.to_translation()),
+                         tuple(math.degrees(a) for a in m.to_euler("XYZ")))
+
+
+_bank()
 # Every screen shares one material, `screens`, and one 1920 x 1080 image: a 3 x 3 grid of
 # 640 x 360 cells, (column, row) from the top left. The desk instrument is 8:3 and takes
 # the left 960 x 360 of the bottom row.
@@ -575,8 +592,6 @@ def screen(name, width, loc, rot):
     face = 0.0
     if name in MAIN_MONITORS:
         face = MONITOR_FACE
-        if name != "screen_center":
-            face -= SIDE_FORWARD * math.cos(math.radians(rot[0]))  # the face, brought forward
     else:
         # Bezel: a plastic frame just behind the screen, and a housing behind that.
         bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
@@ -600,22 +615,7 @@ def screen(name, width, loc, rot):
 # The three main monitors, left to right, and their shared surround (see below).
 MAIN_MONITORS = ("screen_left", "screen_center", "screen_right")
 MONITOR_FACE = -0.008  # the surround's face, in front of the screens (local -y is out)
-# The outer monitors sit a little further back than the centre one, so faces offset
-# equally from the screens would fold nearer the outer screens' edges. Bringing the outer
-# two segments of the surround this far toward the pilot (horizontally, so the mitre stays
-# level) puts each fold exactly midway between the two screens' edges, top to bottom.
-SIDE_FORWARD = 0.00385
-
-
-def surround_frame(name):
-    """A main monitor's frame for the surround: its screen's frame, the outer ones
-    brought SIDE_FORWARD toward the pilot."""
-    f = frame_matrix(*SCREENS[name][1:])
-    if name == "screen_center":
-        return f
-    n = f.to_3x3() @ Vector((0, 1, 0))
-    n.z = 0
-    return Matrix.Translation(-n.normalized() * SIDE_FORWARD) @ f
+WING_TURN, WING_LENGTH = 30, 0.09  # the surround's wrap round each end of the bank
 
 
 def fillet(profile, radii, step=15):
@@ -647,10 +647,13 @@ def sweep(name, frames, ends, profile, material):
     """Sweeps a closed (s, z) profile through a chain of monitor frames, as one closed
     solid. Each frame is a matrix whose local x runs along the monitor, local y is depth
     (+ away from the pilot) and local z is up the screen; a profile point (s, z) runs along
-    local x at (y, z) = (s, z). Neighbouring frames are turned about the vertical only and
-    share their height, so the same profile point traces a horizontal line in each and the
-    two lines meet: their crossing is the mitre. `ends` is the local x where the chain
-    starts in the first frame and stops in the last."""
+    local x at (y, z) = (s, z). Neighbouring frames differ only by a turn about their
+    shared up axis (local z) and a shift across it, so the same profile point traces a line
+    at the same height along that axis in each, and the two lines meet: their crossing is
+    the mitre. `ends` is the local x where the chain starts in the first frame and stops in
+    the last."""
+    base = frames[len(frames) // 2]
+    to_base = base.inverted()
     bm = bmesh.new()
     rings = []
     for k in range(len(frames) + 1):
@@ -661,13 +664,15 @@ def sweep(name, frames, ends, profile, material):
                 co = f @ Vector((ends[0] if k == 0 else ends[1], s, z))
             else:
                 a, b = frames[k - 1], frames[k]
+                a, b = to_base @ a, to_base @ b  # in the middle frame, the up axis is z
                 pa, da = a @ Vector((0, s, z)), (a.to_3x3() @ Vector((1, 0, 0)))
                 pb, db = b @ Vector((0, s, z)), (b.to_3x3() @ Vector((1, 0, 0)))
-                # 2D crossing of pa + t da and pb + q db, in plan.
+                # 2D crossing of pa + t da and pb + q db, across the up axis.
                 det = da.x * -db.y - da.y * -db.x
                 t = ((pb.x - pa.x) * -db.y - (pb.y - pa.y) * -db.x) / det
                 co = pa + da * t
                 co.z = (pa.z + pb.z) / 2
+                co = base @ co
             ring.append(bm.verts.new(co))
         rings.append(ring)
     m = len(profile)
@@ -696,8 +701,17 @@ def build_monitor_surround():
     w = SCREENS[MAIN_MONITORS[0]][0]
     h = w * 9 / 16
     H, F = h / 2, MONITOR_FACE
-    frames = [surround_frame(n) for n in MAIN_MONITORS]
+    frames = [frame_matrix(*SCREENS[n][1:]) for n in MAIN_MONITORS]
     ends = (-(w / 2 + 0.05), w / 2 + 0.05)
+    # Past each outer monitor the surround turns a further WING_TURN toward the pilot
+    # for WING_LENGTH, so it wraps round the ends of the bank: each wing is its monitor's
+    # frame turned about its own up axis at the end of that monitor's segment.
+    wings = []
+    for f, u, turn in ((frames[0], ends[0], WING_TURN), (frames[-1], ends[1], -WING_TURN)):
+        hinge = Matrix.Translation((u, 0, 0))
+        wings.append(f @ hinge @ Matrix.Rotation(math.radians(turn), 4, "Z") @ hinge.inverted())
+    shell_frames = [wings[0]] + frames + [wings[1]]
+    shell_ends = (ends[0] - WING_LENGTH, ends[1] + WING_LENGTH)
     shell = [
         (F, -H - 0.045),        # the face's bottom edge
         (0.12, -H - 0.035),     # the housing's back, under
@@ -708,7 +722,7 @@ def build_monitor_surround():
         (F, H + 0.03),          # where the hood meets the face
     ]
     profile = fillet(shell, [0.012, 0.02, 0.02, 0.015, 0.02, 0.008, 0.008])
-    ob = sweep("monitor_surround", frames, ends, profile, "plastic")
+    ob = sweep("monitor_surround", shell_frames, shell_ends, profile, "plastic")
     # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
     # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
     floor = 0.004

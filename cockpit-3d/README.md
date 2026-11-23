@@ -93,7 +93,7 @@ cabin toward the windshield.
 | Pilot's eye point | about (0, 1.22, 0), looking toward −z |
 | `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.73, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
-| `dashboard` | the three monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward, in one moulded surround (a face with a window per screen, a hood with an amber strip under its nose, and a housing behind) mitred where the monitors meet; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
+| `dashboard` | the three monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward about the centre screen's own leaned-back up axis, so the gap between neighbours is an even 5.5 cm top to bottom (their outer edges sit a little higher), in one moulded surround (a face with a window per screen, a hood with an amber strip under its nose, and a housing behind) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
 | `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
@@ -115,9 +115,9 @@ atlas holds a test card per screen.
 
 | Node | Atlas cell (px) | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
 |---|---|---|---|---|---|---|---|
-| `screen_left` | 0, 0 to 640, 360 | 0.520 × 0.292 | (−0.811, 1.114, −1.261) | (−0.328, 1.114, −1.456) | (−0.792, 0.826, −1.214) | (−0.309, 0.826, −1.409) | (0.37, 0.17, 0.91) |
+| `screen_left` | 0, 0 to 640, 360 | 0.520 × 0.292 | (−0.796, 1.150, −1.263) | (−0.314, 1.116, −1.455) | (−0.796, 0.862, −1.212) | (−0.314, 0.828, −1.404) | (0.37, 0.16, 0.91) |
 | `screen_center` | 640, 0 to 1280, 360 | 0.520 × 0.292 | (−0.260, 1.114, −1.465) | (0.260, 1.114, −1.465) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0, 0.17, 0.98) |
-| `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.328, 1.114, −1.456) | (0.811, 1.114, −1.261) | (0.309, 0.826, −1.409) | (0.792, 0.826, −1.214) | (−0.37, 0.17, 0.91) |
+| `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.314, 1.116, −1.455) | (0.796, 1.150, −1.263) | (0.314, 0.828, −1.404) | (0.796, 0.862, −1.212) | (−0.37, 0.16, 0.91) |
 | `screen_overhead_left` | 0, 360 to 640, 720 | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_overhead_right` | 640, 360 to 1280, 720 | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_side_left` | 1280, 360 to 1920, 720 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
