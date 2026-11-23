@@ -15,7 +15,7 @@ import os
 import sys
 
 from mcp import init, op, batch, asset
-from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, THROTTLE_PIVOT, _bounds, p
+from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -173,17 +173,6 @@ must(batch([
         geo(CX, CY, S * (BOUNDS_MAX[0] - BOUNDS_MIN[0]), S * (BOUNDS_MAX[1] - BOUNDS_MIN[1]),
             depth_px=0.0)),
 ], "cockpit items"), "cockpit items")
-
-# The throttle lever, where the model ships one: a second model placed at its hinge.
-THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
-    lo, hi = _bounds(THROTTLE)
-    mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
-    must(batch([
-        src("throttle_model", "Throttle lever", "model", {"file": asset(THROTTLE), "lighting": "scene"}),
-        add("cockpit", "throttle", "throttle_model",
-            geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
-    ], "throttle"), "throttle")
 
 # ---- lights ----
 def light(lid, name, settings, at, aim=None, size=60):

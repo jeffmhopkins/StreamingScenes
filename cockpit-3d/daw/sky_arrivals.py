@@ -12,7 +12,7 @@ two pictures, the planet at the bottom (pinned ahead) and its sun on top, pinned
 item's turn_deg and tilt_deg from the planet so the planet's lit side faces it
 (arrivals/sun_directions.json, written by arrivals/src/render_all.py). The sun is behind
 the ship's shoulder for most of them, so turning the ship finds it, and it is the one
-that lights the scene. That needs a JStream with ADR-0188's companions; an older one
+that lights the scene. That needs a JStream with ADR-0198's companions; an older one
 leaves out an item that shows a scene, so SUNS is off by default until that lands.
 
 Build from build_daw.py: `edits()` returns the scene, and `patch()` the sky's settings.

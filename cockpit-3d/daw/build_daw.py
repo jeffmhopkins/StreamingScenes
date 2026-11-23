@@ -352,17 +352,6 @@ if GLOW and GLOW_CARDS:
             must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
                      "motion": gate_list}), "screens switch")
 
-THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
-    from shots import THROTTLE_PIVOT, _bounds
-    lo, hi = _bounds(THROTTLE)
-    mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
-    must(batch([
-        src("throttle_model", "Throttle lever", "model", {"file": asset(THROTTLE), "lighting": "scene"}),
-        add("cockpit", "throttle", "throttle_model",
-            geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
-    ], "throttle"), "throttle")
-
 
 def light(lid, name, settings, at, aim=None, size=60, scene="cockpit"):
     q = p(*at)
@@ -457,7 +446,7 @@ if GLOW:
         L += light(lid, f"Pad light {ti + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
                                                  "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
-# The warp goes where the ship points (JStream ADR-0186): each jump travels straight ahead
+# The warp goes where the ship points (JStream ADR-0187): each jump travels straight ahead
 # from wherever the heading, pitch and roll have turned the sky, and at warp they swing it
 # at most WARP_LOOK_DEG; out of warp the sky stays put and they turn it from there.
 # WARP_AIM=sky streams along the sky's own axis, as before. An engine without the setting
@@ -470,12 +459,12 @@ if WARP_AIM == "ahead":
     _, ok = op({"type": "source.set_settings", "source_id": "l_env",
                 "patch": {"warp_aim": "ahead", "warp_look_deg": WARP_LOOK_DEG}})
     if not ok:
-        print("this JStream has no warp_aim (ADR-0186): the warp streams along the sky's axis",
+        print("this JStream has no warp_aim (ADR-0187): the warp streams along the sky's axis",
               file=sys.stderr)
 # Where a warp arrives (JStream ADR-0188): a picture in the sky ahead as each warp drops
 # out, a nebula, a galaxy, a black hole or a planet, a different one each time
 # (sky_arrivals.py). SUNS=1 gives each planet its star, off to one side, to turn and find
-# (needs ADR-0188's companions). ARRIVALS=0 leaves the sky as it was. An engine without
+# (needs ADR-0198's companions). ARRIVALS=0 leaves the sky as it was. An engine without
 # them refuses the settings, and nothing of them is left.
 ARRIVALS = os.environ.get("ARRIVALS", "1") == "1"
 SUNS = os.environ.get("SUNS", "0") == "1"
