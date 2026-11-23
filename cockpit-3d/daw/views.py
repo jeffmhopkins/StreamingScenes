@@ -41,7 +41,7 @@ VIEWS = [
     ("cockpit", "Wide", "Digit1"),
     ("seat_wide", "Behind the seat", "Digit2"),
     ("seat", "Pilot's seat", "Digit3"),
-    ("desk", "Desk: clip launcher", "Digit4"),
+    ("desk", "Desk: pads", "Digit4"),
     ("monitor", "Centre monitor: arrangement", "Digit5"),
     ("monitor_l", "Left monitor: transport", "Digit6"),
     ("monitor_r", "Right monitor: device", "Digit7"),

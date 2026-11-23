@@ -40,6 +40,8 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
+| [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
+| [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
 
 ## Numbers
@@ -49,7 +51,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 169,596 | 2,000,000 |
+| Triangles | 169,818 | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 14 MiB of mesh: about 451 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -94,6 +96,7 @@ cabin toward the windshield.
 | `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.73, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
 | `dashboard` | the three monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward about the centre screen's own leaned-back up axis, so the gap between neighbours is an even 5.5 cm top to bottom (their outer edges sit a little higher), in one moulded surround (a face with a window per screen, a hood with an amber strip under its nose, and a housing behind) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
+| `live_panels` | eleven quads on the `screens` material over the centre console's, the wings' and the overhead switch panel's readouts and the button panel right of the centre console's readouts (see [Screens](#screens)) |
 | `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
@@ -128,7 +131,17 @@ atlas holds a test card per screen.
 that is not 16:9: it is 8:3, the shape of a long grid controller seen from above, and takes
 the left 960 × 360 of the bottom row. Its placeholder is a dark 24 × 8 grid of pads, so the
 instrument reads as switched off; draw the same dark grid in that cell when the live
-instrument camera is off. The bottom row's middle 320 px (960 to 1280) is unused.
+instrument camera is off.
+
+The bottom row's middle 320 × 360 px (960 to 1280) feeds the **live panels**: eleven small
+displays on the consoles, in one node, `live_panels`, also on `screens`. Ten sit just in
+front of the amber readouts they replace, and one covers the 7 × 7 button panel right of
+the centre console's readouts. Each maps one cell of that strip, as
+[`tools/live_panels.py`](tools/live_panels.py) lists them (`PANELS`): the launcher panel
+160 × 160 px, six readouts 160 × 80 and four 80 × 40, all 2:1 like the readouts. The
+placeholder atlas holds each readout's old picture there, so the model looks as it did
+until a live source fills the strip; the DAW scene draws them from its `panels` page
+([daw/README.md](daw/README.md)).
 
 To put live pictures on the screens, lay them out in one 1920 × 1080 scene in those cells
 and give the model source `texture` = that scene and `texture_material` = `screens`
@@ -268,5 +281,7 @@ python tools/render_previews.py cockpit.blend media 48 1280
 ```
 
 `build_cockpit.py` is plain code: boxes, extruded profiles and cylinders, bevelled, then
-joined into one node per part. Change a dimension there and rebuild; the screen table
+joined into one node per part. It makes the live panels itself; to add them to a
+model exported before they existed, without Blender, run
+`python tools/add_live_panels.py model/cockpit.gltf` (it does nothing if they are there). Change a dimension there and rebuild; the screen table
 above comes from the `SCREENS` table at its top.
