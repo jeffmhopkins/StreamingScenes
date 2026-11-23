@@ -7,7 +7,7 @@
   cockpit's camera from wherever it is to the view, and a hotkey for each: Ctrl+Alt+1 to
   9, 0, - and = (a JStream before sequences, protocol 0.170, gets them as keyframes);
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
-  shows or hides it, Ctrl+Alt+Shift+H hides it, and its `holo_feed` source is the one to swap
+  shows it, Ctrl+Alt+Shift+H hides it (before sequences, Ctrl+Alt+H shows or hides it), and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
@@ -286,7 +286,7 @@ if CC:
         print("camera CCs: 20 to 29, autofocus on")
     else:
         text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit",
-                       "motion": motion[:8]})
+                       "motion": base + motion[:8]})
         if ok:
             print("camera CCs: 20 to 27; this JStream has no roll CC or autofocus (before "
                   "protocol 0.167)", file=sys.stderr)

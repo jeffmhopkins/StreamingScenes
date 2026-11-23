@@ -147,14 +147,18 @@ def _sequences(scene, holo_inputs=()):
     show["lanes"] = [_lane("holo_beam", (0, 0.0, "linear"), (BEAM_UP, 1.0, "ease_out")),
                      _lane("holo_panel", (0, 0.0, "linear"), (PANEL_FROM, 0.0, "linear"),
                            (PANEL_UP, 1.0, "ease_out"))]
+    # Each stops on the other's edge, so a hide's late cues never hide a show that
+    # followed it.
     show["starts"] = [{"type": "channel", "channel_id": "holo", "edge": "rises"}]
+    show["stops"] = [{"type": "channel", "channel_id": "holo", "edge": "falls"}]
     hide = _timeline(HIDE, "Hologram off", [(PANEL_DOWN, "item.hide", CARD), (PANEL_DOWN, "item.hide", HAZE),
                                             (BEAM_DOWN, "item.hide", BEAM), (BEAM_DOWN, "item.hide", FLARE)])
     hide["duration_ms"] = BEAM_DOWN
     # From wherever they are: the panel first, then the beam.
     hide["lanes"] = [_lane("holo_panel", (PANEL_DOWN, 0.0, "ease_in")),
-                     _lane("holo_beam", (PANEL_DOWN, 1.0, "hold"), (BEAM_DOWN, 0.0, "ease_in"))]
+                     _lane("holo_beam", (PANEL_DOWN, 1.0, "linear"), (BEAM_DOWN, 0.0, "ease_in"))]
     hide["starts"] = [{"type": "channel", "channel_id": "holo", "edge": "falls"}]
+    hide["stops"] = [{"type": "channel", "channel_id": "holo", "edge": "rises"}]
     return ([{"type": "channel.set", "channel": c} for c in chans] + [
         {"type": "item.set_motion", "item_id": BEAM, "motion": [_reveal("holo_beam")]},
         {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _reveal("holo_panel")]},
@@ -275,10 +279,13 @@ if __name__ == "__main__":
         scene = sys.argv[2] if len(sys.argv) > 2 else "cockpit"
         add(scene, {scene: SHOTS["cockpit"]} if scene == "cockpit" else None)
         print("added, off: Ctrl+Alt+H shows or hides it, Ctrl+Alt+Shift+H hides it")
-    elif cmd == "show":
-        _must(op(show_action()), "show")
-    elif cmd == "hide":
-        _must(op(hide_action()), "hide")
+    elif cmd in ("show", "hide"):
+        # With sequences, set the `holo` switch, so its edges and the keys stay in step;
+        # without the channel, play the timeline.
+        _, ok = op({"type": "channel.set_value", "channel_id": "holo",
+                    "value": 1.0 if cmd == "show" else 0.0})
+        if not ok:
+            _must(op(show_action() if cmd == "show" else hide_action()), cmd)
     elif cmd == "source" and len(sys.argv) > 2:
         _must(op({"type": "item.set_source", "item_id": CARD, "source_id": sys.argv[2]}),
               "item.set_source")

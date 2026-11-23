@@ -71,7 +71,9 @@ BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 # fades its lights out over SWITCH_FADE_MS while it is up (SWITCH_UP=off, the default),
 # or in (SWITCH_UP=on). A CC reads 0 until it is first sent, so with `off` the cockpit is
 # lit until a switch moves. The last CC, the master, fades every group out, so only the
-# sky lights the cabin. SWITCHES=0 builds without them.
+# sky lights the cabin. SWITCHES=0 builds without them. With channels (below) every switch
+# starts on whatever SWITCH_UP says, since a CC only counts once it moves, and SWITCHES=0
+# leaves out only the CCs.
 # In a JStream with channels (ADR-0183, protocol 0.169) each switch is a channel,
 # `power_<group>` (1 on, 0 off), that its CC is one input of, so a sequence (ADR-0184,
 # import_show.py's) can switch the same lights; `screen_<cell>` is a channel a monitor,
@@ -338,10 +340,17 @@ if GLOW and GLOW_CARDS:
                         "back": "hide", "shadows": False}
         cards.append(add("cockpit", "g_" + sid, sid, g))
     must(batch(cards, "glow"), "glow")
+    # With channels each card follows its own monitor's channel, as its cover does.
+    CELL_OF = {"p_" + view: item[2:] for item, view, *_ in PAGES_AT}
     for sid, *_ in ON_SCREENS:
-        if SWITCHES or CHANNELS:
+        if CHANNELS:
+            gate_list = [follow("screen", "opacity", "screen_" + CELL_OF.get(sid, "desk"), -1.0, 0.0),
+                         gate("master")]
+        else:
+            gate_list = gates("screens")
+        if gate_list:
             must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
-                     "motion": gates("screens")}), "screens switch")
+                     "motion": gate_list}), "screens switch")
 
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
 if os.path.exists(THROTTLE):
@@ -454,6 +463,8 @@ must(batch(L, "lights"), "lights")
 # WARP_AIM=sky streams along the sky's own axis, as before. An engine without the setting
 # keeps the sky's axis.
 WARP_AIM = os.environ.get("WARP_AIM", "ahead")
+if WARP_AIM not in ("ahead", "sky"):
+    print(f"WARP_AIM={WARP_AIM!r} is neither `ahead` nor `sky`: using `sky`", file=sys.stderr)
 WARP_LOOK_DEG = float(os.environ.get("WARP_LOOK_DEG", "10"))
 if WARP_AIM == "ahead":
     _, ok = op({"type": "source.set_settings", "source_id": "l_env",

@@ -61,8 +61,9 @@ up:
 A CC up (64 or more, 127 fully) switches its group off, and down switches it back on
 (`SWITCH_UP=off`, the default): JStream reads a CC as 0 until it is first sent, so the
 cockpit is lit when the show opens. `SWITCH_UP=on` turns that round, and then the
-cockpit is dark until each switch is sent. A switch that sits between the two dims its
-group part way. `SWITCHES=0` builds without them.
+cockpit is dark until each switch is sent (with channels, below, it starts lit either way,
+since a CC only counts once it moves). A switch that sits between the two dims its group
+part way. `SWITCHES=0` builds without the CCs (with channels, the switch channels stay).
 
 Each switch is a `midi` motion modifier on every light of its group, beside the data
 modifiers already there: it adds -1 to a light's opacity (a light's strength is its
@@ -111,8 +112,10 @@ sequences keep working beside it.
 | 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
-CCs do. The camera's channels (`cam_*`) and the hologram's `holo_beam` and `holo_panel`
-belong to the sequences and have no Mod.
+CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
+Mod. The camera's channels (`cam_*`, see [Camera views](#camera-views)) have no Mod either,
+so Mods 20 to 32 stay free: assign one to a camera channel in JStream (the channel's
+inputs) to play it from Bitwig.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
@@ -162,11 +165,18 @@ without reflections and says so.
 ### Camera views
 
 Each view is a sequence (JStream ADR-0184), not a keyframe. The cockpit keeps one camera,
-the wide view's, and nine channels (ADR-0183) offset it: `cam_x`, `cam_y` and `cam_z` move
-it, `cam_tx`, `cam_ty` and `cam_tz` move the point it looks at, and `cam_fov`, `cam_focus`
-and `cam_blur` zoom and focus it (focus and blur only with `DOF=1` or `CC=1`). Each channel
-spans what its field does across the views, so 0 to 1 covers every view and its default
-is the wide view. A view's sequence, `view_<shot>`, has a lane on each channel with one
+the wide view's, and ten channels (ADR-0183) offset it, each named for what 1 does:
+
+| Channel | Name | 0 to 1 spans |
+|---|---|---|
+| `cam_x`, `cam_y`, `cam_z` | Camera X (right), Camera Y (up), Camera Z (back) | the views' positions and 30 cm past them each way |
+| `cam_tx`, `cam_ty`, `cam_tz` | Camera aim X (right), aim Y (up), aim Z (back) | the point it looks at, the views' and 60 cm past them |
+| `cam_fov` | Camera field of view | 15° to 100° |
+| `cam_roll` | Camera roll (clockwise) | -45° to 45°, level at one half |
+| `cam_focus`, `cam_blur` | Camera focus, Camera blur | the views' focus and 60 cm past it; blur 0 to 20 px (only with `DOF=1` or `CC=1`) |
+
+Each default is the wide view. Any of them can be given an input in JStream, a JTunnel
+Mod or a CC, to play it by hand; it then takes the camera from where the views left it. A view's sequence, `view_<shot>`, has a lane on each channel with one
 point at `GLIDE_MS`, eased in and out, and no point at 0. So it starts from the channel's
 value at that moment and glides from wherever the camera is: from a view, halfway through
 a glide to another, or where the Bitwig camera CCs left it, which still add on top. The
@@ -215,7 +225,7 @@ made of cards in the cockpit's 3D space, so panning the camera shows it in depth
 
 | | |
 |---|---|
-| Show, hide | With sequences: Ctrl+Alt+H sets the channel `holo` to 1 and Ctrl+Alt+Shift+H to 0, as Mod 7 does; its rising past one half starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.set_value` on `holo` (or `timeline.play` with either). Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
+| Show, hide | With sequences: Ctrl+Alt+H sets the channel `holo` to 1 and Ctrl+Alt+Shift+H to 0, as Mod 7 does; its rising past one half starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.set_value` on `holo`, as `python3 hologram.py show` and `hide` do. Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
 | What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
 | Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
 | Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card` and `holo_haze`; the art is in `hologram/` (`make_art.py` draws it) |

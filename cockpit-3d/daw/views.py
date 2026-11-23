@@ -33,9 +33,9 @@ for _name, _shot in SHOTS.items():
     if "blur_px" in _shot:
         SHOTS[_name] = dict(_shot, blur_px=3.0 if _name in CLOSE else 0.0)
 
-# The views a person switches between live: (shot, its name in the scene list, the
-# hotkey's key after Ctrl+Alt). `cockpit` is the scene's own camera; every other is a
-# keyframe of it. The demo's `window` and `warp` shots are left out: `out` covers them.
+# The views a person switches between live: (shot, its name, the hotkey's key after
+# Ctrl+Alt). `cockpit` is the scene's own camera; every other is a sequence that glides it
+# there (a keyframe of it on a JStream without sequences). The demo's `window` and `warp` shots are left out: `out` covers them.
 VIEWS = [
     ("cockpit", "Wide", "Digit1"),
     ("seat_wide", "Behind the seat", "Digit2"),
@@ -58,17 +58,20 @@ VIEWS = [
 # to the view. A lane starts from its channel's value when the sequence starts, so a view
 # glides from wherever the camera is: mid-glide, or moved by a Bitwig CC.
 RIG = [
-    # (channel suffix, its name, the camera property it offsets, the field it reads)
-    ("x", "right", "position_x", lambda c: c["position"]["x"]),
-    ("y", "down", "position_y", lambda c: c["position"]["y"]),
-    ("z", "back", "position_z", lambda c: c["position"]["z"]),
-    ("tx", "aim right", "target_x", lambda c: c["target"]["x"]),
-    ("ty", "aim down", "target_y", lambda c: c["target"]["y"]),
-    ("tz", "aim back", "target_z", lambda c: c["target"]["z"]),
-    ("fov", "field of view", "fov", lambda c: c["fov_deg"]),
-    ("roll", "roll", "roll", lambda c: c.get("roll_deg", 0.0)),
-    ("focus", "focus", "focus", lambda c: c.get("focus_px")),
-    ("blur", "blur", "blur", lambda c: c.get("blur_px")),
+    # (channel suffix, its name, the camera property it offsets, the field it reads, its
+    # reach, and whether 1 is the field's least): the reach is ("pad", px) past the views'
+    # span on each side, or ("abs", lo, hi), a range of the field the span is widened to, so
+    # a person moving the channel (a JTunnel Mod) can go past the views.
+    ("x", "Camera X (right)", "position_x", lambda c: c["position"]["x"], ("pad", 300.0), False),
+    ("y", "Camera Y (up)", "position_y", lambda c: c["position"]["y"], ("pad", 300.0), True),
+    ("z", "Camera Z (back)", "position_z", lambda c: c["position"]["z"], ("pad", 300.0), False),
+    ("tx", "Camera aim X (right)", "target_x", lambda c: c["target"]["x"], ("pad", 600.0), False),
+    ("ty", "Camera aim Y (up)", "target_y", lambda c: c["target"]["y"], ("pad", 600.0), True),
+    ("tz", "Camera aim Z (back)", "target_z", lambda c: c["target"]["z"], ("pad", 600.0), False),
+    ("fov", "Camera field of view", "fov", lambda c: c["fov_deg"], ("abs", 15.0, 100.0), False),
+    ("roll", "Camera roll (clockwise)", "roll", lambda c: c.get("roll_deg", 0.0), ("abs", -45.0, 45.0), False),
+    ("focus", "Camera focus", "focus", lambda c: c.get("focus_px"), ("pad", 600.0), False),
+    ("blur", "Camera blur", "blur", lambda c: c.get("blur_px"), ("abs", 0.0, 20.0), False),
 ]
 BASE = "cockpit"
 
@@ -78,31 +81,39 @@ def view_id(shot):
     return "view_" + shot
 
 
-def sequences(glide_ms, smoothing_ms, base=BASE):
+def sequences(glide_ms, smoothing_ms, base=BASE, inputs=lambda cid: []):
     """The views as channels, camera motion and sequences: `(channels, motion, timelines)`.
 
-    Each channel spans what its field does across the views, so it maps 0 to 1 onto the
-    least to the most any view adds to the base camera's, and starts at the base view
-    (adding nothing). A field no view changes gets no channel. Each sequence is one pass of
-    `glide_ms` whose lanes ease every channel from where it is to its view's value.
+    Each channel spans what its field does across the views and its reach (`RIG`), so it
+    maps 0 to 1 onto the least to the most it adds to the base camera's, and starts at the
+    base view (adding nothing). `inputs(channel_id)` gives a channel's inputs, such as its
+    JTunnel Mod. A field without a value on every view (focus and blur without DOF) gets no
+    channel. Each sequence is one pass of `glide_ms` whose lanes ease every channel from
+    where it is to its view's value.
     """
     cams = {shot: SHOTS[shot] for shot, _, _ in VIEWS}
     b = cams[base]
     channels, motion = [], []
     lanes = {shot: [] for shot in cams}
-    for key, label, prop, read in RIG:
+    for key, label, prop, read, reach, invert in RIG:
         if read(b) is None or any(read(c) is None for c in cams.values()):
             continue
         offset = {shot: read(c) - read(b) for shot, c in cams.items()}
         lo, hi = min(offset.values()), max(offset.values())
-        if hi - lo < 1e-3:
-            continue
+        if reach[0] == "pad":
+            lo, hi = lo - reach[1], hi + reach[1]
+        else:
+            lo, hi = min(lo, reach[1] - read(b)), max(hi, reach[2] - read(b))
         cid = "cam_" + key
         at = {shot: min(max((o - lo) / (hi - lo), 0.0), 1.0) for shot, o in offset.items()}
-        channels.append({"channel_id": cid, "name": "Camera " + label, "default": round(at[base], 6)})
+        frm, to = round(lo, 3), round(hi, 3)
+        if invert:
+            at = {shot: 1.0 - v for shot, v in at.items()}
+            frm, to = to, frm
+        channels.append({"channel_id": cid, "name": label, "default": round(at[base], 6),
+                         "inputs": inputs(cid)})
         motion.append({"modifier_id": "view_" + key, "property": prop, "kind": "channel",
-                       "channel_id": cid, "smoothing_ms": smoothing_ms,
-                       "from": round(lo, 3), "to": round(hi, 3)})
+                       "channel_id": cid, "smoothing_ms": smoothing_ms, "from": frm, "to": to})
         for shot in cams:
             lanes[shot].append({"target": {"channel": cid},
                                 "points": [{"at_ms": glide_ms, "value": round(at[shot], 6),
