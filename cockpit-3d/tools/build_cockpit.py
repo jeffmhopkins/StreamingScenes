@@ -64,7 +64,8 @@ SCREENS = {
 # the centre screen's own up axis (leaned back with it), hinged on a line BANK_GAP past
 # its edge, so each pair of neighbouring edges is parallel and the gap between them is
 # BANK_GAP * 2 wide from top to bottom, with the hinge right in the middle of it.
-BANK_TURN, BANK_GAP = 22, 0.028
+BANK_TURN = float(os.environ.get("BANK_TURN", 22))
+BANK_GAP = 0.028
 
 
 # How far the monitors lean back from upright, in degrees, hinged on the centre screen's
