@@ -212,7 +212,8 @@ if CC:
     if ok:
         cams = []
         for shot, _, _ in VIEWS:
-            cam = dict(SHOTS[shot], autofocus=True)
+            # Only a camera with a focus can autofocus (DOF=0 gives none).
+            cam = dict(SHOTS[shot], autofocus="focus_px" in SHOTS[shot])
             cams.append({"type": "scene.set_camera", "scene_id": view_scene(shot),
                          "camera": hologram.stacking(cam) if HOLOGRAM else cam})
         must(batch(cams, "autofocus"), "autofocus")
