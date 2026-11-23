@@ -570,21 +570,160 @@ def screen(name, width, loc, rot):
     q["group"] = name
     m = Matrix.Translation(Vector(loc)) @ Euler([math.radians(a) for a in rot], "XYZ").to_matrix().to_4x4()
     q.matrix_world = m
-    # Bezel: a plastic frame just behind the screen, and a housing behind that.
-    bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
-             bev=0.008, segs=3)
-    bz.matrix_world = m @ Matrix.Translation((0, 0.017, 0))
-    if "overhead" not in name:
-        hs = box(f"{name}_housing", (width + 0.08, 0.08, h + 0.08), (0, 0, 0),
-                 material="paint_dark", bev=0.012, segs=2)
-        hs.matrix_world = m @ Matrix.Translation((0, 0.07, 0))
+    # The three main monitors share one moulded surround (build_monitor_surround), whose
+    # face stands MONITOR_FACE in front of the screens; the others get their own bezel.
+    face = 0.0
+    if name in MAIN_MONITORS:
+        face = MONITOR_FACE
+    else:
+        # Bezel: a plastic frame just behind the screen, and a housing behind that.
+        bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
+                 bev=0.008, segs=3)
+        bz.matrix_world = m @ Matrix.Translation((0, 0.017, 0))
+        if "overhead" not in name:
+            hs = box(f"{name}_housing", (width + 0.08, 0.08, h + 0.08), (0, 0, 0),
+                     material="paint_dark", bev=0.012, segs=2)
+            hs.matrix_world = m @ Matrix.Translation((0, 0.07, 0))
     # A row of small soft keys under the screen.
     for i in range(5):
         k = box(f"{name}_key{i}", (width * 0.12, 0.012, 0.016), (0, 0, 0), material="plastic",
                 bev=0.003)
-        k.matrix_world = m @ Matrix.Translation(((i - 2) * width * 0.19, 0.0, -h / 2 - 0.016))
+        k.matrix_world = m @ Matrix.Translation(((i - 2) * width * 0.19, face - 0.002 if face else 0.0,
+                                                 -h / 2 - 0.016))
     led = box(f"{name}_led", (0.008, 0.008, 0.008), (0, 0, 0), material="led_amber", bev=0.002)
-    led.matrix_world = m @ Matrix.Translation((width / 2 + 0.012, 0.0, -h / 2 - 0.012))
+    led.matrix_world = m @ Matrix.Translation((width / 2 + 0.012, face - 0.001 if face else 0.0,
+                                               -h / 2 - 0.012))
+
+
+# The three main monitors, left to right, and their shared surround (see below).
+MAIN_MONITORS = ("screen_left", "screen_center", "screen_right")
+MONITOR_FACE = -0.008  # the surround's face, in front of the screens (local -y is out)
+
+
+def fillet(profile, radii, step=15):
+    """Rounds the corners of a closed 2D polygon: radii[i] at corner i (0 keeps it sharp),
+    an arc point every `step` degrees or less. Works on concave corners too."""
+    out = []
+    n = len(profile)
+    for i, r in enumerate(radii):
+        p = Vector(profile[i])
+        a, b = Vector(profile[i - 1]), Vector(profile[(i + 1) % n])
+        u1, u2 = (a - p).normalized(), (b - p).normalized()
+        theta = math.acos(max(-1.0, min(1.0, u1.dot(u2))))
+        if r <= 0 or theta > math.radians(179):
+            out.append(p)
+            continue
+        t = r / math.tan(theta / 2)
+        c = p + (u1 + u2).normalized() * (r / math.sin(theta / 2))
+        t1, t2 = p + u1 * t, p + u2 * t
+        a1 = math.atan2(*(t1 - c).yx)
+        a2 = math.atan2(*(t2 - c).yx)
+        da = (a2 - a1 + math.pi) % (2 * math.pi) - math.pi  # the short way round
+        k = max(2, math.ceil(abs(math.degrees(da)) / step))
+        out += [c + r * Vector((math.cos(a1 + da * j / k), math.sin(a1 + da * j / k)))
+                for j in range(k + 1)]
+    return [(v.x, v.y) for v in out]
+
+
+def sweep(name, frames, ends, profile, material):
+    """Sweeps a closed (s, z) profile through a chain of monitor frames, as one closed
+    solid. Each frame is a matrix whose local x runs along the monitor, local y is depth
+    (+ away from the pilot) and local z is up the screen; a profile point (s, z) runs along
+    local x at (y, z) = (s, z). Neighbouring frames are turned about the vertical only and
+    share their height, so the same profile point traces a horizontal line in each and the
+    two lines meet: their crossing is the mitre. `ends` is the local x where the chain
+    starts in the first frame and stops in the last."""
+    bm = bmesh.new()
+    rings = []
+    for k in range(len(frames) + 1):
+        ring = []
+        for s, z in profile:
+            if k == 0 or k == len(frames):
+                f = frames[0] if k == 0 else frames[-1]
+                co = f @ Vector((ends[0] if k == 0 else ends[1], s, z))
+            else:
+                a, b = frames[k - 1], frames[k]
+                pa, da = a @ Vector((0, s, z)), (a.to_3x3() @ Vector((1, 0, 0)))
+                pb, db = b @ Vector((0, s, z)), (b.to_3x3() @ Vector((1, 0, 0)))
+                # 2D crossing of pa + t da and pb + q db, in plan.
+                det = da.x * -db.y - da.y * -db.x
+                t = ((pb.x - pa.x) * -db.y - (pb.y - pa.y) * -db.x) / det
+                co = pa + da * t
+                co.z = (pa.z + pb.z) / 2
+            ring.append(bm.verts.new(co))
+        rings.append(ring)
+    m = len(profile)
+    for r0, r1 in zip(rings, rings[1:]):
+        for i in range(m):
+            bm.faces.new((r0[i], r0[(i + 1) % m], r1[(i + 1) % m], r1[i]))
+    bm.faces.new(rings[0])
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    # The mitres are folds in flat faces: keep them crisp, not smoothed across.
+    bm.normal_update()
+    for ring in rings[1:-1]:
+        for i in range(m):
+            e = bm.edges.get((ring[i], ring[(i + 1) % m]))
+            if e.calc_face_angle(0) > math.radians(12):
+                e.smooth = False
+    return new_object(name, bm, material)
+
+
+def build_monitor_surround():
+    """One moulded surround for the three main monitors, in place of a bezel, housing,
+    hood and two ears per monitor that overlapped where the monitors meet. Its profile
+    (a face with a window per screen, a hood over the top and a housing behind) is swept
+    through the three monitors' frames with a mitre at each join, and the windows are
+    cut through the face down to just behind the screens, which do not move."""
+    w = SCREENS[MAIN_MONITORS[0]][0]
+    h = w * 9 / 16
+    H, F = h / 2, MONITOR_FACE
+    frames = [frame_matrix(*SCREENS[n][1:]) for n in MAIN_MONITORS]
+    ends = (-(w / 2 + 0.05), w / 2 + 0.05)
+    shell = [
+        (F, -H - 0.045),        # the face's bottom edge
+        (0.12, -H - 0.035),     # the housing's back, under
+        (0.135, H + 0.045),
+        (0.15, H + 0.075),      # the hood's back
+        (-0.06, H + 0.075),     # the hood's nose, over the pilot's side
+        (-0.06, H + 0.03),      # under the nose
+        (F, H + 0.03),          # where the hood meets the face
+    ]
+    profile = fillet(shell, [0.012, 0.02, 0.02, 0.015, 0.02, 0.008, 0.008])
+    ob = sweep("monitor_surround", frames, ends, profile, "plastic")
+    # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
+    # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
+    floor = 0.004
+    for i, (n, f) in enumerate(zip(MAIN_MONITORS, frames)):
+        bm = bmesh.new()
+        bmesh.ops.create_cube(bm, size=1.0)
+        bmesh.ops.scale(bm, vec=Vector((w + 0.002, 0.08, (w + 0.002) * 9 / 16)), verts=bm.verts)
+        me = bpy.data.meshes.new(f"{n}_window")
+        bm.to_mesh(me)
+        bm.free()
+        cut = bpy.data.objects.new(f"{n}_window", me)
+        bpy.context.collection.objects.link(cut)
+        cut.matrix_world = f @ Matrix.Translation((0, floor - 0.04, 0))
+        cut.hide_render = True
+        cut.display_type = "WIRE"
+        CUTTERS.append(cut)
+        mod = ob.modifiers.new(f"window{i}", "BOOLEAN")
+        mod.operation = "DIFFERENCE"
+        mod.solver = "EXACT"
+        mod.object = cut
+    bev = ob.modifiers.new("bevel", "BEVEL")
+    bev.width = 0.003
+    bev.segments = 3
+    bev.limit_method = "ANGLE"
+    bev.angle_limit = math.radians(40)
+    # An amber strip under the hood's nose, the length of the bank, mitred with it.
+    led = fillet([(-0.054, H + 0.024), (-0.046, H + 0.024), (-0.046, H + 0.031),
+                  (-0.054, H + 0.031)], [0, 0, 0, 0])
+    sweep("monitor_surround_led", frames, (ends[0] + 0.06, ends[1] - 0.06), led, "led_amber")
+    return ob
+
+
+CUTTERS = []
 
 
 def button_grid(name, m, nx, ny, pitch, size=0.018, leds=True, toggles=False, seed=1):
@@ -730,21 +869,9 @@ def build_console():
     box("monitor_bank", (0.66, 0.2, 0.24), (0, 1.56, 0.87), material="paint_dark", bev=0.01)
     for name, (w, loc, rot) in SCREENS.items():
         screen(name, w, loc, rot)
-        if name in ("screen_center", "screen_left", "screen_right"):
-            # A chunky moulded hood over each monitor, standing up into the windshield,
-            # with an amber strip under its front edge.
-            h = w * 9 / 16
-            m = frame_matrix(loc, rot)
-            hood = box(f"{name}_hood", (w + 0.11, 0.2, 0.05), (0, 0, 0), material="plastic",
-                       bev=0.02, segs=4)
-            hood.matrix_world = m @ Matrix.Translation((0, 0.045, h / 2 + 0.05))
-            for side in (-1, 1):
-                ear = box(f"{name}_ear{side}", (0.035, 0.16, h + 0.09), (0, 0, 0),
-                          material="plastic", bev=0.014, segs=3)
-                ear.matrix_world = m @ Matrix.Translation((side * (w / 2 + 0.04), 0.06, 0.005))
-            led = box(f"{name}_hood_led", (w * 0.7, 0.006, 0.006), (0, 0, 0), material="led_amber",
-                      bev=0)
-            led.matrix_world = m @ Matrix.Translation((0, -0.05, h / 2 + 0.024))
+    # The three main monitors' one-piece surround, with its hood standing up into the
+    # windshield and an amber strip under the hood's nose.
+    build_monitor_surround()
     # The sloped console: a centre section ahead of the desk, and a wing each side that
     # reaches back past the desk toward the pilot.
     y_c = 1.10
@@ -1021,6 +1148,8 @@ def main():
     build_header()
     build_conduits()
     finish()
+    for cut in CUTTERS:  # the surround's window cutters, applied in finish
+        bpy.data.objects.remove(cut)
     tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in ALL)
     print(f"objects {len(ALL)}  triangles {tris}")
     if BLEND:

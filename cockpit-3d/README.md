@@ -10,7 +10,7 @@ painted metal panelling with seams, rivets, chipped edges and grime, amber indic
 lights all over the consoles, dim orange glow strips along the pillars and sills, and
 glossy bezels that catch the light from outside. The shape is an aircraft flight deck: a
 wide panoramic windshield and an angled window each side in thick pillars, three equal
-monitors wrapped around the pilot in chunky moulded hoods, an overhead console with two
+monitors wrapped around the pilot in one chunky moulded surround, an overhead console with two
 more screens, and a tray in front of the pilot. There is no seat, so the camera can sit
 where a pilot would. On the tray, right under the monitors, lies a grid instrument that
 looks switched off until a live source is put on it.
@@ -49,7 +49,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 170,948 | 2,000,000 |
+| Triangles | 169,596 | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 14 MiB of mesh: about 451 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -93,7 +93,7 @@ cabin toward the windshield.
 | Pilot's eye point | about (0, 1.22, 0), looking toward −z |
 | `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.73, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
-| `dashboard` | the three hooded monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
+| `dashboard` | the three monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward, in one moulded surround (a face with a window per screen, a hood with an amber strip under its nose, and a housing behind) mitred where the monitors meet; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
 | `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
