@@ -11,8 +11,9 @@
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
-- with CC=1, Bitwig CCs 20 to 27 on channel 16 that move, turn, zoom and focus the
-  cockpit's camera in every view (CAMERA_CCS below; needs a JStream whose cameras take MIDI, alpha.8 on);
+- with CC=1, Bitwig CCs 20 to 29 on channel 16 that move, turn, roll, zoom and focus the
+  cockpit's camera in every view, and switch its autofocus off (CC=1 turns on the views'
+  depth of field and autofocus) (CAMERA_CCS below; needs a JStream whose cameras take MIDI, alpha.8 on);
 - and the studio keeps the scenes warm, so switching between 2D and 3D starts nothing.
 
     python3 import_show.py [project file]
@@ -50,7 +51,7 @@ CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
 CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
 
-# The camera's CCs (a camera takes at most 8 modifiers), from CC_FIRST up, in this order: the property and how far the CC's
+# The camera's CCs, from CC_FIRST up, in this order: the property and how far the CC's
 # top (127) takes it from the view. Each rests at the view (from 0), since a CC reads 0
 # until it is first sent. Scene space is 1000 px to the model's metre, x right, y down
 # and z toward the viewer; angles are degrees, fov a zoom in when it drops.
@@ -62,8 +63,13 @@ CAMERA_CCS = [
     ("tilt", 20),          # look up
     ("fov", -25),          # zoom in
     ("focus", 600),        # focus further away
-    ("blur", 16),          # more depth-of-field blur
+    ("blur", 16),          # aperture: more depth-of-field blur
+    ("roll", 15),          # clockwise
+    ("autofocus", -1),     # past its middle: autofocus off, the focus stays put
 ]
+if CC:
+    # Every view gets its depth of field (shots.py's DOF) and starts autofocusing.
+    os.environ.setdefault("DOF", "1")
 
 
 def must(result, what):
@@ -101,6 +107,11 @@ mcp.S["sid"] = None
 init()
 
 from views import SHOTS, VIEWS  # noqa: E402
+
+if CC:
+    for cam in SHOTS.values():
+        if "focus_px" in cam:
+            cam["autofocus"] = True
 
 # ---- the camera views: keyframes of the cockpit, glided between ----
 must(op({"type": "transition.create", "preset_id": "glide", "name": f"Glide {GLIDE_MS} ms",
@@ -196,7 +207,8 @@ if CC:
     # alike and carries through a glide between them.
     motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
                "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
-               "from": 0, "to": to, "smoothing_ms": CC_SMOOTHING_MS}
+               "from": 0, "to": to,
+               "smoothing_ms": 0 if prop == "autofocus" else CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
     must(op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion}),
          "camera CCs (needs a JStream whose cameras take MIDI, alpha.8 on)")
