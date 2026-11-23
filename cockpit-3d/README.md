@@ -10,7 +10,7 @@ painted metal panelling with seams, rivets, chipped edges and grime, amber indic
 lights all over the consoles, dim orange glow strips along the pillars and sills, and
 glossy bezels that catch the light from outside. The shape is an aircraft flight deck: a
 wide panoramic windshield and an angled window each side in thick pillars, three equal
-monitors wrapped around the pilot in chunky moulded hoods, an overhead console with two
+monitors wrapped around the pilot in one slim moulded case under a ledge that climbs over the centre one, an overhead console with two
 more screens, and a tray in front of the pilot. There is no seat, so the camera can sit
 where a pilot would. On the tray, right under the monitors, lies a grid instrument that
 looks switched off until a live source is put on it.
@@ -51,7 +51,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 170,970 | 2,000,000 |
+| Triangles | 171,210 | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 14 MiB of mesh: about 451 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -95,7 +95,7 @@ cabin toward the windshield.
 | Pilot's eye point | about (0, 1.22, 0), looking toward −z |
 | `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.73, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
-| `dashboard` | the three hooded monitors, the centre one at z ≈ −1.44 and the outer two turned 22° inward; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
+| `dashboard` | the three monitors, upright, the centre one at z ≈ −1.42 and the outer two turned 15° inward, hinged midway in an even 5.5 cm gap, in one slim moulded case (a face with a window per screen, about 4 cm deep, with a deeper chamfered frame standing 3 cm proud round each side screen, and over it all one ledge standing 7 cm out toward the pilot that steps up one ledge-thickness (2.4 cm) into a low trapezoid crown over the centre monitor, an amber light bar along its whole front edge) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
 | `live_panels` | eleven quads on the `screens` material over the centre console's, the wings' and the overhead switch panel's readouts and the button panel right of the centre console's readouts (see [Screens](#screens)) |
 | `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
@@ -118,9 +118,9 @@ atlas holds a test card per screen.
 
 | Node | Atlas cell (px) | Size (m) | Top-left | Top-right | Bottom-left | Bottom-right | Faces |
 |---|---|---|---|---|---|---|---|
-| `screen_left` | 0, 0 to 640, 360 | 0.520 × 0.292 | (−0.811, 1.114, −1.261) | (−0.328, 1.114, −1.456) | (−0.792, 0.826, −1.214) | (−0.309, 0.826, −1.409) | (0.37, 0.17, 0.91) |
-| `screen_center` | 640, 0 to 1280, 360 | 0.520 × 0.292 | (−0.260, 1.114, −1.465) | (0.260, 1.114, −1.465) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0, 0.17, 0.98) |
-| `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.328, 1.114, −1.456) | (0.811, 1.114, −1.261) | (0.309, 0.826, −1.409) | (0.792, 0.826, −1.214) | (−0.37, 0.17, 0.91) |
+| `screen_left` | 0, 0 to 640, 360 | 0.520 × 0.292 | (−0.817, 1.118, −1.273) | (−0.315, 1.118, −1.407) | (−0.817, 0.826, −1.273) | (−0.315, 0.826, −1.407) | (0.26, 0.00, 0.97) |
+| `screen_center` | 640, 0 to 1280, 360 | 0.520 × 0.292 | (−0.260, 1.118, −1.415) | (0.260, 1.118, −1.415) | (−0.260, 0.826, −1.415) | (0.260, 0.826, −1.415) | (0.00, 0.00, 1.00) |
+| `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.315, 1.118, −1.407) | (0.817, 1.118, −1.273) | (0.315, 0.826, −1.407) | (0.817, 0.826, −1.273) | (−0.26, 0.00, 0.97) |
 | `screen_overhead_left` | 0, 360 to 640, 720 | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_overhead_right` | 640, 360 to 1280, 720 | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_side_left` | 1280, 360 to 1920, 720 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
