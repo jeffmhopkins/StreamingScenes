@@ -66,8 +66,8 @@ def play(tid):
     return {"type": "timeline.play", "timeline_id": tid}
 
 
-def holo(to):
-    return {"type": "channel.switch", "channel_id": "holo", "to": to}
+def holo(value):
+    return {"type": "channel.set_value", "channel_id": "holo", "value": value}
 
 
 # What a person plays, in this order on NOTES' notes after the views': (its name, the key
@@ -77,8 +77,8 @@ CONTROLS = [
     ("Lights off", "Shift+KeyL", play("lights_off")),
     ("Monitors on", "KeyM", play("monitors_on")),
     ("Monitors off", "Shift+KeyM", play("monitors_off")),
-    ("Hologram on", None, holo("on")),
-    ("Hologram off", None, holo("off")),
+    ("Hologram on", None, holo(1.0)),
+    ("Hologram off", None, holo(0.0)),
     ("Go to warp", "KeyW", play("warp_in")),
     ("Drop out of warp", "Shift+KeyW", play("warp_out")),
 ]

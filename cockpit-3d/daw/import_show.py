@@ -182,7 +182,7 @@ import hologram  # noqa: E402
 # Its edits go in as one batch, so a JStream without the `hologram` filter (before alpha.8)
 # gets none of it, and the rest of the show still imports.
 try:
-    hologram.add("cockpit", VIEW_CAMERAS, channels=SEQ)
+    hologram.add("cockpit", VIEW_CAMERAS, channels=SEQ, holo_inputs=BUILT["mod_inputs"]("holo"))
     HOLOGRAM = True
 except SystemExit as e:
     # Most likely a JStream without the `hologram` filter; the reason says which.
@@ -259,7 +259,7 @@ if NOTES:
                    "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
                    "action": action}
                   for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
-                  if HOLOGRAM or action["type"] != "channel.switch"]
+                  if HOLOGRAM or action.get("channel_id") != "holo"]
     must(batch(notes, "notes"), "notes")
 
 if CC:
@@ -308,5 +308,6 @@ must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
 print("imported: views Ctrl+Alt+1..0, -, =" + (" (sequences)" if SEQ else " (keyframes)")
       + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W" if SHIP else "")
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
-      + ("; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off" if HOLOGRAM else "; no hologram"))
+      + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ
+          else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram"))
 print("saved to", PROJECT)

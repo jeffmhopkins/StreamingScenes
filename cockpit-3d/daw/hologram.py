@@ -17,9 +17,9 @@ In a JStream with sequences (protocol 0.170), `add(..., channels=True)` makes th
 the hide sequences with lanes: the channels `holo_beam` and `holo_panel` drive the
 `reveal`s, so the beam rises and then the panel builds up from the bottom, and on the way
 out the panel dissolves and then the beam sinks, before the cues hide the cards. The
-channel `holo` is the switch: its rising starts the show sequence and its falling the
-hide, so Ctrl+Alt+H toggles it, Ctrl+Alt+Shift+H switches it off and anything that sets it
-(a cue, a MIDI pad) does too.
+channel `holo` is the switch, 0 to 1: its rising past one half starts the show sequence and
+its falling the hide, so Ctrl+Alt+H sets it to 1, Ctrl+Alt+Shift+H to 0, and anything that
+sets it (a cue, an input such as a JTunnel Mod) shows and hides the hologram too.
 
 The rig, in the model's metres (glTF: +y up, the pilot faces -z):
 - the projector's lens, a small glow on the dash, below the monitors, dim while off, and a
@@ -133,10 +133,10 @@ BEAM_UP, PANEL_FROM, PANEL_UP = 250, 120, 620
 PANEL_DOWN, BEAM_DOWN = 450, 750
 
 
-def _sequences(scene):
-    """The show and hide sequences with lanes, the `holo` switch that starts them, and the
-    keys that switch it."""
-    chans = [{"channel_id": "holo", "name": "Hologram", "default": 1.0, "on": False},
+def _sequences(scene, holo_inputs=()):
+    """The show and hide sequences with lanes, the `holo` switch that starts them (with
+    `holo_inputs`, its inputs), and the keys that set it."""
+    chans = [{"channel_id": "holo", "name": "Hologram", "default": 0.0, "inputs": list(holo_inputs)},
              {"channel_id": "holo_beam", "name": "Hologram beam"},
              {"channel_id": "holo_panel", "name": "Hologram panel"}]
     show = _timeline(SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
@@ -162,9 +162,9 @@ def _sequences(scene):
         {"type": "timeline.set", "scene_id": scene, "timeline": show},
         {"type": "timeline.set", "scene_id": scene, "timeline": hide},
         {"type": "hotkey.set", "chord": TOGGLE_KEY,
-         "action": {"type": "channel.switch", "channel_id": "holo", "to": "toggle"}},
+         "action": {"type": "channel.set_value", "channel_id": "holo", "value": 1.0}},
         {"type": "hotkey.set", "chord": HIDE_KEY,
-         "action": {"type": "channel.switch", "channel_id": "holo", "to": "off"}},
+         "action": {"type": "channel.set_value", "channel_id": "holo", "value": 0.0}},
     ])
 
 
@@ -174,7 +174,7 @@ def _bob():
             "phase": 0.0}
 
 
-def edits(scene="cockpit", channels=False):
+def edits(scene="cockpit", channels=False, holo_inputs=()):
     """The edits that add the rig, switched off, to the 3D scene `scene`, on top of what
     it holds; with `channels`, its show and hide as sequences with lanes."""
     beam_h = BEAM_TOP - LENS_AT[1]
@@ -238,9 +238,9 @@ def edits(scene="cockpit", channels=False):
     ]
     if channels:
         # The lanes' motion, timelines and keys replace the cue-only ones. A toggle of the
-        # cards alone would leave them unrevealed, so the `holo` switch toggles instead.
+        # cards alone would leave them unrevealed, so the keys set the `holo` switch instead.
         keep = [x for x in e if x["type"] not in ("hotkey.set", "item.set_motion", "timeline.set")]
-        e = keep + _sequences(scene)
+        e = keep + _sequences(scene, holo_inputs)
     return e
 
 
@@ -257,11 +257,11 @@ def stacking(camera):
     return dict(camera, depth_sort=False)
 
 
-def add(scene="cockpit", cameras=None, channels=False):
+def add(scene="cockpit", cameras=None, channels=False, holo_inputs=()):
     """Adds the rig to `scene`, switched off. `cameras` maps each scene (the 3D scene and
     its keyframes) to its camera, which is sent again with `depth_sort` off. `channels`
     makes its show and hide sequences with lanes (protocol 0.170)."""
-    _must(batch(edits(scene, channels), "hologram"), "hologram")
+    _must(batch(edits(scene, channels, holo_inputs), "hologram"), "hologram")
     if cameras:
         _must(batch([{"type": "scene.set_camera", "scene_id": sid, "camera": stacking(cam)}
                      for sid, cam in cameras.items()], "hologram cameras"), "hologram cameras")

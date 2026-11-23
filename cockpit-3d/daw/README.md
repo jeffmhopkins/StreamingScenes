@@ -38,7 +38,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
 | A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
-| The ship's warp drive and orientation: the sky streams past as the warp comes up, and the sky and the starlight turn around the cabin as the ship yaws, pitches and rolls | MIDI CCs from Bitwig on channel `SHIP_CC_CHANNEL` (16) from the sender `SHIP_CC_INPUT` (`Bitwig`): `SHIP_CC_WARP` (30) takes the warp from rest to full, and `SHIP_CC_YAW` (31), `SHIP_CC_PITCH` (32) and `SHIP_CC_ROLL` (33) each turn the ship a whole turn over the CC's travel (right, nose up, right wing down), all smoothed over `SHIP_CC_SMOOTHING_MS` (250). `WARP`, `SHIP_YAW`, `SHIP_PITCH` and `SHIP_ROLL` set where they rest. Turning also moves where the warp streams from, so hold the heading while at warp. The sky follows pitch and roll with a JStream that has ADR-0182; an older one turns it on the heading only | a `channel` modifier on the environment light's `warp` following the channel `warp`, which CC 30 and the [warp sequences](#cockpit-sequences) drive (a `midi` modifier on a JStream without channels), and `midi` modifiers on the `turn`, `tilt` and `rotation` of three nested 3D groups (the ship's rig, ADR-0164) that hold the sky and the starlight |
+| The ship's warp drive and orientation: the sky streams past as the warp comes up, and the sky and the starlight turn around the cabin as the ship yaws, pitches and rolls | MIDI CCs from Bitwig on channel `SHIP_CC_CHANNEL` (16) from the sender `SHIP_CC_INPUT` (`Bitwig`): `SHIP_CC_WARP` (30) takes the warp from rest to full, and `SHIP_CC_YAW` (31), `SHIP_CC_PITCH` (32) and `SHIP_CC_ROLL` (33) each turn the ship a whole turn over the CC's travel (right, nose up, right wing down), all smoothed over `SHIP_CC_SMOOTHING_MS` (250). `WARP`, `SHIP_YAW`, `SHIP_PITCH` and `SHIP_ROLL` set where they rest. Turning also moves where the warp streams from, so hold the heading while at warp. The sky follows pitch and roll with a JStream that has ADR-0182; an older one turns it on the heading only | a `channel` modifier on the environment light's `warp` following the channel `warp`, which CC 30, [Mod](#jtunnel-mods) 6 and the [warp sequences](#cockpit-sequences) drive (a `midi` modifier on a JStream without channels), and `channel` modifiers on the `turn`, `tilt` and `rotation` of three nested 3D groups (the ship's rig, ADR-0164) that hold the sky and the starlight, following `ship_yaw`, `ship_pitch` and `ship_roll`, which CCs 31 to 33 and [Mods](#jtunnel-mods) 8 to 10 drive (`midi` modifiers without channels) |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
 | The model's red, green, blue and amber LEDs and orange strips | the drums', bass's, keys', master's and lead's meters | `data` modifiers on the materials' `emissive_strength`, by material name |
 | The cabin's light strips, on the beat | `clock.beatPhase` | the same, on `light_strip` |
@@ -85,6 +85,35 @@ instead of one over the atlas, each following its own channel, `screen_center`,
 still switches them all, and a sequence can light them one at a time. `CHANNELS=0`
 builds the CCs straight onto the lights, as a JStream without channels gets.
 
+### JTunnel Mods
+
+With channels, every control a person plays is also a JTunnel modulation param: a channel
+reads its Mod (the sender's `params` key, `values.N` for Mod N+1) as one more input, and
+JStream names the Mod after the channel (ADR-0181), so the JTunnel plugin in Bitwig lists
+"Master power", "Warp" and so on. Map a knob, a fader or automation to the Mod in Bitwig.
+They read from `MOD_INPUT` (default `DAW_INPUT`, `Bitwig`), the JTunnel sender to accept
+with "Use this sender's state" on, and `MODS=0` leaves them out. Each Mod only takes over
+once it first moves, and whichever input moved last wins, so the CCs, the keys and the
+sequences keep working beside it.
+
+| Mod | Channel | 0 | 1 |
+|---|---|---|---|
+| 1 | `power_master` | every light and monitor off | on |
+| 2 | `power_cabin` | cabin lights off | on |
+| 3 | `power_desk` | desk lights off | on |
+| 4 | `power_glow` | LEDs and strips off | on |
+| 5 | `power_screens` | every monitor off | on |
+| 6 | `warp` | at rest | full warp |
+| 7 | `holo` | hologram hidden (crossing one half plays the hide) | shown (crossing one half plays the show) |
+| 8 | `ship_yaw` | heading at rest | a whole turn right |
+| 9 | `ship_pitch` | pitch at rest | a whole turn nose up |
+| 10 | `ship_roll` | roll at rest | a whole turn right wing down |
+| 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
+
+The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
+CCs do. The camera's channels (`cam_*`) and the hologram's `holo_beam` and `holo_panel`
+belong to the sequences and have no Mod.
+
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
 the earlier set: no cards, a light per track around the cabin, the desk's and the
@@ -118,7 +147,7 @@ What it makes:
 | Scenes | `DAW cockpit` (3D, with a sequence a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
-| Hologram | Ctrl+Alt+H shows or hides the hologram over the dash, Ctrl+Alt+Shift+H hides it. It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
+| Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences) |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
@@ -163,13 +192,15 @@ still work, and whichever moved last wins. An agent plays one with `timeline.pla
 | `lights_off` | Shift+L | From wherever each group is: the glow goes first, then the desk, the cabin last, over 2.6 s. |
 | `monitors_on` | M | The monitors one after another, the centre first and the desk and panels last, each flickering on, 180 ms apart. One already on flickers in its turn. |
 | `monitors_off` | Shift+M | The other way round, each snapping to black in its turn, 150 ms apart. |
-| `holo_show`, `holo_hide` | H toggles, Shift+H hides | The hologram projecting in and dissolving out; see [The hologram](#the-hologram). |
+| `holo_show`, `holo_hide` | H shows, Shift+H hides | The hologram projecting in and dissolving out; see [The hologram](#the-hologram). |
 | `warp_in` | W | The sky's warp from wherever it is to full over 4 s, slow at first. |
 | `warp_out` | Shift+W | Back to rest over 2.5 s, slowing at the end. |
 
 The lights and the monitors are separate: lights off leaves the monitors lit, and the
 master switch is the lights' alone in a sequence, though its CC still darkens everything.
-The warp is a channel, `warp`, that CC 30 is also an input of. It streams along the sky's
+The warp is a channel, `warp`, that CC 30 and Mod 6 are also inputs of; the heading, pitch
+and roll are channels too (`ship_yaw`, `ship_pitch`, `ship_roll`, CCs 31 to 33, Mods 8 to
+10). It streams along the sky's
 own axis, which turns with the ship's heading, so hold the heading while at warp.
 
 ## The hologram
@@ -184,7 +215,7 @@ made of cards in the cockpit's 3D space, so panning the camera shows it in depth
 
 | | |
 |---|---|
-| Show, hide | With sequences: Ctrl+Alt+H toggles the channel `holo` and Ctrl+Alt+Shift+H switches it off; its rising starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.switch` on `holo` (or `timeline.play` with either). Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
+| Show, hide | With sequences: Ctrl+Alt+H sets the channel `holo` to 1 and Ctrl+Alt+Shift+H to 0, as Mod 7 does; its rising past one half starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.set_value` on `holo` (or `timeline.play` with either). Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
 | What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
 | Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
 | Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card` and `holo_haze`; the art is in `hologram/` (`make_art.py` draws it) |

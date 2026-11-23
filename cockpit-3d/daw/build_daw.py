@@ -78,6 +78,20 @@ BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 # following `power_screens`, so a sequence can light the monitors one at a time, and `warp`
 # carries the warp CC the same way. CHANNELS=0 keeps the CCs on the lights directly.
 CHANNELS = os.environ.get("CHANNELS", "1") == "1"
+# With channels, the controls a person plays are also a JTunnel sender's modulation params
+# (Mod 1 to Mod 32, the `params` key's `values.N`, read from MOD_INPUT, default DAW_INPUT):
+# each channel reads its Mod as one more input, and JStream names the Mod after the channel
+# (ADR-0181), so the Mod list in the JTunnel plugin in Bitwig says what each one does.
+# MODS=0 leaves them out.
+MODS = os.environ.get("MODS", "1") == "1"
+MOD_INPUT = os.environ.get("MOD_INPUT", "")
+MOD = {  # channel: its Mod number. 1 on and 0 off for the switches, 1 full for the warp.
+    "power_master": 1, "power_cabin": 2, "power_desk": 3, "power_glow": 4, "power_screens": 5,
+    "warp": 6, "holo": 7, "ship_yaw": 8, "ship_pitch": 9, "ship_roll": 10,
+    "screen_center": 11, "screen_left": 12, "screen_right": 13, "screen_ovl": 14,
+    "screen_ovr": 15, "screen_side_l": 16, "screen_side_r": 17, "screen_desk": 18,
+    "screen_panels": 19,
+}
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
@@ -144,6 +158,15 @@ def cc_input(controller, at0, at1, smoothing, channel=CC_CHANNEL, sender=CC_INPU
             "input": sender, "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
 
 
+def mod_inputs(channel, smoothing=30):
+    """`channel`'s JTunnel Mod as a list of one input, 0 to 1 onto 0 to 1: [] without one."""
+    if not MODS or channel not in MOD:
+        return []
+    return [{"kind": "data", "input": MOD_INPUT or INPUT, "key": "params",
+             "field": f"values.{MOD[channel] - 1}", "range": [0.0, 1.0], "smoothing_ms": smoothing,
+             "curve": "linear", "from": 0.0, "to": 1.0}]
+
+
 def gate(group, prop="opacity", off=-1.0, **kw):
     """The motion modifier with which `group`'s switch fades a light out: `off` added to
     `prop` while the switch is off, nothing while it is on, over SWITCH_FADE_MS."""
@@ -173,7 +196,8 @@ if CHANNELS:
     # counts once the CC first moves, so the lights start on.
     up, down = (0.0, 1.0) if SWITCH_UP == "off" else (1.0, 0.0)
     chans = [{"channel_id": "power_" + g, "name": f"{g.title()} power", "default": 1.0,
-              "inputs": [cc_input(SWITCH_CC[g], down, up, SWITCH_FADE_MS)] if SWITCHES else []}
+              "inputs": ([cc_input(SWITCH_CC[g], down, up, SWITCH_FADE_MS)] if SWITCHES else [])
+              + mod_inputs("power_" + g, SWITCH_FADE_MS)}
              for g in GROUPS + ["master"]]
     _, CHANNELS = batch([{"type": "channel.set", "channel": c} for c in chans], "power channels")
     if not CHANNELS:
@@ -272,7 +296,8 @@ if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
         "inputs": [{"kind": "channel", "channel_id": "power_screens", "smoothing_ms": 0,
-                    "curve": "linear", "from": 0.0, "to": 1.0}]}} for cell, *_ in SCREEN_CELLS]
+                    "curve": "linear", "from": 0.0, "to": 1.0}] + mod_inputs("screen_" + cell)}}
+        for cell, *_ in SCREEN_CELLS]
     ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_" + cell,
             "motion": [follow("screen", "opacity", "screen_" + cell, 1.0, 0.0),
                        gate("master", off=1.0)]} for cell, *_ in SCREEN_CELLS]
@@ -463,13 +488,26 @@ if CHANNELS:
     must(op({"type": "channel.set", "channel": {
         "channel_id": "warp", "name": "Warp", "default": 0.0,
         "inputs": [cc_input(SHIP_CC_WARP, 0.0, 1.0, SHIP_CC_SMOOTHING_MS,
-                            channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]}}), "warp channel")
+                            channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]
+        + mod_inputs("warp", SHIP_CC_SMOOTHING_MS)}}), "warp channel")
     motion["l_env"].append(follow("warp", "source", "warp", 0.0, 1.0, source={"param": "warp"}))
+    # The heading, pitch and roll too: a whole turn over the channel's 0 to 1, from rest.
+    ship = [("ship_yaw", "Ship heading", SHIP_CC_YAW, "turn", -360.0),
+            ("ship_pitch", "Ship pitch", SHIP_CC_PITCH, "tilt", 360.0),
+            ("ship_roll", "Ship roll", SHIP_CC_ROLL, "rotation", -360.0)]
+    must(batch([{"type": "channel.set", "channel": {
+        "channel_id": cid, "name": name, "default": 0.0,
+        "inputs": [cc_input(ccn, 0.0, 1.0, SHIP_CC_SMOOTHING_MS, channel=SHIP_CC_CHANNEL,
+                            sender=SHIP_CC_INPUT)] + mod_inputs(cid, SHIP_CC_SMOOTHING_MS)}}
+        for cid, name, ccn, _, _ in ship], "ship channels"), "ship channels")
+    for cid, _, _, prop, turn in ship:
+        motion[cid] = [follow(cid[5:], prop, cid, 0.0, turn)]
 else:
     motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
-motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
-motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
-motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]
+if not CHANNELS:
+    motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
+    motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
+    motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]
 # The model's own LEDs and light strips follow the band, by material name: the red LEDs
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
 # accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
