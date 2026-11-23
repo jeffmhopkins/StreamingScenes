@@ -150,7 +150,7 @@ else:
         "columns_key": "track/{column}", "cells_field": "slots", "state_field": "queued,state",
         "color_field": "color", "looks": LAUNCHER_LOOKS, "dim": 0.2, "gap": 6, "radius": 5,
         "background": "#05080cff"})]
-# The console's small displays (the launcher panel, the note and bend readouts, ...): one
+# The console's small displays (the launcher panel, the note and density readouts, ...): one
 # page, `panels`, in the atlas's free strip right of the desk; the model's live-panel quads
 # map its cells (tools/live_panels.py).
 PX, PY, PW, PH = PANELS_AT
