@@ -101,6 +101,7 @@ SCREEN_CELLS = {
 LEDS = {
     "led_green": (0.15, 1.0, 0.35),
     "led_amber": (1.0, 0.55, 0.05),
+    "light_bar": (1.0, 0.55, 0.05),  # the ledge's light bar: amber, and its own material
     "led_red": (1.0, 0.08, 0.05),
     "led_blue": (0.15, 0.55, 1.0),
     "light_strip": (1.0, 0.62, 0.2),
@@ -661,14 +662,16 @@ def fillet(profile, radii, step=15):
     return [(v.x, v.y) for v in out]
 
 
-def sweep(name, frames, ends, profile, material):
+def sweep(name, frames, ends, profile, material, along=False):
     """Sweeps a closed (s, z) profile through a chain of frames, as one closed solid. Each
     frame is a matrix whose local x runs along the path, local y is depth (+ away from the
     pilot) and local z is up; a profile point (s, z) runs along local x at (y, z) = (s, z).
     Neighbouring frames differ by a turn about an axis they share (their up axis where the
     bank turns a corner, their depth axis where the ledge climbs), so the same profile point
     traces a line in each and the two lines meet: their crossing is the mitre. `ends` is the
-    local x where the chain starts in the first frame and stops in the last."""
+    local x where the chain starts in the first frame and stops in the last. With `along`,
+    its texture coordinates run u 0 to 1 along its length, measured through the middle of
+    the profile, at v 0.5: it shows its texture's middle row."""
     bm = bmesh.new()
     rings = []
     for k in range(len(frames) + 1):
@@ -691,6 +694,16 @@ def sweep(name, frames, ends, profile, material):
             bm.faces.new((r0[i], r0[(i + 1) % m], r1[(i + 1) % m], r1[i]))
     bm.faces.new(rings[0])
     bm.faces.new(rings[-1])
+    if along:
+        mids = [sum((v.co for v in r), Vector()) / m for r in rings]
+        run = [0.0]
+        for a, b in zip(mids, mids[1:]):
+            run.append(run[-1] + (b - a).length)
+        uvl = bm.loops.layers.uv.new("UVMap")
+        ring_of = {v: k for k, r in enumerate(rings) for v in r}
+        for f in bm.faces:
+            for loop in f.loops:
+                loop[uvl].uv = (run[ring_of[loop.vert]] / run[-1], 0.5)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     # The mitres are folds in flat faces: keep them crisp, not smoothed across.
     bm.normal_update()
@@ -699,7 +712,10 @@ def sweep(name, frames, ends, profile, material):
             e = bm.edges.get((ring[i], ring[(i + 1) % m]))
             if e.calc_face_angle(0) > math.radians(12):
                 e.smooth = False
-    return new_object(name, bm, material)
+    ob = new_object(name, bm, material)
+    if along:
+        ob["keep_uv"] = True
+    return ob
 
 
 def operand(ob, name, bm, matrix, operation):
@@ -836,10 +852,16 @@ def build_monitor_surround():
     bev.limit_method = "ANGLE"
     bev.angle_limit = math.radians(40)
     # The light bar: an amber strip along the underside of the ledge's nose, all the way
-    # round, climbing over the crown with it.
+    # round, climbing over the crown with it. It is its own node and file, light_bar.gltf,
+    # on its own unlit material, `light_bar`, whose u runs 0 to 1 along it with 0.5 over
+    # the middle of the centre monitor, at v 0.5: it shows a live texture's middle row, so
+    # a box centred in that texture, scaled up from nothing, lights it from the centre out.
     bar = [(-LEDGE_NOSE + 0.006, -0.005), (-LEDGE_NOSE + 0.014, -0.005),
            (-LEDGE_NOSE + 0.014, 0.001), (-LEDGE_NOSE + 0.006, 0.001)]
-    sweep("monitor_light_bar", path, (body_ends[0] + 0.01, body_ends[1] - 0.01), bar, "led_amber")
+    group, GROUP[0] = GROUP[0], "light_bar"
+    sweep("light_bar", path, (body_ends[0] + 0.01, body_ends[1] - 0.01), bar, "light_bar",
+          along=True)
+    GROUP[0] = group
     return ob
 
 
@@ -1288,8 +1310,10 @@ def main():
     if BLEND:
         bpy.ops.wm.save_as_mainfile(filepath=BLEND)
     lever = next(o for o in ALL if o.name == "throttle")
-    for path, obs in [(OUT, [o for o in ALL if o is not lever]),
-                      (os.path.join(os.path.dirname(OUT), "throttle.gltf"), [lever])]:
+    bar = next(o for o in ALL if o.name == "light_bar")
+    for path, obs in [(OUT, [o for o in ALL if o not in (lever, bar)]),
+                      (os.path.join(os.path.dirname(OUT), "throttle.gltf"), [lever]),
+                      (os.path.join(os.path.dirname(OUT), "light_bar.gltf"), [bar])]:
         bpy.ops.object.select_all(action="DESELECT")
         for ob in obs:
             ob.select_set(True)

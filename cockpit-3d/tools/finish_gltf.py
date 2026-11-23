@@ -105,6 +105,21 @@ def main():
                 "extensions": {"KHR_materials_emissive_strength": {"emissiveStrength": 3.0}},
                 "doubleSided": True,
             })
+        elif name == "light_bar":
+            # The ledge's light bar (light_bar.gltf): unlit amber, so a live texture on it
+            # (`texture_material` = "light_bar") shows times amber: white lights it, black
+            # puts it out. u runs along the bar, 0.5 at its middle.
+            m.clear()
+            m.update({
+                "name": name,
+                "pbrMetallicRoughness": {
+                    "baseColorFactor": [1.0, 0.55, 0.05, 1],
+                    "metallicFactor": 0,
+                    "roughnessFactor": 1,
+                },
+                "extensions": {"KHR_materials_unlit": {}},
+                "doubleSided": False,
+            })
         elif name == "glass":
             m["doubleSided"] = True
             m["alphaMode"] = "BLEND"
