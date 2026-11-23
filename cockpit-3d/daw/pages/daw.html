@@ -6,12 +6,16 @@
 // transport, arrange, device, notes, mixer, clip or scenes (or `window.DAW_VIEW`, set by a
 // script ahead of this one when the page is given to JStream inline). Everything that moves or
 // blinks follows the data (the clock key's beats), never the page's own clock, so a
-// render on a held clock draws the same picture every time.
+// render on a held clock draws the same picture every time. `?w=` (or `window.DAW_W`) sets
+// the width; the desk's note grid is 600 wide.
 const VIEW = window.DAW_VIEW || new URLSearchParams(location.search).get('view') || 'transport';
-const x = document.getElementById('c').getContext('2d');
-const W = 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
+const cv = document.getElementById('c');
+const x = cv.getContext('2d');
+const W = +(window.DAW_W || new URLSearchParams(location.search).get('w')) || 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
 const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';
+cv.width = W; document.body.style.width = W + 'px';
 let D = {}, dirty = true;
+const lowest = {};   // isomorphic view: the lowest pitch each track has played
 const history = [];  // notes view: [beat start, beat end or null, pitch, track]
 const steps = {};    // clip view: steps a note started on, per clip
 let lastBeats = -1;
@@ -197,6 +201,27 @@ const views = {
     }
     txt(`${bars} BARS  ·  STEP ${step >= 0 ? step + 1 : '-'}`, W - 24, 78, 13, `rgba(${CYAN},.8)`, 'right', 600);
   },
+  // The desk's pads as an isomorphic note grid, as a grid instrument lays it out: a
+  // semitone to the right, a fourth (5 semitones) up a row, the lowest row nearest the
+  // player (the foot of the picture). The selected track's playing notes light every pad
+  // of their pitch in its colour, brighter with velocity; each C glows faintly. The grid
+  // starts on the C at or below the lowest note the track has played, so its notes fit.
+  iso() {
+    const g = D.grid || {}, sel = g.selectedTrack >= 0 ? g.selectedTrack : 0;
+    const t = D['track/' + sel] || {}, playing = ((D.notes && D.notes.tracks) || [])[sel] || [];
+    const lo = lowest[sel] !== undefined ? lowest[sel] : 36, base = Math.min(Math.floor(lo / 12) * 12, 72);
+    const vel = new Map(playing.map(([p, v]) => [p, v]));
+    x.fillStyle = '#05080c'; x.fillRect(0, 0, W, H);
+    const cols = 8, rows = 8, gap = 6, cw = (W - gap * (cols + 1)) / cols, ch = (H - gap * (rows + 1)) / rows;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const pitch = base + c + 5 * r, px = gap + c * (cw + gap), py = H - (r + 1) * (ch + gap);
+      const on = vel.has(pitch), root = pitch % 12 === 0;
+      x.fillStyle = on ? rgba(t.color, 0.55 + 0.45 * Math.min(1, vel.get(pitch) || 1))
+        : root ? rgba(t.color, 0.3) : '#1a2028';
+      x.beginPath(); x.roundRect(px, py, cw, ch, 5); x.fill();
+      if (root) txt('C' + (pitch / 12 - 2), px + 6, py + ch - 7, 11, on ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.35)', 'left', 700);
+    }
+  },
   scenes() {
     const sc = (D.scenes && D.scenes.items) || [], g = D.grid || {}, tr = tracks();
     frame('SCENES', `${g.trackCount || 0} TRACKS`);
@@ -228,6 +253,7 @@ function take() {
   history.forEach((n, i) => { if (n[1] === null) open.set(`${n[3]}:${n[2]}`, i); });
   const seen = new Set();
   ns.forEach((list, ti) => list.forEach(([p, v]) => {
+    if (lowest[ti] === undefined || p < lowest[ti]) lowest[ti] = p;
     const pitch = ti === 0 ? -({ 36: 1, 38: 2, 42: 3 }[p] || 3) : p, k = `${ti}:${pitch}`;
     seen.add(k);
     if (!open.has(k)) {
@@ -243,7 +269,7 @@ function take() {
   dirty = true;
 }
 function draw() {
-  if (window.jstream && jstream.data) { if (dirty) { views[VIEW](); scan(); dirty = false; } }
+  if (window.jstream && jstream.data) { if (dirty) { views[VIEW](); if (VIEW !== 'iso') scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }

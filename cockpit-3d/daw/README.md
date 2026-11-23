@@ -14,7 +14,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `prep.py` | Turns the funk song into `session.json`: the arrangement, tempo and chords from v42's `song.py`, the e-piano and lead notes and the lead's breath from the note lists v42's own script writes, the drums and bass notes from onsets in the MP3, and each track's meter from its band of the MP3's spectrum. |
 | `session.json` | That timeline, so a render needs no Jclap checkout. |
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
-| `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
+| `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`) and the desk's note grid (`?view=iso&w=600`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as keyframes with a hotkey each, two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into keyframes. |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
@@ -26,7 +26,8 @@ scene follows a real Bitwig with the JTunnel plugin.
 
 | In the cockpit | Driven by | How |
 |---|---|---|
-| The desk's pad surface: the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
+| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
+| …or, with `DESK_GRID=clips`, the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
 | The seven screens | every key | browser sources with `page_api_data` |
 | The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
