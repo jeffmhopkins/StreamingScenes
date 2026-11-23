@@ -44,6 +44,15 @@ GLOW = os.environ.get("GLOW", "1") == "1"
 # The desk's 8 x 8 pads: `notes` (the default) plays the selected track as an isomorphic
 # note grid, rows a fourth apart, from the page's `iso` view; `clips` is the clip launcher.
 DESK_GRID = os.environ.get("DESK_GRID", "notes")
+# The ship (see the l_env lights below): its heading at rest in degrees, its warp at rest
+# (0 to 1), and the MIDI CCs that drive them.
+SHIP_YAW = float(os.environ.get("SHIP_YAW", "0"))
+WARP = float(os.environ.get("WARP", "0"))
+SHIP_CC_CHANNEL = int(os.environ.get("SHIP_CC_CHANNEL", "16"))
+SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "Bitwig")
+SHIP_CC_WARP = int(os.environ.get("SHIP_CC_WARP", "30"))
+SHIP_CC_YAW = int(os.environ.get("SHIP_CC_YAW", "31"))
+SHIP_CC_SMOOTHING_MS = int(os.environ.get("SHIP_CC_SMOOTHING_MS", "250"))
 # The cards only show where the engine sorts them after the model (ADR-0107 decision 7:
 # items composite by their centres' depth, and the cockpit's centre is nearer than its
 # screens), so they are off until cards have depth of their own; the bloom does the glow.
@@ -233,10 +242,10 @@ L += light("l_env", "Space sky", {
     "type": "environment", "intensity": 0.9, "backdrop": True, "sky_color": "#070b15",
     "horizon_color": "#131b2c", "ground_color": "#020306", "stars": 0.4, "star_brightness": 1.3,
     "nebula": 0.7, "nebula_color": "#3a1460", "nebula_color_2": "#0d3a5c", "galaxy": 0.7,
-    "sky_seed": 4127, "warp": 0.0, "warp_ramp_s": 0.0}, (0, 1.2, 0), aim={"turn_deg": 0.0})
+    "sky_seed": 4127, "warp": WARP, "warp_ramp_s": 0.0}, (0, 1.2, 0), aim={"turn_deg": SHIP_YAW})
 L += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "intensity": 2.0,
                                   "shadows": True, "shadow_softness": 0.35},
-           (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0})
+           (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0 + SHIP_YAW})
 L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.2, "range_px": 3200},
            (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
 # A model is lit by at most 8 lights (the ambient and the environment aside), the first
@@ -298,6 +307,20 @@ motion["l_ambient"] = [data("break", "opacity", "track/5", "stopped", -0.6, 0.0,
 # The sky brightens while either chorus's clip plays on the drums track.
 motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0.0, 0.9,
                         smoothing=1800, states={"playing": 1.0}, source={"param": "intensity"}) for s in (2, 5)]
+# The ship: the warp drive and the heading, on MIDI CCs from Bitwig (a JTunnel plugin's
+# sender, as the camera CCs in import_show.py): SHIP_CC_WARP (30) takes the sky's warp
+# from rest to full, and SHIP_CC_YAW (31) turns the ship a whole turn to the right over
+# the CC's travel, by spinning the sky and the starlight around the cabin. Each rests
+# until its CC first moves (a CC reads 0 until then).
+def cc(mid, prop, controller, frm, to, **kw):
+    return {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "midi",
+            "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, "input": SHIP_CC_INPUT,
+            "from": frm, "to": to, "smoothing_ms": SHIP_CC_SMOOTHING_MS, **kw}
+
+
+motion["l_env"] += [cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}),
+                    cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
+motion["l_sun"].append(cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0))
 # The model's own LEDs and light strips follow the band, by material name: the red LEDs
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
 # accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
