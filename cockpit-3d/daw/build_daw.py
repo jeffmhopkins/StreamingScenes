@@ -472,6 +472,23 @@ if WARP_AIM == "ahead":
     if not ok:
         print("this JStream has no warp_aim (ADR-0186): the warp streams along the sky's axis",
               file=sys.stderr)
+# Where a warp arrives (JStream ADR-0188): a picture in the sky ahead as each warp drops
+# out, a nebula, a galaxy, a black hole or a planet, a different one each time
+# (sky_arrivals.py). SUNS=1 gives each planet its star, off to one side, to turn and find
+# (needs ADR-0188's companions). ARRIVALS=0 leaves the sky as it was. An engine without
+# them refuses the settings and the sky has no pictures.
+ARRIVALS = os.environ.get("ARRIVALS", "1") == "1"
+SUNS = os.environ.get("SUNS", "0") == "1"
+ARRIVAL_LIGHT = float(os.environ.get("ARRIVAL_LIGHT", "0.6"))
+if ARRIVALS:
+    sys.path.insert(0, HERE)
+    import sky_arrivals
+    _, ok = batch(sky_arrivals.edits(SUNS), "arrival pictures")
+    if ok:
+        _, ok = op({"type": "source.set_settings", "source_id": "l_env",
+                    "patch": sky_arrivals.patch(ARRIVAL_LIGHT)})
+    if not ok:
+        print("this JStream has no sky_pictures (ADR-0188): no arrival pictures", file=sys.stderr)
 
 # ---- the data moves the lights ----
 # A meter falls to nothing between a drum's hits, eight or sixteen times a bar, so a

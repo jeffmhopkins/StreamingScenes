@@ -213,6 +213,37 @@ and roll are channels too (`ship_yaw`, `ship_pitch`, `ship_roll`, CCs 31 to 33, 
 10). With JStream's
 ADR-0186 it travels where the ship points (see [What follows the data](#what-follows-the-data)).
 
+### Where a warp arrives
+
+With a JStream that has ADR-0188, each warp drops out in front of something new: one of
+the twelve pictures in [`arrivals/`](arrivals), picked at random as the warp ends and
+pinned in the sky a little off straight ahead, so it is in view when you arrive. It lights
+the cabin faintly in its own colour (`ARRIVAL_LIGHT`, 0.6). `sky_arrivals.py` puts them in
+a group scene, `arrivals`, and sets the sky's `sky_pictures` to it.
+
+Each is sized for what it is (`SIZE` in `sky_arrivals.py`, its width across the sky):
+
+| Picture | Width |
+|---|---|
+| Emission nebula, spiral galaxy, reflection nebula | 70° to 80°, most of the window |
+| Ring nebula, black hole | 50° |
+| Ringed giant, ice giant (with their rings) | 36°, 30° |
+| Violet giant, ocean world, desert world, grey moon, lava world | 24° down to 15°, a planet's disc about 0.8 of that, so they look a good way off |
+
+With `SUNS=1`, each planet arrives with its star (a yellow one, or an orange one for the
+lava world and the violet giant), placed where the planet's lit side faces it: for most,
+100° to 140° away, back over a shoulder, so turning the ship finds it. The star is then
+what lights the cabin. That needs ADR-0188's companion pictures, which an older JStream
+doesn't have (it would leave those planets out), so `SUNS` is off by default for now.
+`ARRIVALS=0` leaves the sky without pictures. A JStream without ADR-0188 refuses the
+settings, and the build says so and goes on.
+
+The pictures are original, rendered by `arrivals/src/render_all.py` with numpy and Pillow
+alone: the black hole is ray traced through a Schwarzschild metric, the planets are lit
+spheres with atmospheres and ring shadows, and the nebulae and galaxy are layers of gas,
+dust and stars. It writes them at 1024 pixels (rendered at 2048) and writes
+`arrivals/sun_directions.json`, each planet's sun and where it is.
+
 ## The hologram
 
 A holographic display that projects up out of the dash, the 3D
