@@ -5,6 +5,9 @@
   the reflections, the filters, and the data modifiers that move them with Bitwig;
 - the camera views (views.py) as keyframes of the cockpit scene, a glide between them,
   and a hotkey for each: Ctrl+Alt+1 to 9, 0, - and =;
+- the hologram (hologram.py), a display that projects up from the tray: Ctrl+Alt+H
+  shows or hides it, Ctrl+Alt+Shift+H hides it, and its `holo_feed` source is the one to swap
+  for a camera or a screen capture;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
@@ -119,6 +122,13 @@ def view_scene(shot):
     return "cockpit" if shot == "cockpit" else "view_" + shot
 
 
+# ---- the hologram (hologram.py): projects up from the tray on Ctrl+Alt+H (again: away), away on
+# Ctrl+Alt+Shift+H; every view's camera draws in stacking order so it shows ----
+import hologram  # noqa: E402
+
+hologram.add("cockpit", {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS})
+
+
 # ---- two 2D scenes from the same live data ----
 def src(sid, name, kind, settings):
     return {"type": "source.create", "source_id": sid, "name": name,
@@ -193,5 +203,6 @@ text, ok = op({"type": "studio.set_warm", "scenes": WARM})
 if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
-print("imported: views Ctrl+Alt+1..0, -, =; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back")
+print("imported: views Ctrl+Alt+1..0, -, =; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back;"
+      " hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off")
 print("saved to", PROJECT)
