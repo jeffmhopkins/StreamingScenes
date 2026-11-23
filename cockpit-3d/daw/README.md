@@ -71,6 +71,7 @@ What it makes:
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| Camera CCs | with `CC=1` (JStream protocol 0.164 or later), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50) |
 
 The app hears the hotkeys while another application, such as Bitwig, has the focus. An
 agent switches the views with `scene.switch` to `cockpit` or a `view_…` keyframe and the

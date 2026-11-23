@@ -8,6 +8,8 @@
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
+- with CC=1, Bitwig CCs 20 to 27 on channel 16 that move, turn, zoom and focus the
+  cockpit's camera in every view (CAMERA_CCS below; needs JStream protocol 0.164);
 - and the studio keeps the scenes warm, so switching between 2D and 3D starts nothing.
 
     python3 import_show.py [project file]
@@ -39,6 +41,26 @@ FADE_MS = int(os.environ.get("FADE_MS", "600"))
 NOTES = os.environ.get("NOTES", "0") == "1"
 NOTE_CHANNEL = int(os.environ.get("NOTE_CHANNEL", "16"))
 WARM = int(os.environ.get("WARM", "3"))
+CC = os.environ.get("CC", "0") == "1"
+CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
+CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
+CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
+
+# The camera's CCs (a camera takes at most 8 modifiers), from CC_FIRST up, in this order: the property and how far the CC's
+# top (127) takes it from the view. Each rests at the view (from 0), since a CC reads 0
+# until it is first sent. Scene space is 1000 px to the model's metre, x right, y down
+# and z toward the viewer; angles are degrees, fov a zoom in when it drops.
+CAMERA_CCS = [
+    ("position_x", 300),   # 30 cm to the right
+    ("position_y", -200),  # 20 cm up
+    ("position_z", -300),  # 30 cm forward
+    ("pan", 30),           # turn right
+    ("tilt", 20),          # look up
+    ("fov", -25),          # zoom in
+    ("focus", 600),        # focus further away
+    ("blur", 16),          # more depth-of-field blur
+]
 
 
 def must(result, what):
@@ -150,6 +172,16 @@ if NOTES:
               "action": {"type": "scene.switch", "scene_id": view_scene(shot), "preset_id": "glide"}}
              for i, (shot, _, _) in enumerate(VIEWS)]
     must(batch(notes, "notes"), "notes")
+
+if CC:
+    # Camera motion belongs to the scene's family, so the cockpit's offsets every view
+    # alike and carries through a glide between them.
+    motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
+               "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
+               "from": 0, "to": to, "smoothing_ms": CC_SMOOTHING_MS}
+              for i, (prop, to) in enumerate(CAMERA_CCS)]
+    must(op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion}),
+         "camera CCs (needs JStream protocol 0.164)")
 
 # ---- the screens atlas is a picture for the model, not a scene to show: a group, out of
 # the scene list, and last, since opening the project puts its first scene on program ----
