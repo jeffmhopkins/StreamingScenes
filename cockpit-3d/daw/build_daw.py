@@ -63,6 +63,20 @@ PAD_INTENSITY = float(os.environ.get("PAD_INTENSITY", "2.2"))
 PAD_RANGE = float(os.environ.get("PAD_RANGE", "1200"))
 BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.4" if GLOW else "0.85"))
 BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
+# The light switches: a group's MIDI CC, from SWITCH_FIRST up on CC_CHANNEL from CC_INPUT,
+# fades its lights out over SWITCH_FADE_MS while it is up (SWITCH_UP=off, the default),
+# or in (SWITCH_UP=on). A CC reads 0 until it is first sent, so with `off` the cockpit is
+# lit until a switch moves. The last CC, the master, fades every group out, so only the
+# sky lights the cabin. SWITCHES=0 builds without them.
+SWITCHES = os.environ.get("SWITCHES", "1") == "1"
+SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
+SWITCH_UP = os.environ.get("SWITCH_UP", "off")
+SWITCH_FADE_MS = int(os.environ.get("SWITCH_FADE_MS", "2000"))
+CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
+CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+# The groups, in CC order, then the master.
+GROUPS = ["cabin", "desk", "screens", "glow"]
+SWITCH_CC = {g: SWITCH_FIRST + i for i, g in enumerate(GROUPS + ["master"])}
 
 
 def geo(cx, cy, w, h, **kw):
@@ -103,6 +117,24 @@ def data(mid, prop, key, field, frm, to, smoothing=60, states=None, rng=(0.0, 1.
         m["states"] = states
     m.update(kw)
     return m
+
+
+def gate(group, prop="opacity", off=-1.0, **kw):
+    """The motion modifier with which `group`'s switch fades a light out: `off` added to
+    `prop` while the switch is off, nothing while it is on, over SWITCH_FADE_MS."""
+    frm, to = (0.0, off) if SWITCH_UP == "off" else (off, 0.0)
+    m = {"modifier_id": f"switch_{group}", "property": prop, "enabled": True, "clock": "engine",
+         "kind": "midi", "control": "cc", "controller": SWITCH_CC[group], "channel": CC_CHANNEL,
+         "input": CC_INPUT, "smoothing_ms": SWITCH_FADE_MS, "curve": "linear", "from": frm, "to": to}
+    m.update(kw)
+    return m
+
+
+def gates(group, prop="opacity", off=-1.0, **kw):
+    """`group`'s switch and the master's, for one setting: [] without SWITCHES."""
+    if not SWITCHES:
+        return []
+    return [gate(group, prop, off, **kw), gate("master", prop, off, **kw)]
 
 
 init()
@@ -182,7 +214,15 @@ ed += [
     {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
      "kind": {"type": "scene", "scene_id": "atlas"}},
 ]
+if SWITCHES:
+    # The screens' switch: a black cover over the whole atlas, clear until it fades in.
+    ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
+           add("atlas", "a_off", "atlas_off", geo(960, 540, 1920, 1080), opacity=0.0)]
 must(batch(ed, "atlas"), "atlas")
+if SWITCHES:
+    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_off",
+             "motion": gates("screens", off=1.0)}),
+         "screens switch")
 
 # ---- the cockpit ----
 cam = SHOTS["cockpit"]
@@ -215,6 +255,10 @@ if GLOW and GLOW_CARDS:
                         "back": "hide", "shadows": False}
         cards.append(add("cockpit", "g_" + sid, sid, g))
     must(batch(cards, "glow"), "glow")
+    for sid, *_ in ON_SCREENS:
+        if SWITCHES:
+            must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
+                     "motion": gates("screens")}), "screens switch")
 
 THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
 if os.path.exists(THROTTLE):
@@ -336,6 +380,22 @@ motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=LEV
 # their own strength on the beat to 0.25 (the file's 2.5 would flare).
 motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=120,
                             source={"param": "emissive_strength", "material": "light_strip"}))
+# ---- the light switches: each light's group, and the master on all of them ----
+# A light's strength is its intensity times its opacity, so each switch adds -1 to its
+# lights' opacities as it fades off. The glow group's LEDs and strips are the model's
+# materials: its 8 motion modifiers are 6 data ones above and these 2, so the glow
+# switches drive every material's `emissive_strength` at once, which needs a JStream
+# that drives a glow with no material named; an older one leaves the LEDs lit.
+LIGHT_GROUP = {"l_ambient": "cabin", "l_sun": "cabin", "l_cabin": "cabin", "l_glow": "desk",
+               "l_desk": "desk"}
+LIGHT_GROUP.update({lid: "desk" for lid, *_ in TRACK_LIGHTS})
+LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})
+for lid, group in LIGHT_GROUP.items():
+    if any(e.get("item_id") == lid for e in L):
+        motion.setdefault(lid, []).extend(gates(group))
+# The glow's strength multiplies the file's by 1 plus its drives, and the LEDs' data
+# drives add up to 1.6, so a switch adds -3 to take it to nothing.
+motion["model"] += gates("glow", "source", off=-3.0, source={"param": "emissive_strength"})
 for lid, mods in motion.items():
     must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": lid, "motion": mods}), f"motion {lid}")
 
