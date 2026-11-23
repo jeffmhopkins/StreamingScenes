@@ -81,7 +81,7 @@ without reflections and says so.
 
 ## The hologram
 
-A holographic display that projects up out of the instrument on the tray, the 3D
+A holographic display that projects up out of the dash, the 3D
 version of the 2D cockpit's incoming-transmission hologram: the projector's lens flares,
 a beam rises from it, and a 16:9 panel floats over the dash in front of the windshield,
 tinted blue, see-through where the picture is dark, with scanlines, a sweep band, an edge
