@@ -64,13 +64,14 @@ SCREENS = {
 # the centre screen's own up axis (leaned back with it), hinged on a line BANK_GAP past
 # its edge, so each pair of neighbouring edges is parallel and the gap between them is
 # BANK_GAP * 2 wide from top to bottom, with the hinge right in the middle of it.
-BANK_TURN = float(os.environ.get("BANK_TURN", 22))
+BANK_TURN = float(os.environ.get("BANK_TURN", 15))
 BANK_GAP = 0.028
 
 
-# How far the monitors lean back from upright, in degrees, hinged on the centre screen's
-# bottom edge, which stays where it is.
-MONITOR_TILT = float(os.environ.get("MONITOR_TILT", 10))
+# How far the monitors lean back from upright, in degrees (0: upright, square to the
+# desk), hinged on the centre screen's bottom edge, which stays where the first layout
+# (centre (0, 1.44, 0.97), leaning back 10°) put it.
+MONITOR_TILT = float(os.environ.get("MONITOR_TILT", 0))
 
 
 def _bank():
@@ -739,6 +740,34 @@ def build_monitor_surround():
     # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
     # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
     floor = 0.004
+    # A raised cap over the centre monitor, like an instrument binnacle: a trapezoid
+    # standing up from the hood, from the hood's nose back to the case's back, joined
+    # into the case so the bevel runs round it in one piece.
+    cf = frames[1]
+    lo, hi = H + 0.03, H + 0.12             # its foot (inside the hood) and its top
+    bw, tw = w / 2 + 0.005, w / 2 - 0.09    # half-widths at the foot and the top
+    bm = bmesh.new()
+    pts = [(-bw, lo), (bw, lo), (tw, hi), (-tw, hi)]
+    front = [bm.verts.new((x, -0.03, z)) for x, z in pts]
+    back = [bm.verts.new((x, 0.035, z)) for x, z in pts]
+    bm.faces.new(front)
+    bm.faces.new(back[::-1])
+    for k in range(4):
+        bm.faces.new((front[k], back[k], back[(k + 1) % 4], front[(k + 1) % 4]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new("monitor_cap")
+    bm.to_mesh(me)
+    bm.free()
+    cap = bpy.data.objects.new("monitor_cap", me)
+    bpy.context.collection.objects.link(cap)
+    cap.matrix_world = cf
+    cap.hide_render = True
+    cap.display_type = "WIRE"
+    CUTTERS.append(cap)
+    mod = ob.modifiers.new("cap", "BOOLEAN")
+    mod.operation = "UNION"
+    mod.solver = "EXACT"
+    mod.object = cap
     for i, n in enumerate(MAIN_MONITORS):
         f = frame_matrix(*SCREENS[n][1:])  # the screen's own frame: the floor is behind it
         bm = bmesh.new()
