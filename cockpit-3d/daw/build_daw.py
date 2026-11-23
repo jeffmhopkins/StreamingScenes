@@ -72,6 +72,12 @@ BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 # or in (SWITCH_UP=on). A CC reads 0 until it is first sent, so with `off` the cockpit is
 # lit until a switch moves. The last CC, the master, fades every group out, so only the
 # sky lights the cabin. SWITCHES=0 builds without them.
+# In a JStream with channels (ADR-0183, protocol 0.169) each switch is a channel,
+# `power_<group>` (1 on, 0 off), that its CC is one input of, so a sequence (ADR-0184,
+# import_show.py's) can switch the same lights; `screen_<cell>` is a channel a monitor,
+# following `power_screens`, so a sequence can light the monitors one at a time, and `warp`
+# carries the warp CC the same way. CHANNELS=0 keeps the CCs on the lights directly.
+CHANNELS = os.environ.get("CHANNELS", "1") == "1"
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
@@ -123,9 +129,26 @@ def data(mid, prop, key, field, frm, to, smoothing=60, states=None, rng=(0.0, 1.
     return m
 
 
+def follow(mid, prop, channel, at0, at1, smoothing=30, **kw):
+    """A `channel` motion modifier (ADR-0183 decision 5): `at0` added to `prop` while the
+    channel reads 0, `at1` while it reads 1."""
+    m = {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "channel",
+         "channel_id": channel, "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
+    m.update(kw)
+    return m
+
+
+def cc_input(controller, at0, at1, smoothing, channel=CC_CHANNEL, sender=CC_INPUT):
+    """A channel's input reading a MIDI CC: `at0` at 0 and `at1` at 127, as channel values."""
+    return {"kind": "midi", "control": "cc", "controller": controller, "channel": channel,
+            "input": sender, "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
+
+
 def gate(group, prop="opacity", off=-1.0, **kw):
     """The motion modifier with which `group`'s switch fades a light out: `off` added to
     `prop` while the switch is off, nothing while it is on, over SWITCH_FADE_MS."""
+    if CHANNELS:
+        return follow(f"switch_{group}", prop, "power_" + group, off, 0.0, **kw)
     frm, to = (0.0, off) if SWITCH_UP == "off" else (off, 0.0)
     m = {"modifier_id": f"switch_{group}", "property": prop, "enabled": True, "clock": "engine",
          "kind": "midi", "control": "cc", "controller": SWITCH_CC[group], "channel": CC_CHANNEL,
@@ -135,14 +158,27 @@ def gate(group, prop="opacity", off=-1.0, **kw):
 
 
 def gates(group, prop="opacity", off=-1.0, **kw):
-    """`group`'s switch and the master's, for one setting: [] without SWITCHES."""
-    if not SWITCHES:
+    """`group`'s switch and the master's, for one setting: [] without SWITCHES or channels."""
+    if not SWITCHES and not CHANNELS:
         return []
     return [gate(group, prop, off, **kw), gate("master", prop, off, **kw)]
 
 
 init()
 must(op({"type": "canvas.set_size", "width": 1920, "height": 1080}), "canvas")
+
+# ---- the switches as channels: each on (1) until its CC or a sequence turns it off ----
+if CHANNELS:
+    # The CC's travel as the channel's value: up is off with SWITCH_UP=off. The input only
+    # counts once the CC first moves, so the lights start on.
+    up, down = (0.0, 1.0) if SWITCH_UP == "off" else (1.0, 0.0)
+    chans = [{"channel_id": "power_" + g, "name": f"{g.title()} power", "default": 1.0,
+              "inputs": [cc_input(SWITCH_CC[g], down, up, SWITCH_FADE_MS)] if SWITCHES else []}
+             for g in GROUPS + ["master"]]
+    _, CHANNELS = batch([{"type": "channel.set", "channel": c} for c in chans], "power channels")
+    if not CHANNELS:
+        print("no channels in this JStream (protocol 0.169): the switches stay on their CCs",
+              file=sys.stderr)
 
 # ---- the screens: one 1920 x 1080 atlas on the model's `screens` material ----
 LAUNCHER_LOOKS = {
@@ -218,12 +254,30 @@ ed += [
     {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
      "kind": {"type": "scene", "scene_id": "atlas"}},
 ]
-if SWITCHES:
+# With channels, each monitor has a black cover of its own, clear while its `screen_<cell>`
+# channel is on; the channel follows `power_screens`, so the screens' CC still switches
+# them all, and a sequence can switch them one by one. Without, one cover over the atlas.
+SCREEN_CELLS = [(item[2:], x, y, w, h) for item, _, x, y, w, h in PAGES_AT]
+SCREEN_CELLS += [("desk", 0, 720, 960, 360), ("panels", PX, PY, PW, PH)]
+if CHANNELS:
+    ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 64, "height": 64})]
+    ed += [add("atlas", "off_" + cell, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"),
+               opacity=0.0) for cell, x, y, w, h in SCREEN_CELLS]
+elif SWITCHES:
     # The screens' switch: a black cover over the whole atlas, clear until it fades in.
     ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
            add("atlas", "a_off", "atlas_off", geo(960, 540, 1920, 1080), opacity=0.0)]
 must(batch(ed, "atlas"), "atlas")
-if SWITCHES:
+if CHANNELS:
+    ch = [{"type": "channel.set", "channel": {
+        "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
+        "inputs": [{"kind": "channel", "channel_id": "power_screens", "smoothing_ms": 0,
+                    "curve": "linear", "from": 0.0, "to": 1.0}]}} for cell, *_ in SCREEN_CELLS]
+    ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_" + cell,
+            "motion": [follow("screen", "opacity", "screen_" + cell, 1.0, 0.0),
+                       gate("master", off=1.0)]} for cell, *_ in SCREEN_CELLS]
+    must(batch(ch, "screen channels"), "screen channels")
+elif SWITCHES:
     must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_off",
              "motion": gates("screens", off=1.0)}),
          "screens switch")
@@ -260,7 +314,7 @@ if GLOW and GLOW_CARDS:
         cards.append(add("cockpit", "g_" + sid, sid, g))
     must(batch(cards, "glow"), "glow")
     for sid, *_ in ON_SCREENS:
-        if SWITCHES:
+        if SWITCHES or CHANNELS:
             must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
                      "motion": gates("screens")}), "screens switch")
 
@@ -404,7 +458,15 @@ def cc(mid, prop, controller, frm, to, **kw):
             "from": frm, "to": to, "smoothing_ms": SHIP_CC_SMOOTHING_MS, **kw}
 
 
-motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
+if CHANNELS:
+    # The warp is a channel the CC is one input of, so a sequence can jump to warp too.
+    must(op({"type": "channel.set", "channel": {
+        "channel_id": "warp", "name": "Warp", "default": 0.0,
+        "inputs": [cc_input(SHIP_CC_WARP, 0.0, 1.0, SHIP_CC_SMOOTHING_MS,
+                            channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]}}), "warp channel")
+    motion["l_env"].append(follow("warp", "source", "warp", 0.0, 1.0, source={"param": "warp"}))
+else:
+    motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
 motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
 motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
 motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]

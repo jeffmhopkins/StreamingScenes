@@ -3,8 +3,9 @@
 
 - the 3D DAW cockpit (build_daw.py): the model, its screens atlas, the sky, the lights,
   the reflections, the filters, and the data modifiers that move them with Bitwig;
-- the camera views (views.py) as keyframes of the cockpit scene, a glide between them,
-  and a hotkey for each: Ctrl+Alt+1 to 9, 0, - and =;
+- the camera views (views.py) as sequences of the cockpit scene, each gliding the
+  cockpit's camera from wherever it is to the view, and a hotkey for each: Ctrl+Alt+1 to
+  9, 0, - and = (a JStream before sequences, protocol 0.170, gets them as keyframes);
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows or hides it, Ctrl+Alt+Shift+H hides it, and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
@@ -51,6 +52,11 @@ CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
 CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
 CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
+# How the camera follows its view channels: a little smoothing hides the values thread's
+# ticks, which aren't in step with the frames.
+VIEW_SMOOTHING_MS = int(os.environ.get("VIEW_SMOOTHING_MS", "40"))
+# SEQUENCES=0 makes the views keyframes, as before JStream had sequences.
+SEQUENCES = os.environ.get("SEQUENCES", "1") == "1"
 
 # The camera's CCs, from CC_FIRST up, in this order: the property and how far the CC's
 # top (127) takes it from the view. Each rests at the view (from 0), since a CC reads 0
@@ -102,31 +108,71 @@ mcp._close()
 mcp.S["sid"] = None
 
 # ---- the 3D cockpit ----
-runpy.run_path(os.path.join(HERE, "build_daw.py"), run_name="__main__")
+BUILT = runpy.run_path(os.path.join(HERE, "build_daw.py"), run_name="__main__")
+# Whether the cockpit's switches and warp are channels (protocol 0.169) a sequence can move.
+CHANNELS = BUILT.get("CHANNELS", False)
 mcp._close()
 mcp.S["sid"] = None
 init()
 
-from views import SHOTS, VIEWS  # noqa: E402
+from views import SHOTS, VIEWS, sequences, view_id  # noqa: E402
 
-# ---- the camera views: keyframes of the cockpit, glided between ----
-must(op({"type": "transition.create", "preset_id": "glide", "name": f"Glide {GLIDE_MS} ms",
-         "kind": "move", "duration_ms": GLIDE_MS, "easing": "ease_in_out"}), "glide")
+# ---- the camera views ----
 must(op({"type": "transition.create", "preset_id": "fade", "name": f"Fade {FADE_MS} ms",
          "kind": "fade", "duration_ms": FADE_MS, "easing": "ease_in_out"}), "fade")
-edits = []
-for shot, name, _ in VIEWS:
-    if shot == "cockpit":
-        edits.append({"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS[shot]})
-        continue
-    edits += [{"type": "scene.create_variant", "scene_id": "view_" + shot, "variant_of": "cockpit",
-               "name": f"Cockpit · {name}"},
-              {"type": "scene.set_camera", "scene_id": "view_" + shot, "camera": SHOTS[shot]}]
-must(batch(edits, "views"), "views")
+VIEW_CHANNELS, VIEW_MOTION, VIEW_TIMELINES = sequences(GLIDE_MS, VIEW_SMOOTHING_MS)
+
+
+def sequence_views():
+    """The views as sequences: channels for the camera's fields, the cockpit's camera
+    following them, and a sequence a view that glides them there. All or nothing, so a
+    JStream without sequences (before protocol 0.170) refuses the lot."""
+    edits = [{"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS["cockpit"]}]
+    edits += [{"type": "channel.set", "channel": ch} for ch in VIEW_CHANNELS]
+    edits.append({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": VIEW_MOTION})
+    edits += [{"type": "timeline.set", "scene_id": "cockpit", "timeline": t} for t in VIEW_TIMELINES]
+    text, ok = batch(edits, "view sequences")
+    if not ok:
+        print("no sequences in this JStream (protocol 0.170): the views are keyframes",
+              file=sys.stderr)
+    return ok
+
+
+def keyframe_views():
+    """The views as keyframes of the cockpit, each switched to with a glide."""
+    must(op({"type": "transition.create", "preset_id": "glide", "name": f"Glide {GLIDE_MS} ms",
+             "kind": "move", "duration_ms": GLIDE_MS, "easing": "ease_in_out"}), "glide")
+    edits = []
+    for shot, name, _ in VIEWS:
+        if shot == "cockpit":
+            edits.append({"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS[shot]})
+            continue
+        edits += [{"type": "scene.create_variant", "scene_id": "view_" + shot,
+                   "variant_of": "cockpit", "name": f"Cockpit · {name}"},
+                  {"type": "scene.set_camera", "scene_id": "view_" + shot, "camera": SHOTS[shot]}]
+    must(batch(edits, "views"), "views")
+
+
+SEQ = SEQUENCES and sequence_views()
+if not SEQ:
+    keyframe_views()
 
 
 def view_scene(shot):
-    return "cockpit" if shot == "cockpit" else "view_" + shot
+    """The scene a view draws through: the cockpit itself with sequences, else its keyframe."""
+    return "cockpit" if SEQ or shot == "cockpit" else "view_" + shot
+
+
+def view_action(shot):
+    """What a view's hotkey or note runs."""
+    if SEQ:
+        return {"type": "timeline.play", "timeline_id": view_id(shot)}
+    return {"type": "scene.switch", "scene_id": view_scene(shot), "preset_id": "glide"}
+
+
+# One camera a scene that draws a view: with sequences, the cockpit's alone.
+VIEW_CAMERAS = {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS if view_scene(shot) != "cockpit"}
+VIEW_CAMERAS["cockpit"] = SHOTS["cockpit"]
 
 
 # ---- the hologram (hologram.py): projects up from the dash on Ctrl+Alt+H (again: away), away on
@@ -136,7 +182,7 @@ import hologram  # noqa: E402
 # Its edits go in as one batch, so a JStream without the `hologram` filter (before alpha.8)
 # gets none of it, and the rest of the show still imports.
 try:
-    hologram.add("cockpit", {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS})
+    hologram.add("cockpit", VIEW_CAMERAS, channels=SEQ)
     HOLOGRAM = True
 except SystemExit as e:
     # Most likely a JStream without the `hologram` filter; the reason says which.
@@ -184,23 +230,42 @@ must(batch([
 # ---- hotkeys: the views glide, the scenes fade ----
 keys = []
 for shot, _, key in VIEWS:
-    keys.append({"type": "hotkey.set", "chord": "Ctrl+Alt+" + key,
-                 "action": {"type": "scene.switch", "scene_id": view_scene(shot), "preset_id": "glide"}})
+    keys.append({"type": "hotkey.set", "chord": "Ctrl+Alt+" + key, "action": view_action(shot)})
 for key, scene in [("F1", "cockpit"), ("F2", "desk_2d"), ("F3", "brb_2d")]:
     keys.append({"type": "hotkey.set", "chord": "Ctrl+Alt+" + key,
                  "action": {"type": "scene.switch", "scene_id": scene, "preset_id": "fade"}})
 must(batch(keys, "hotkeys"), "hotkeys")
 
+# ---- the cockpit's sequences (ship_sequences.py): lights, monitors and warp ----
+import ship_sequences  # noqa: E402
+
+SHIP = SEQ and CHANNELS
+if SHIP:
+    seq = [{"type": "timeline.set", "scene_id": "cockpit", "timeline": t}
+           for t in ship_sequences.timelines()]
+    seq += [{"type": "hotkey.set", "chord": "Ctrl+Alt+" + key, "action": action}
+            for _, key, action in ship_sequences.CONTROLS if key]
+    must(batch(seq, "ship sequences"), "ship sequences")
+
 if NOTES:
     notes = [{"type": "binding.set",
               "trigger": {"kind": "midi_note", "note": 36 + i, "channel": NOTE_CHANNEL},
-              "action": {"type": "scene.switch", "scene_id": view_scene(shot), "preset_id": "glide"}}
+              "action": view_action(shot)}
              for i, (shot, _, _) in enumerate(VIEWS)]
+    if SHIP:
+        # The cockpit's sequences on the notes after the views', from 48 (C2).
+        first = 36 + len(VIEWS)
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
+                  if HOLOGRAM or action["type"] != "channel.switch"]
     must(batch(notes, "notes"), "notes")
 
 if CC:
     # Camera motion belongs to the scene's family, so the cockpit's offsets every view
-    # alike and carries through a glide between them.
+    # alike and carries through a glide between them. With sequences the views' own
+    # channels come first in the same list, and the CCs add to wherever they put it.
     motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
                "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
                "from": 0, "to": to,
@@ -208,13 +273,14 @@ if CC:
               for i, (prop, to) in enumerate(CAMERA_CCS)]
     # Roll and the autofocus switch are the last two: a JStream before protocol 0.167 caps
     # a camera at 8 modifiers and has no autofocus, so it gets the first 8 only.
-    text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion})
+    base = VIEW_MOTION if SEQ else []
+    text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": base + motion})
     if ok:
         cams = []
-        for shot, _, _ in VIEWS:
+        for sid, view in VIEW_CAMERAS.items():
             # Only a camera with a focus can autofocus (DOF=0 gives none).
-            cam = dict(SHOTS[shot], autofocus="focus_px" in SHOTS[shot])
-            cams.append({"type": "scene.set_camera", "scene_id": view_scene(shot),
+            cam = dict(view, autofocus="focus_px" in view)
+            cams.append({"type": "scene.set_camera", "scene_id": sid,
                          "camera": hologram.stacking(cam) if HOLOGRAM else cam})
         must(batch(cams, "autofocus"), "autofocus")
         print("camera CCs: 20 to 29, autofocus on")
@@ -231,13 +297,16 @@ if CC:
 # ---- the screens atlas is a picture for the model, not a scene to show: a group, out of
 # the scene list, and last, since opening the project puts its first scene on program ----
 must(batch([{"type": "scene.set_role", "scene_id": "atlas", "role": "group"},
-            {"type": "scene.reorder", "scene_id": "atlas", "index": len(VIEWS) + 2}], "atlas"), "atlas")
+            {"type": "scene.reorder", "scene_id": "atlas",
+             "index": (1 if SEQ else len(VIEWS)) + 2}], "atlas"), "atlas")
 
 # ---- keep the scenes warm, and start on the wide view ----
 text, ok = op({"type": "studio.set_warm", "scenes": WARM})
 if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
-print("imported: views Ctrl+Alt+1..0, -, =; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
+print("imported: views Ctrl+Alt+1..0, -, =" + (" (sequences)" if SEQ else " (keyframes)")
+      + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W" if SHIP else "")
+      + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + ("; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off" if HOLOGRAM else "; no hologram"))
 print("saved to", PROJECT)

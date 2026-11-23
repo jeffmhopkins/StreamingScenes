@@ -13,6 +13,14 @@ and the `additive` blend, shown and hidden by timelines of `item.show`, `item.hi
 modifier on the `shown` clock drives each one's `reveal` from 0 to 1. `add` binds
 Ctrl+Alt+H to toggle it and Ctrl+Alt+Shift+H to hide it.
 
+In a JStream with sequences (protocol 0.170), `add(..., channels=True)` makes the show and
+the hide sequences with lanes: the channels `holo_beam` and `holo_panel` drive the
+`reveal`s, so the beam rises and then the panel builds up from the bottom, and on the way
+out the panel dissolves and then the beam sinks, before the cues hide the cards. The
+channel `holo` is the switch: its rising starts the show sequence and its falling the
+hide, so Ctrl+Alt+H toggles it, Ctrl+Alt+Shift+H switches it off and anything that sets it
+(a cue, a MIDI pad) does too.
+
 The rig, in the model's metres (glTF: +y up, the pilot faces -z):
 - the projector's lens, a small glow on the dash, below the monitors, dim while off, and a
   flare over it while on;
@@ -107,9 +115,68 @@ def _timeline(tid, name, cues):
                      for at, action, item in cues]}
 
 
-def edits(scene="cockpit"):
+def _reveal(channel):
+    """A modifier that raises the hologram effect's `reveal` with `channel`, 0 to 1."""
+    return {"modifier_id": "pop", "property": "effect", "enabled": True, "clock": "engine",
+            "effect": {"filter_id": "holo_fx", "param": "reveal"}, "kind": "channel",
+            "channel_id": channel, "smoothing_ms": 0, "curve": "linear", "from": 0.0, "to": 1.0}
+
+
+def _lane(channel, *points):
+    return {"target": {"channel": channel},
+            "points": [{"at_ms": at, "value": v, "curve": c} for at, v, c in points]}
+
+
+# The show and the hide, in milliseconds: the beam rises, then the panel builds; the panel
+# dissolves, then the beam sinks.
+BEAM_UP, PANEL_FROM, PANEL_UP = 250, 120, 620
+PANEL_DOWN, BEAM_DOWN = 450, 750
+
+
+def _sequences(scene):
+    """The show and hide sequences with lanes, the `holo` switch that starts them, and the
+    keys that switch it."""
+    chans = [{"channel_id": "holo", "name": "Hologram", "default": 1.0, "on": False},
+             {"channel_id": "holo_beam", "name": "Hologram beam"},
+             {"channel_id": "holo_panel", "name": "Hologram panel"}]
+    show = _timeline(SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
+                                           (PANEL_FROM, "item.show", CARD),
+                                           (PANEL_FROM, "item.show", HAZE)])
+    show["duration_ms"] = PANEL_UP
+    # From nothing: each lane holds at 0 until its card shows, then rises.
+    show["lanes"] = [_lane("holo_beam", (0, 0.0, "linear"), (BEAM_UP, 1.0, "ease_out")),
+                     _lane("holo_panel", (0, 0.0, "linear"), (PANEL_FROM, 0.0, "linear"),
+                           (PANEL_UP, 1.0, "ease_out"))]
+    show["starts"] = [{"type": "channel", "channel_id": "holo", "edge": "rises"}]
+    hide = _timeline(HIDE, "Hologram off", [(PANEL_DOWN, "item.hide", CARD), (PANEL_DOWN, "item.hide", HAZE),
+                                            (BEAM_DOWN, "item.hide", BEAM), (BEAM_DOWN, "item.hide", FLARE)])
+    hide["duration_ms"] = BEAM_DOWN
+    # From wherever they are: the panel first, then the beam.
+    hide["lanes"] = [_lane("holo_panel", (PANEL_DOWN, 0.0, "ease_in")),
+                     _lane("holo_beam", (PANEL_DOWN, 1.0, "hold"), (BEAM_DOWN, 0.0, "ease_in"))]
+    hide["starts"] = [{"type": "channel", "channel_id": "holo", "edge": "falls"}]
+    return ([{"type": "channel.set", "channel": c} for c in chans] + [
+        {"type": "item.set_motion", "item_id": BEAM, "motion": [_reveal("holo_beam")]},
+        {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _reveal("holo_panel")]},
+        {"type": "item.set_motion", "item_id": HAZE, "motion": [_reveal("holo_panel")]},
+        {"type": "timeline.set", "scene_id": scene, "timeline": show},
+        {"type": "timeline.set", "scene_id": scene, "timeline": hide},
+        {"type": "hotkey.set", "chord": TOGGLE_KEY,
+         "action": {"type": "channel.switch", "channel_id": "holo", "to": "toggle"}},
+        {"type": "hotkey.set", "chord": HIDE_KEY,
+         "action": {"type": "channel.switch", "channel_id": "holo", "to": "off"}},
+    ])
+
+
+def _bob():
+    return {"modifier_id": "bob", "property": "y", "enabled": True, "clock": "engine",
+            "kind": "oscillate", "shape": "sine", "amplitude": 4.0, "period_ms": 3200,
+            "phase": 0.0}
+
+
+def edits(scene="cockpit", channels=False):
     """The edits that add the rig, switched off, to the 3D scene `scene`, on top of what
-    it holds."""
+    it holds; with `channels`, its show and hide as sequences with lanes."""
     beam_h = BEAM_TOP - LENS_AT[1]
     beam_at = (0.0, LENS_AT[1] + beam_h / 2, LENS_AT[2])
 
@@ -151,10 +218,7 @@ def edits(scene="cockpit"):
              HAZE_FX, 0.0, "fade", delay=150, opacity=0.35)
     e += [
         {"type": "item.set_motion", "item_id": BEAM, "motion": [_pop(BEAM_REVEAL_S)]},
-        {"type": "item.set_motion", "item_id": CARD, "motion": [
-            {"modifier_id": "bob", "property": "y", "enabled": True, "clock": "engine",
-             "kind": "oscillate", "shape": "sine", "amplitude": 4.0, "period_ms": 3200,
-             "phase": 0.0}, _pop(PANEL_REVEAL_S)]},
+        {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _pop(PANEL_REVEAL_S)]},
         {"type": "item.set_motion", "item_id": HAZE, "motion": [_pop(PANEL_REVEAL_S)]},
         {"type": "timeline.set", "scene_id": scene, "timeline": _timeline(
             SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
@@ -172,6 +236,11 @@ def edits(scene="cockpit"):
         {"type": "hotkey.set", "chord": HIDE_KEY,
          "action": {"type": "timeline.play", "timeline_id": HIDE}},
     ]
+    if channels:
+        # The lanes' motion, timelines and keys replace the cue-only ones. A toggle of the
+        # cards alone would leave them unrevealed, so the `holo` switch toggles instead.
+        keep = [x for x in e if x["type"] not in ("hotkey.set", "item.set_motion", "timeline.set")]
+        e = keep + _sequences(scene)
     return e
 
 
@@ -188,10 +257,11 @@ def stacking(camera):
     return dict(camera, depth_sort=False)
 
 
-def add(scene="cockpit", cameras=None):
+def add(scene="cockpit", cameras=None, channels=False):
     """Adds the rig to `scene`, switched off. `cameras` maps each scene (the 3D scene and
-    its keyframes) to its camera, which is sent again with `depth_sort` off."""
-    _must(batch(edits(scene), "hologram"), "hologram")
+    its keyframes) to its camera, which is sent again with `depth_sort` off. `channels`
+    makes its show and hide sequences with lanes (protocol 0.170)."""
+    _must(batch(edits(scene, channels), "hologram"), "hologram")
     if cameras:
         _must(batch([{"type": "scene.set_camera", "scene_id": sid, "camera": stacking(cam)}
                      for sid, cam in cameras.items()], "hologram cameras"), "hologram cameras")
