@@ -44,14 +44,18 @@ GLOW = os.environ.get("GLOW", "1") == "1"
 # The desk's 8 x 8 pads: `notes` (the default) plays the selected track as an isomorphic
 # note grid, rows a fourth apart, from the page's `iso` view; `clips` is the clip launcher.
 DESK_GRID = os.environ.get("DESK_GRID", "notes")
-# The ship (see the l_env lights below): its heading at rest in degrees, its warp at rest
-# (0 to 1), and the MIDI CCs that drive them.
+# The ship (see the ship's rig below): its heading, pitch (nose up) and roll (right wing
+# down) at rest in degrees, its warp at rest (0 to 1), and the MIDI CCs that drive them.
 SHIP_YAW = float(os.environ.get("SHIP_YAW", "0"))
+SHIP_PITCH = float(os.environ.get("SHIP_PITCH", "0"))
+SHIP_ROLL = float(os.environ.get("SHIP_ROLL", "0"))
 WARP = float(os.environ.get("WARP", "0"))
 SHIP_CC_CHANNEL = int(os.environ.get("SHIP_CC_CHANNEL", "16"))
 SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "Bitwig")
 SHIP_CC_WARP = int(os.environ.get("SHIP_CC_WARP", "30"))
 SHIP_CC_YAW = int(os.environ.get("SHIP_CC_YAW", "31"))
+SHIP_CC_PITCH = int(os.environ.get("SHIP_CC_PITCH", "32"))
+SHIP_CC_ROLL = int(os.environ.get("SHIP_CC_ROLL", "33"))
 SHIP_CC_SMOOTHING_MS = int(os.environ.get("SHIP_CC_SMOOTHING_MS", "250"))
 # The cards only show where the engine sorts them after the model (ADR-0107 decision 7:
 # items composite by their centres' depth, and the cockpit's centre is nearer than its
@@ -272,24 +276,61 @@ if os.path.exists(THROTTLE):
     ], "throttle"), "throttle")
 
 
-def light(lid, name, settings, at, aim=None, size=60):
+def light(lid, name, settings, at, aim=None, size=60, scene="cockpit"):
     q = p(*at)
     g = geo(q["x"], q["y"], size, size, depth_px=q["z"])
+    if scene != "cockpit":
+        # In the ship's rig: the group's canvas centre is the rig's pivot (see below).
+        g["center"] = {"x": q["x"] - RIG_AT["x"] + 960, "y": q["y"] - RIG_AT["y"] + 540}
+        g["depth_px"] = q["z"] - RIG_AT["z"]
     if aim:
         g.update(aim)
-    return [src(lid, name, "light", settings), add("cockpit", lid, lid, g)]
+    return [src(lid, name, "light", settings), add(scene, lid, lid, g)]
+
+
+# The ship's rig: the sky and the starlight turn around the cabin as the ship turns, inside
+# three nested 3D groups (ADR-0164: a child's orientation is its group's followed by its
+# own, and lights in a 3D group light the whole scene). The outer group rolls, the middle
+# one pitches and the inner one yaws, so the sky turns by the inverse of the ship's
+# heading, then pitch, then roll, as an aircraft's. Each group pivots on the pilot's seat.
+# A group's tilt tips its top away from the cabin's camera, so a positive tilt brings the
+# sky's zenith forward (the nose up); its rotation turns it clockwise on screen, so the
+# sky turns the other way to the ship's roll (SHIP_ROLL is to the right, rotation_deg
+# its negative).
+# The sky follows its item's tilt and rotation with a JStream from ADR-0182 on; an older
+# one turns it on the heading only.
+RIG_AT = p(0, 1.2, 0)
+RIG = [("ship_roll", "Ship roll", {"rotation_deg": -SHIP_ROLL}),
+       ("ship_pitch", "Ship pitch", {"tilt_deg": SHIP_PITCH}),
+       ("ship_yaw", "Ship heading", {"turn_deg": SHIP_YAW})]
+SHIP = RIG[-1][0]
+
+
+def rig():
+    out, parent = [], "cockpit"
+    for gid, name, pose in RIG:
+        out += [{"type": "scene.create", "scene_id": gid, "name": name, "role": "group"},
+                {"type": "scene.set_options", "scene_id": gid, "share_space": True},
+                {"type": "source.create", "source_id": gid, "name": name,
+                 "kind": {"type": "scene", "scene_id": gid}, "settings": {}}]
+    for gid, name, pose in RIG:
+        at = RIG_AT if parent == "cockpit" else {"x": 960, "y": 540, "z": 0.0}
+        out.append(add(parent, gid, gid, geo(at["x"], at["y"], 1920, 1080, depth_px=at["z"], **pose)))
+        parent = gid
+    return out
 
 
 L = []
 L += light("l_ambient", "Ambient", {"type": "ambient", "color": "#8aa4c8", "intensity": 0.4}, (0, 1.2, 0))
+L += rig()
 L += light("l_env", "Space sky", {
     "type": "environment", "intensity": 0.9, "backdrop": True, "sky_color": "#070b15",
     "horizon_color": "#131b2c", "ground_color": "#020306", "stars": 0.4, "star_brightness": 1.3,
     "nebula": 0.7, "nebula_color": "#3a1460", "nebula_color_2": "#0d3a5c", "galaxy": 0.7,
-    "sky_seed": 4127, "warp": WARP, "warp_ramp_s": 0.0}, (0, 1.2, 0), aim={"turn_deg": SHIP_YAW})
+    "sky_seed": 4127, "warp": WARP, "warp_ramp_s": 0.0}, (0, 1.2, 0), scene=SHIP)
 L += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "intensity": 2.0,
                                   "shadows": True, "shadow_softness": 0.35},
-           (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0 + SHIP_YAW})
+           (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0}, scene=SHIP)
 L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.2, "range_px": 3200},
            (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
 # A model is lit by at most 8 lights (the ambient and the environment aside), the first
@@ -351,20 +392,22 @@ motion["l_ambient"] = [data("break", "opacity", "track/5", "stopped", -0.6, 0.0,
 # The sky brightens while either chorus's clip plays on the drums track.
 motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0.0, 0.9,
                         smoothing=1800, states={"playing": 1.0}, source={"param": "intensity"}) for s in (2, 5)]
-# The ship: the warp drive and the heading, on MIDI CCs from Bitwig (a JTunnel plugin's
-# sender, as the camera CCs in import_show.py): SHIP_CC_WARP (30) takes the sky's warp
-# from rest to full, and SHIP_CC_YAW (31) turns the ship a whole turn to the right over
-# the CC's travel, by spinning the sky and the starlight around the cabin. Each rests
-# until its CC first moves (a CC reads 0 until then).
+# The ship: the warp drive, heading, pitch and roll, on MIDI CCs from Bitwig (a JTunnel
+# plugin's sender, as the camera CCs in import_show.py): SHIP_CC_WARP (30) takes the sky's
+# warp from rest to full, and SHIP_CC_YAW (31), SHIP_CC_PITCH (32) and SHIP_CC_ROLL (33)
+# each turn the ship a whole turn over the CC's travel (to the right, nose up and right
+# wing down), by turning the rig's groups and with them the sky and the starlight. Each
+# rests until its CC first moves (a CC reads 0 until then).
 def cc(mid, prop, controller, frm, to, **kw):
     return {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "midi",
             "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, "input": SHIP_CC_INPUT,
             "from": frm, "to": to, "smoothing_ms": SHIP_CC_SMOOTHING_MS, **kw}
 
 
-motion["l_env"] += [cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}),
-                    cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
-motion["l_sun"].append(cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0))
+motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
+motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
+motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
+motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]
 # The model's own LEDs and light strips follow the band, by material name: the red LEDs
 # the drums, the green the bass, the blue the keys, the amber the master, the orange
 # accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
@@ -397,7 +440,8 @@ for lid, group in LIGHT_GROUP.items():
 # drives add up to 1.6, so a switch adds -3 to take it to nothing.
 motion["model"] += gates("glow", "source", off=-3.0, source={"param": "emissive_strength"})
 for lid, mods in motion.items():
-    must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": lid, "motion": mods}), f"motion {lid}")
+    scene = {"l_env": SHIP, "l_sun": SHIP, "ship_pitch": "ship_roll", "ship_yaw": "ship_pitch"}.get(lid, "cockpit")
+    must(op({"type": "item.set_motion", "scene_id": scene, "item_id": lid, "motion": mods}), f"motion {lid}")
 
 # ---- reflections: the cabin reflects its screens and lights ----
 if PROBE:
