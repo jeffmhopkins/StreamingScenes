@@ -8,7 +8,9 @@
  *
  *     P w h ex ey ez tx ty tz fov    a camera at e looking at t, vertical fov in degrees
  *     C res ex ey ez                 all six directions from a point
- *     O res dx dy dz                 from far outside, looking along d
+ *     O res dx dy dz cx cy cz width  from far outside, looking along d at c
+ *     B res ex ey ez                 prints the share of what a point sees, all six
+ *                                    directions, that shows its back: high inside a solid
  *
  * out.vis: n bytes, bit 0 where a triangle is the nearest surface at some pixel of a P or
  * C view (or, too small to hold a pixel, within a pixel of one), bit 1 in an O view. Each view prints a hash of its depth picture, so a caller
@@ -27,6 +29,7 @@
 typedef struct { double x, y, z; } V;
 static int n, W, H, bit;
 static float *T, *zb;
+static unsigned char *fb; /* per pixel: 1 where the nearest surface shows its back */
 static int *F;
 static unsigned char *vis;
 
@@ -37,7 +40,10 @@ static V norm(V a) { double l = sqrt(dot(a, a)); return (V){a.x / l, a.y / l, a.
 
 static void setup(int w, int h) {
     W = w; H = h;
+    if (w <= 0 || h <= 0) exit(2);
     zb = realloc(zb, sizeof(float) * w * h);
+    fb = realloc(fb, (size_t)w * h);
+    if (!zb || !fb) exit(2);
     for (int i = 0; i < w * h; i++) zb[i] = 0;
 }
 
@@ -87,7 +93,8 @@ static void fill(const double *x, const double *y, const double *q, int id, int 
                 double d = w0 * q[0] + w1 * q[1] + w2 * q[2];
                 int k = py * W + px;
                 if (pass == 0) {
-                    if ((float)d > zb[k]) zb[k] = (float)d;
+                    /* The screen's y runs down, so a front face winds with a < 0. */
+                    if ((float)d > zb[k]) { zb[k] = (float)d; fb[k] = a > 0; }
                     continue;
                 }
                 inside = 1;
@@ -170,12 +177,13 @@ static void view(int as, const char *what) {
 int main(int argc, char **argv) {
     if (argc < 3) return 2;
     FILE *f = fopen(argv[1], "rb");
-    if (!f || fread(&n, 4, 1, f) != 1) return 2;
+    if (!f || fread(&n, 4, 1, f) != 1 || n <= 0) return 2;
     T = malloc(36 * (size_t)n);
     F = malloc(4 * (size_t)n);
+    vis = calloc(n, 1);
+    if (!T || !F || !vis) return 2;
     if (fread(T, 36, n, f) != (size_t)n || fread(F, 4, n, f) != (size_t)n) return 2;
     fclose(f);
-    vis = calloc(n, 1);
     char cmd[8];
     while (scanf("%7s", cmd) == 1) {
         double a[7];
@@ -199,6 +207,22 @@ int main(int argc, char **argv) {
                 look(e, (V){e.x + dirs[d].x, e.y + dirs[d].y, e.z + dirs[d].z}, ups[d]);
                 view(1, "C");
             }
+        } else if (cmd[0] == 'B') {
+            if (scanf("%d %lf %lf %lf", &w, &a[0], &a[1], &a[2]) != 4) return 2;
+            V dirs[6] = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+            V ups[6] = {{0, 1, 0}, {0, 1, 0}, {0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, 1, 0}};
+            long hit = 0, back = 0;
+            for (int d = 0; d < 6; d++) {
+                setup(w, w);
+                ortho = 0;
+                focal = w * 0.5;
+                V e = {a[0], a[1], a[2]};
+                look(e, (V){e.x + dirs[d].x, e.y + dirs[d].y, e.z + dirs[d].z}, ups[d]);
+                draw(0);
+                for (int k = 0; k < w * w; k++)
+                    if (zb[k] > 0) { hit++; back += fb[k]; }
+            }
+            printf("B %f\n", hit ? (double)back / hit : 0.0);
         } else if (cmd[0] == 'O') {
             if (scanf("%d %lf %lf %lf %lf %lf %lf %lf", &w, &a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6]) != 8) return 2;
             setup(w, w);
@@ -210,7 +234,6 @@ int main(int argc, char **argv) {
         }
     }
     f = fopen(argv[2], "wb");
-    fwrite(vis, 1, n, f);
-    fclose(f);
+    if (!f || fwrite(vis, 1, n, f) != (size_t)n || fclose(f) != 0) return 2;
     return 0;
 }

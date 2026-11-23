@@ -41,7 +41,7 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
 | [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
-| [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles no camera can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
+| [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles none of several thousand sampled views can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
 
 ## Numbers
@@ -51,7 +51,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 141,783 | 2,000,000 |
+| Triangles | 147,201 | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -71,17 +71,22 @@ takes out what costs time and shows nothing:
 | | Before | After |
 |---|---|---|
 | Models a scene places | 2 (the cockpit and a throttle lever) | 1 |
-| Triangles | 171,210 and the lever's 408 | 141,783 |
-| Surface area | 109.2 m² | 94.4 m² |
-| Surfaces under a pixel, over the DAW show's twelve views | 4.6 to 8.2 | 3.7 to 6.6 |
+| Triangles | 171,210 and the lever's 408 | 147,201 |
+| Surface area | 109.2 m² | 95.9 m² |
+| Surfaces under a pixel, over the DAW show's twelve views | 3.6 to 8.2 | 3.2 to 6.7 |
 | Glass | lit by every light, then shown at 5% | unlit, at the same 5% |
 
-- **Triangles no camera can see are gone**: 29,427 of them. A triangle stays if it is
-  the nearest surface anywhere in about 2,700 views: six directions from each point of a
-  grid through the cabin's free air and from every view of the DAW show, and 300
-  directions from outside, so the hull casts the same shadows. The depth picture of every
-  one of those views is the same before and after, which the tool checks before it
-  writes anything.
+- **Triangles seen in none of about 5,600 views are gone**: 24,009 of them. A triangle
+  stays if it is the nearest surface anywhere in any of them: six directions from each
+  point of a grid through the cabin, from every view of the DAW show, from 30 cm to
+  each side of every view (as far as the show's camera channels push it), and from
+  points along the glide between every two views; and 300 directions from outside, so
+  the hull casts the same shadows. Points inside a solid part are left out. The depth
+  picture of every one of those views is the same before and after, which the tool
+  checks before it writes anything. That check is over the views the choice was made
+  from: a camera somewhere between them could still find a seam a few pixels wide. Run
+  the tool on the model as `finish_gltf.py` left it when the views change, since it
+  can't put a triangle back.
 - **The throttle lever is gone.** It was a second model, `throttle.gltf`, a prop for
   trying a model a scene could move. A second model costs a renderer full-screen layers
   of its own, far more than its 408 triangles: 2.5 ms a frame on an integrated GPU with
@@ -290,7 +295,7 @@ python tools/make_textures.py dl model/textures
 python tools/make_textures.py --grunge model/textures   # panel: grungy metal, no rivets
 python tools/build_cockpit.py model/textures model/cockpit.gltf --blend cockpit.blend
 python tools/finish_gltf.py model/cockpit.gltf
-python tools/optimize_gltf.py model/cockpit.gltf   # needs numpy and cc; about 5 minutes
+python tools/optimize_gltf.py model/cockpit.gltf   # needs numpy and cc; about 9 minutes on four cores
 python tools/render_previews.py cockpit.blend media 48 1280
 ```
 

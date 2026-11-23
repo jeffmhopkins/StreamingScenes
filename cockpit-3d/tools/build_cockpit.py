@@ -1283,15 +1283,17 @@ def main():
     finish()
     for cut in CUTTERS:  # the surround's window cutters, applied in finish
         bpy.data.objects.remove(cut)
+    # The throttle lever is neither kept nor exported: it was a prop for trying a second
+    # model in a scene, and a second model costs a renderer full-screen layers of its
+    # own. Its base and slot stay on the left console.
+    lever = next(o for o in ALL if o.name == "throttle")
+    ALL.remove(lever)
+    bpy.data.objects.remove(lever)
     tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in ALL)
     print(f"objects {len(ALL)}  triangles {tris}")
     if BLEND:
         bpy.ops.wm.save_as_mainfile(filepath=BLEND)
-    # The throttle lever is not exported: it was a prop for trying a second model in a
-    # scene, and a second model costs a renderer full-screen layers of its own. Its base
-    # and slot stay on the left console.
-    lever = next(o for o in ALL if o.name == "throttle")
-    for path, obs in [(OUT, [o for o in ALL if o is not lever])]:
+    for path, obs in [(OUT, list(ALL))]:
         bpy.ops.object.select_all(action="DESELECT")
         for ob in obs:
             ob.select_set(True)
