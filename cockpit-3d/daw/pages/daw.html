@@ -3,10 +3,11 @@
 <body><canvas id="c" width="640" height="360"></canvas><script>
 // One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
-// transport, arrange, device, notes, mixer, clip or scenes. Everything that moves or
+// transport, arrange, device, notes, mixer, clip or scenes (or `window.DAW_VIEW`, set by a
+// script ahead of this one when the page is given to JStream inline). Everything that moves or
 // blinks follows the data (the clock key's beats), never the page's own clock, so a
 // render on a held clock draws the same picture every time.
-const VIEW = new URLSearchParams(location.search).get('view') || 'transport';
+const VIEW = window.DAW_VIEW || new URLSearchParams(location.search).get('view') || 'transport';
 const x = document.getElementById('c').getContext('2d');
 const W = 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
 const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';

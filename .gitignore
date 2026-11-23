@@ -1,1 +1,3 @@
 __pycache__/
+# Projects import_show.py saves beside cockpit-3d/
+cockpit-3d/DAW show*.json

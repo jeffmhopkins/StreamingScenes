@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "jstream"))
 
 import sim  # noqa: E402
 from mcp import batch, init, op, snap  # noqa: E402
-from shots import EYE, SCREEN, SHOTS, camera  # noqa: E402
+from views import SHOTS  # noqa: E402
 
 SESSION, OUT = sys.argv[1:3]
 FIRST = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0
@@ -31,27 +31,6 @@ LAST = float(sys.argv[4]) if len(sys.argv) > 4 else None
 FPS = 30.0
 SETTLE = float(os.environ.get("SETTLE", "0.12"))  # wall seconds for packets and pages to land
 os.makedirs(OUT, exist_ok=True)
-
-# More shots, for the screens the cockpit demo never looked at closely.
-DESK = (0.0, 0.69, -0.92)
-SHOTS = dict(SHOTS)
-SHOTS["desk"] = camera((0.0, 1.16, -0.52), DESK, 54, focus=DESK, blur=10)
-SHOTS["desk_low"] = camera((0.32, 0.98, -0.55), (-0.05, 0.69, -0.95), 50, focus=DESK, blur=12)
-OVER = (0.0, 1.70, -0.62)
-SHOTS["overhead"] = camera((0.0, 1.40, -0.14), OVER, 52, focus=OVER, blur=8)
-SIDE_L, SIDE_R = (-0.95, 0.86, -0.50), (0.95, 0.86, -0.50)
-SHOTS["side_l"] = camera((-0.74, 1.12, -0.44), SIDE_L, 42, focus=SIDE_L, blur=10)
-SHOTS["side_r"] = camera((0.74, 1.12, -0.44), SIDE_R, 42, focus=SIDE_R, blur=10)
-# Out through the windshield at the sky, the canopy only a little soft.
-SHOTS["out"] = camera(EYE, (0.0, 1.36, -3.0), 60, focus=(0.0, 1.4, -2.2), blur=4)
-SHOTS["seat_wide"] = camera((0.0, 1.30, 0.35), (0.0, 1.0, -1.3), 62, focus=SCREEN, blur=8)
-
-# Focus: sharp everywhere on the wide and seat shots; only the close-ups on one screen
-# keep a light depth of field, so the screen reads and the cabin around it softens.
-CLOSE = {"desk", "desk_low", "monitor", "monitor_l", "monitor_r", "side_l", "side_r", "overhead"}
-for name, shot in SHOTS.items():
-    if "blur_px" in shot:
-        SHOTS[name] = dict(shot, blur_px=3.0 if name in CLOSE else 0.0)
 
 session = sim.Session(SESSION)
 PRE = session.pre

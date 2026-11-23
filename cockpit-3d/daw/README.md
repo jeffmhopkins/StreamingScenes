@@ -15,9 +15,11 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `session.json` | That timeline, so a render needs no Jclap checkout. |
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
-| `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. |
+| `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as keyframes with a hotkey each, two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
+| `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into keyframes. |
+| `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
-| `serve_pages.py` | Serves `pages/` with threads and a deep accept queue: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
+| `serve_pages.py` | Serves `pages/` with threads and a deep accept queue, for `PAGES=…` while editing a page: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -45,6 +47,69 @@ The camera is the one thing the render script moves: it follows the song's secti
 focus is close to infinite on every shot, with a slight depth of field only where it sits
 close to the desk, a screen or a side console (`CLOSE` in `render_daw.py`).
 
+## Importing the show
+
+`import_show.py` puts everything into a running JStream over MCP, with no other step: no
+page server, and no files copied, since the screens' pages go into the project inline and
+the models are read from this checkout.
+
+1. Start the JStream desktop app with `--mcp` (its Getting started guide, "Connect an
+   agent"), or the daemon with `--token-file`.
+2. In the app, turn on "Receive from JTunnel senders" and accept the Bitwig sender, named
+   `Bitwig` (`DAW_INPUT` names another). Only a person can change this setting, so it is
+   the one step a script can't do. It takes effect when the app next starts.
+3. From this folder: `python3 import_show.py` (Python 3 with numpy). It makes a new
+   project, `DAW show.json` beside `cockpit-3d/` (numbered if one exists, or give a path),
+   builds it and saves it there, so the app opens it again next time.
+
+What it makes:
+
+| | |
+|---|---|
+| Scenes | `DAW cockpit` (3D, with a keyframe a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
+| Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) |
+| Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
+| Hologram | Ctrl+Alt+H shows or hides the hologram over the dash, Ctrl+Alt+Shift+H hides it. It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
+| Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
+| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
+
+The app hears the hotkeys while another application, such as Bitwig, has the focus. An
+agent switches the views with `scene.switch` to `cockpit` or a `view_…` keyframe and the
+preset `glide`. Without reflection probes in the JStream it runs on, the cockpit builds
+without reflections and says so.
+
+## The hologram
+
+A holographic display that projects up out of the dash, the 3D
+version of the 2D cockpit's incoming-transmission hologram: the projector's lens flares,
+a beam rises from it, and a 16:9 panel floats over the dash in front of the windshield,
+tinted blue, see-through where the picture is dark, with scanlines, a sweep band, an edge
+glow, flicker and the odd glitch, and a faint sheet of light 6 cm in front of it. It is
+made of cards in the cockpit's 3D space, so panning the camera shows it in depth.
+`hologram.py` builds it, and `import_show.py` calls it.
+
+| | |
+|---|---|
+| Show, hide | Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it. An agent sends `timeline.play` with one of them |
+| What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
+| Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
+| Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card` and `holo_haze`; the art is in `hologram/` (`make_art.py` draws it) |
+
+The cards sit behind the cabin model's centre, so JStream would sort them under the
+model and show them only through the windows. `hologram.py` turns off `depth_sort` on the
+cockpit's camera and on every view's, so items draw in stacking order, the hologram last.
+
+It shows and hides at once: a JStream 3D group is drawn flat while a Move runs, and an
+`item.show` on a 3D view plays its transition without the scene's camera, so the rig
+uses plain items and the default transition. The pop-up's own animation waits on those
+engine fixes.
+
+```sh
+python3 hologram.py add          # into an existing `cockpit` scene (build_daw.py's)
+python3 hologram.py show         # or hide, source <id>, standin
+```
+
 ## Running it
 
 It needs a JStream with the `grid` kind (ADR-0171 decision 9), data modifiers (decision
@@ -53,8 +118,7 @@ with its `cef` feature and the browser helper beside it.
 
 ```sh
 jstream-daemon --port 4455 --token-file ~/jstream-token --jtunnel-accept Bitwig@127.0.0.1:47251
-python3 serve_pages.py 8765 &
-PAGES=http://127.0.0.1:8765 python3 build_daw.py
+python3 build_daw.py
 python3 render_daw.py session.json frames/   # or: … frames/ <first s> <last s>
 ffmpeg -framerate 30 -i frames/f%04d.png -itsoffset 2 -i funk-song-v42.mp3 \
   -map 0:v -map 1:a -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 256k -shortest daw-cockpit.mp4
