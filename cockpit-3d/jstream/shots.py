@@ -142,9 +142,3 @@ SHOTS = {
         tuple(SCREEN_R[i] + 0.6 * SCREEN_R_N[i] - (ACROSS if i == 0 else 0) for i in range(3)),
         SCREEN_R, 46, focus=SCREEN_R, blur=10),
 }
-
-# The throttle lever, a second model with its origin at the hinge.
-THROTTLE_PIVOT = _readme_point("Hinge (pivot)")
-# Whether the cockpit model holds the lever itself (tools/optimize_gltf.py puts it there):
-# a scene then places no second model for it.
-LEVER_IN_MODEL = any(n.get("name") == "throttle" for n in json.load(open(MODEL))["nodes"])

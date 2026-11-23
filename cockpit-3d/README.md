@@ -34,7 +34,6 @@ scene's lights, so it will not look exactly like this there.
 | Path | What it is |
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
-| [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, for a scene that moves it. The cockpit holds the lever too, so most scenes don't need this. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
 | [`model/textures/`](model/textures/) | 21 images: six tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and the screens' placeholder atlas. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
@@ -42,7 +41,7 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
 | [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
-| [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it folds the lever in, makes the glass unlit and removes triangles no camera can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
+| [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles no camera can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
 
 ## Numbers
@@ -52,15 +51,13 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 142,057 | 2,000,000 |
+| Triangles | 141,783 | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
-Nothing in the file was reported as ignored. `throttle.gltf` loads the same way: 408
-triangles, and its own copy of the `paint` and `plastic` sets, 128 MiB, which a scene that
-uses the lever in the cockpit doesn't load.
+Nothing in the file was reported as ignored.
 
 ## What the model doesn't draw
 
@@ -73,19 +70,22 @@ takes out what costs time and shows nothing:
 
 | | Before | After |
 |---|---|---|
-| Models a scene places | 2 (the cockpit and the lever) | 1 |
-| Triangles | 171,210 and the lever's 408 | 142,057 |
+| Models a scene places | 2 (the cockpit and a throttle lever) | 1 |
+| Triangles | 171,210 and the lever's 408 | 141,783 |
 | Surface area | 109.2 m² | 94.5 m² |
 | Surfaces under a pixel, over the DAW show's twelve views | 4.6 to 8.2 | 3.7 to 6.6 |
 | Glass | lit by every light, then shown at 5% | unlit, at the same 5% |
 
-- **Triangles no camera can see are gone**: 29,561 of them. A triangle stays if it is
+- **Triangles no camera can see are gone**: 29,427 of them. A triangle stays if it is
   the nearest surface anywhere in about 2,700 views: six directions from each point of a
   grid through the cabin's free air and from every view of the DAW show, and 300
   directions from outside, so the hull casts the same shadows. The depth picture of every
   one of those views is the same before and after, which the tool checks before it
   writes anything.
-- **The lever is in the cockpit**, as the node `throttle`, upright at its hinge.
+- **The throttle lever is gone.** It was a second model, `throttle.gltf`, a prop for
+  trying a model a scene could move. A second model costs a renderer full-screen layers
+  of its own, far more than its 408 triangles: 2.5 ms a frame on an integrated GPU with
+  reflections on. Its base and slot stay on the left console.
 - **The glass is `KHR_materials_unlit`**. It was lit like every other surface and then
   shown at 5% opacity, across every window. Unlit, it dims what is behind it the same;
   what is lost is a reflection of the sky and the lights at a twentieth of its strength,
@@ -128,7 +128,7 @@ cabin toward the windshield.
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
 | `dashboard` | the three monitors, upright, the centre one at z ≈ −1.42 and the outer two turned 15° inward, hinged midway in an even 5.5 cm gap, in one slim moulded case (a face with a window per screen, about 4 cm deep, with a deeper chamfered frame standing 3 cm proud round each side screen, and over it all one ledge standing 7 cm out toward the pilot that steps up one ledge-thickness (2.4 cm) into a low trapezoid crown over the centre monitor, an amber light bar along its whole front edge) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
 | `live_panels` | eleven quads on the `screens` material over the centre console's, the wings' and the overhead switch panel's readouts and the button panel right of the centre console's readouts (see [Screens](#screens)) |
-| `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
+| `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (with no lever), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
 | `cabin` | the walls and roof behind the side windows, light strips, floor, pipes |
@@ -177,28 +177,6 @@ until a live source fills the strip; the DAW scene draws them from its `panels` 
 To put live pictures on the screens, lay them out in one 1920 × 1080 scene in those cells
 and give the model source `texture` = that scene and `texture_material` = `screens`
 (ADR-0107 decision 5).
-
-### The throttle lever
-
-The lever (shaft and grip) is in `cockpit.gltf` as the node `throttle`, upright, at the
-middle of its travel. JStream can't move one node inside a model, so a scene that wants
-to move the lever needs it as a model of its own: that is `throttle.gltf`, with its origin
-at the hinge inside the base. Build the cockpit without the lever for such a scene
-(`tools/optimize_gltf.py --keep-throttle-out`), or it shows two. A second model costs a
-renderer full-screen layers of its own, far more than the lever's 408 triangles, which is
-why the cockpit holds it by default. The scripts in `jstream/` and `daw/` place
-`throttle.gltf` only when the cockpit they load has no `throttle` node.
-
-| | |
-|---|---|
-| Hinge (pivot), in the cockpit's coordinates | (−0.930, 0.737, −0.150) |
-| Hinge axis | the cockpit's x axis: the grip swings toward −z (forward) or +z (back) |
-| Travel | −25° to +25° from upright; the slot in the base is 24 cm long |
-| Size | 0.120 × 0.220 × 0.080 m (x, y, z) |
-| Bounds centre, from the pivot | (0, 0.110, 0): the lever stands on its pivot |
-
-To animate `throttle.gltf`, put it in a group whose centre is the pivot, offset the lever
-by its bounds centre, and tilt the group.
 
 ### All materials
 
@@ -251,7 +229,7 @@ What it shows:
 | File | What it does |
 |---|---|
 | [`jstream/build_scene.py`](jstream/build_scene.py) | Builds the `feed` and `cockpit` scenes, the lights, filters, the shot variants and the glide presets. |
-| [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point and throttle hinge from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
+| [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
 | [`jstream/drive.py`](jstream/drive.py) | Plays the tour live on program and records it (`record` output, H.264), with the jump to warp and back. |
 | [`jstream/render_frames.py`](jstream/render_frames.py) | Renders the tour frame by frame through `video.snapshot`, for a machine too slow to composite it live. |
 | [`jstream/snap_shot.py`](jstream/snap_shot.py) | Puts one shot on program and saves a snapshot. |

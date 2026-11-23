@@ -1,15 +1,10 @@
 """Takes out of the finished cockpit.gltf what costs render time and shows nothing.
 
-    python optimize_gltf.py <cockpit.gltf> [--keep-throttle-out] [--keep-glass-lit] [--keep-hidden]
+    python optimize_gltf.py <cockpit.gltf> [--keep-glass-lit] [--keep-hidden]
 
-Run it last, after finish_gltf.py (and add_live_panels.py). It does three things, each of
+Run it last, after finish_gltf.py (and add_live_panels.py). It does two things, each of
 which leaves the picture as it was:
 
-- **The throttle lever joins the cockpit**, as a node `throttle` at its hinge. A renderer
-  that gives every model its own full-screen layers pays for a second model by the
-  screen, not by the triangle, so a 408-triangle lever cost as much as a tenth of the
-  cabin. `throttle.gltf` stays beside the model for a scene that wants to move the
-  lever: build the cockpit with `--keep-throttle-out` for that scene.
 - **The glass becomes unlit.** It is 5% opaque, so 95% of whatever lighting it gets is
   thrown away, and it covers every window. Unlit, it still dims what is behind it by the
   same 5%.
@@ -24,12 +19,11 @@ which leaves the picture as it was:
   be identical, or nothing is written.
 
 It needs numpy and a C compiler (`cc`), for visibility.c beside it. It is safe to run
-again: the lever isn't added twice, and a second pass finds nothing more to remove.
+again: a second pass finds nothing more to remove.
 """
 import json
 import math
 import os
-import re
 import struct
 import subprocess
 import sys
@@ -117,41 +111,6 @@ def write(path, g, prims):
     with open(os.path.join(os.path.dirname(path), uri), "wb") as f:
         f.write(blob)
     json.dump(g, open(path, "w"), separators=(",", ":"))
-
-
-def pivot(path):
-    """The throttle's hinge in the cockpit's coordinates, from the README's table."""
-    readme = os.path.join(os.path.dirname(path), "..", "README.md")
-    for line in open(readme, encoding="utf-8"):
-        if line.startswith("| Hinge (pivot)"):
-            nums = re.findall(r"\(([-−\d.,\s]+)\)", line)[0].replace("−", "-")
-            return [float(v) for v in nums.split(",")]
-    sys.exit(f"{readme} has no row for the hinge")
-
-
-def add_throttle(path, g, prims):
-    """Adds throttle.gltf's lever at its hinge as the node `throttle`."""
-    if any(n.get("name") == "throttle" for n in g["nodes"]):
-        return 0
-    lever_path = os.path.join(os.path.dirname(path), "throttle.gltf")
-    if not os.path.exists(lever_path):
-        print("no throttle.gltf beside the model: the lever stays out")
-        return 0
-    lever, lever_prims = read(lever_path)
-    names = {m["name"]: i for i, m in enumerate(g["materials"])}
-    at = np.array(pivot(path), "f4")
-    g["meshes"].append({"name": "throttle", "primitives": []})
-    g["nodes"].append({"mesh": len(g["meshes"]) - 1, "name": "throttle"})
-    g["scenes"][g.get("scene", 0)]["nodes"].append(len(g["nodes"]) - 1)
-    added = 0
-    for _, p, attrs, idx in lever_prims:
-        name = lever["materials"][p["material"]]["name"]
-        if name not in names:
-            sys.exit(f"throttle.gltf uses the material {name}, which the cockpit lacks")
-        attrs["POSITION"] = attrs["POSITION"] + at
-        prims.append([len(g["meshes"]) - 1, {"material": names[name]}, attrs, idx])
-        added += len(idx)
-    return added
 
 
 def unlight_glass(g):
@@ -264,13 +223,11 @@ def remove_hidden(path, g, prims):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = set(a for a in sys.argv[1:] if a.startswith("--"))
-    if len(args) != 1 or flags - {"--keep-throttle-out", "--keep-glass-lit", "--keep-hidden"}:
+    if len(args) != 1 or flags - {"--keep-glass-lit", "--keep-hidden"}:
         sys.exit(__doc__)
     path = args[0]
     g, prims = read(path)
     before = sum(len(idx) for *_, idx in prims)
-    if "--keep-throttle-out" not in flags:
-        print("throttle lever: added", add_throttle(path, g, prims), "triangles")
     if "--keep-glass-lit" not in flags:
         print("unlit now:", ", ".join(unlight_glass(g)) or "nothing new")
     if "--keep-hidden" not in flags:

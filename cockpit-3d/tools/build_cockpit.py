@@ -1101,8 +1101,8 @@ def build_side_consoles():
     base.matrix_world = tm
     box("throttle_slot", (0.03, 0.24, 0.01), (0, 0, 0), material="plastic", bev=0).matrix_world = (
         tm @ Matrix.Translation((0, 0, 0.027)))
-    # The lever is its own node and its own file (throttle.gltf), with its origin at the
-    # hinge inside the base, so a scene can tilt it. It is built upright, mid-travel.
+    # The lever is its own node, with its origin at the hinge inside the base. It is built
+    # upright, mid-travel, and main() leaves it out of the export.
     GROUP[0] = "throttle"
     PIVOT[:] = tm.translation
     arm = box("throttle_arm", (0.03, 0.04, 0.17), (0, 0, 0), material="paint_dark", bev=0.008)
@@ -1287,14 +1287,14 @@ def main():
     print(f"objects {len(ALL)}  triangles {tris}")
     if BLEND:
         bpy.ops.wm.save_as_mainfile(filepath=BLEND)
+    # The throttle lever is not exported: it was a prop for trying a second model in a
+    # scene, and a second model costs a renderer full-screen layers of its own. Its base
+    # and slot stay on the left console.
     lever = next(o for o in ALL if o.name == "throttle")
-    for path, obs in [(OUT, [o for o in ALL if o is not lever]),
-                      (os.path.join(os.path.dirname(OUT), "throttle.gltf"), [lever])]:
+    for path, obs in [(OUT, [o for o in ALL if o is not lever])]:
         bpy.ops.object.select_all(action="DESELECT")
         for ob in obs:
             ob.select_set(True)
-        if obs == [lever]:
-            lever.location = (0, 0, 0)
         bpy.ops.export_scene.gltf(
             filepath=path,
             use_selection=True,
