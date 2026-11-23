@@ -575,6 +575,8 @@ def screen(name, width, loc, rot):
     face = 0.0
     if name in MAIN_MONITORS:
         face = MONITOR_FACE
+        if name != "screen_center":
+            face -= SIDE_FORWARD * math.cos(math.radians(rot[0]))  # the face, brought forward
     else:
         # Bezel: a plastic frame just behind the screen, and a housing behind that.
         bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
@@ -598,6 +600,22 @@ def screen(name, width, loc, rot):
 # The three main monitors, left to right, and their shared surround (see below).
 MAIN_MONITORS = ("screen_left", "screen_center", "screen_right")
 MONITOR_FACE = -0.008  # the surround's face, in front of the screens (local -y is out)
+# The outer monitors sit a little further back than the centre one, so faces offset
+# equally from the screens would fold nearer the outer screens' edges. Bringing the outer
+# two segments of the surround this far toward the pilot (horizontally, so the mitre stays
+# level) puts each fold exactly midway between the two screens' edges, top to bottom.
+SIDE_FORWARD = 0.00385
+
+
+def surround_frame(name):
+    """A main monitor's frame for the surround: its screen's frame, the outer ones
+    brought SIDE_FORWARD toward the pilot."""
+    f = frame_matrix(*SCREENS[name][1:])
+    if name == "screen_center":
+        return f
+    n = f.to_3x3() @ Vector((0, 1, 0))
+    n.z = 0
+    return Matrix.Translation(-n.normalized() * SIDE_FORWARD) @ f
 
 
 def fillet(profile, radii, step=15):
@@ -678,7 +696,7 @@ def build_monitor_surround():
     w = SCREENS[MAIN_MONITORS[0]][0]
     h = w * 9 / 16
     H, F = h / 2, MONITOR_FACE
-    frames = [frame_matrix(*SCREENS[n][1:]) for n in MAIN_MONITORS]
+    frames = [surround_frame(n) for n in MAIN_MONITORS]
     ends = (-(w / 2 + 0.05), w / 2 + 0.05)
     shell = [
         (F, -H - 0.045),        # the face's bottom edge
@@ -694,7 +712,8 @@ def build_monitor_surround():
     # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
     # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
     floor = 0.004
-    for i, (n, f) in enumerate(zip(MAIN_MONITORS, frames)):
+    for i, n in enumerate(MAIN_MONITORS):
+        f = frame_matrix(*SCREENS[n][1:])  # the screen's own frame: the floor is behind it
         bm = bmesh.new()
         bmesh.ops.create_cube(bm, size=1.0)
         bmesh.ops.scale(bm, vec=Vector((w + 0.002, 0.08, (w + 0.002) * 9 / 16)), verts=bm.verts)
