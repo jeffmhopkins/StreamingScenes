@@ -236,7 +236,8 @@ lava world and the violet giant), placed where the planet's lit side faces it: f
 what lights the cabin. That needs ADR-0188's companion pictures, which an older JStream
 doesn't have (it would leave those planets out), so `SUNS` is off by default for now.
 `ARRIVALS=0` leaves the sky without pictures. A JStream without ADR-0188 refuses the
-settings, and the build says so and goes on.
+settings and the pictures in one batch, so nothing of them is left (checked on
+alpha.9), and the build says so and goes on.
 
 The pictures are original, rendered by `arrivals/src/render_all.py` with numpy and Pillow
 alone: the black hole is ray traced through a Schwarzschild metric, the planets are lit

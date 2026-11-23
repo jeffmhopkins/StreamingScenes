@@ -476,17 +476,17 @@ if WARP_AIM == "ahead":
 # out, a nebula, a galaxy, a black hole or a planet, a different one each time
 # (sky_arrivals.py). SUNS=1 gives each planet its star, off to one side, to turn and find
 # (needs ADR-0188's companions). ARRIVALS=0 leaves the sky as it was. An engine without
-# them refuses the settings and the sky has no pictures.
+# them refuses the settings, and nothing of them is left.
 ARRIVALS = os.environ.get("ARRIVALS", "1") == "1"
 SUNS = os.environ.get("SUNS", "0") == "1"
 ARRIVAL_LIGHT = float(os.environ.get("ARRIVAL_LIGHT", "0.6"))
 if ARRIVALS:
     sys.path.insert(0, HERE)
     import sky_arrivals
-    _, ok = batch(sky_arrivals.edits(SUNS), "arrival pictures")
-    if ok:
-        _, ok = op({"type": "source.set_settings", "source_id": "l_env",
-                    "patch": sky_arrivals.patch(ARRIVAL_LIGHT)})
+    # One batch, so an engine that refuses the settings is left with no `arrivals` scene.
+    _, ok = batch(sky_arrivals.edits(SUNS) + [{"type": "source.set_settings", "source_id": "l_env",
+                                                "patch": sky_arrivals.patch(ARRIVAL_LIGHT)}],
+                  "arrival pictures")
     if not ok:
         print("this JStream has no sky_pictures (ADR-0188): no arrival pictures", file=sys.stderr)
 
