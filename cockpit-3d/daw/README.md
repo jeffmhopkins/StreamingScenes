@@ -69,6 +69,7 @@ What it makes:
 | Scenes | `DAW cockpit` (3D, with a keyframe a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
+| Hologram | Ctrl+Alt+H shows or hides the hologram over the dash, Ctrl+Alt+Shift+H hides it. It shows the `holo_feed` source; see [The hologram](#the-hologram) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 
@@ -76,6 +77,37 @@ The app hears the hotkeys while another application, such as Bitwig, has the foc
 agent switches the views with `scene.switch` to `cockpit` or a `view_…` keyframe and the
 preset `glide`. Without reflection probes in the JStream it runs on, the cockpit builds
 without reflections and says so.
+
+## The hologram
+
+A holographic display that projects up out of the instrument on the tray, the 3D
+version of the 2D cockpit's incoming-transmission hologram: the projector's lens flares,
+a beam rises from it, and a 16:9 panel floats over the dash in front of the windshield,
+tinted blue, see-through where the picture is dark, with scanlines, a sweep band, an edge
+glow, flicker and the odd glitch, and a faint sheet of light 6 cm in front of it. It is
+made of cards in the cockpit's 3D space, so panning the camera shows it in depth.
+`hologram.py` builds it, and `import_show.py` calls it.
+
+| | |
+|---|---|
+| Show, hide | Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it. An agent sends `timeline.play` with one of them |
+| What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
+| Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
+| Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card` and `holo_haze`; the art is in `hologram/` (`make_art.py` draws it) |
+
+The cards sit behind the cabin model's centre, so JStream would sort them under the
+model and show them only through the windows. `hologram.py` turns off `depth_sort` on the
+cockpit's camera and on every view's, so items draw in stacking order, the hologram last.
+
+It shows and hides at once: a JStream 3D group is drawn flat while a Move runs, and an
+`item.show` on a 3D view plays its transition without the scene's camera, so the rig
+uses plain items and the default transition. The pop-up's own animation waits on those
+engine fixes.
+
+```sh
+python3 hologram.py add          # into an existing `cockpit` scene (build_daw.py's)
+python3 hologram.py show         # or hide, source <id>, standin
+```
 
 ## Running it
 
