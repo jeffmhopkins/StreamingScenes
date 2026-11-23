@@ -99,10 +99,11 @@ The cards sit behind the cabin model's centre, so JStream would sort them under 
 model and show them only through the windows. `hologram.py` turns off `depth_sort` on the
 cockpit's camera and on every view's, so items draw in stacking order, the hologram last.
 
-It shows and hides at once: a JStream 3D group is drawn flat while a Move runs, and an
-`item.show` on a 3D view plays its transition without the scene's camera, so the rig
-uses plain items and the default transition. The pop-up's own animation waits on those
-engine fixes.
+It projects in: the flare comes up, the beam rises out of the lens in a quarter of a
+second, and the panel and its haze materialise from the bottom up over half a second
+behind a bright scan line. Each is the effect's `reveal` driven from 0 to 1 by a
+motion modifier on the `shown` clock, so it plays every time the item is shown, under
+any transition. It goes at once.
 
 ```sh
 python3 hologram.py add          # into an existing `cockpit` scene (build_daw.py's)
