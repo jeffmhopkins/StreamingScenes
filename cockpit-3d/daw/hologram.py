@@ -1,5 +1,5 @@
 """The cockpit's hologram: a holographic display that projects up out of the instrument
-on the tray, over MCP. A module import_show.py calls, and a command line:
+on the dash, over MCP. A module import_show.py calls, and a command line:
 
     python3 hologram.py add [scene]      # add the rig to `cockpit` (or scene), off
     python3 hologram.py show             # show it
@@ -12,7 +12,7 @@ and the `additive` blend, shown and hidden by timelines of `item.show`, `item.hi
 `item.toggle` cues. `add` binds Ctrl+Alt+H to toggle it and Ctrl+Alt+Shift+H to hide it.
 
 The rig, in the model's metres (glTF: +y up, the pilot faces -z):
-- the projector's lens, a small glow on the instrument on the tray, dim while off, and a
+- the projector's lens, a small glow on the dash, below the monitors, dim while off, and a
   flare over it while on;
 - the beam, a light cone standing on it up to the panel;
 - the panel, a 16:9 card floating over the dash, above the monitors and in front of the
@@ -47,8 +47,8 @@ SHOW, HIDE, TOGGLE = "holo_show", "holo_hide", "holo_toggle"
 TOGGLE_KEY, HIDE_KEY = "Ctrl+Alt+KeyH", "Ctrl+Alt+Shift+KeyH"
 
 # Where the rig stands, in model metres.
-LENS_AT = (0.0, 0.715, -0.98)
-PANEL_AT = (0.0, 1.36, -0.98)
+LENS_AT = (0.0, 0.79, -1.28)
+PANEL_AT = (0.0, 1.42, -1.28)
 PANEL_W, PANEL_H = 0.70, 0.39375
 BEAM_TOP = PANEL_AT[1] - PANEL_H / 2
 

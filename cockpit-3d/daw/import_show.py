@@ -5,7 +5,7 @@
   the reflections, the filters, and the data modifiers that move them with Bitwig;
 - the camera views (views.py) as keyframes of the cockpit scene, a glide between them,
   and a hotkey for each: Ctrl+Alt+1 to 9, 0, - and =;
-- the hologram (hologram.py), a display that projects up from the tray: Ctrl+Alt+H
+- the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows or hides it, Ctrl+Alt+Shift+H hides it, and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
@@ -100,7 +100,7 @@ def view_scene(shot):
     return "cockpit" if shot == "cockpit" else "view_" + shot
 
 
-# ---- the hologram (hologram.py): projects up from the tray on Ctrl+Alt+H (again: away), away on
+# ---- the hologram (hologram.py): projects up from the dash on Ctrl+Alt+H (again: away), away on
 # Ctrl+Alt+Shift+H; every view's camera draws in stacking order so it shows ----
 import hologram  # noqa: E402
 
