@@ -63,17 +63,18 @@ def text(r):
     return "\n".join(c.get("text", "") for c in r["result"]["content"] if c["type"] == "text")
 
 
-def _result(r, label):
+def _result(r, label, quiet=False):
     t = text(r)
     err = r.get("result", {}).get("isError") or t.startswith("RPCERR")
-    if err:
+    if err and not quiet:
         print("FAIL", label, t[:1500], file=sys.stderr)
     return t, not err
 
 
-def op(o, **kw):
-    """Runs one protocol op through its noun's tool. Returns (text, ok)."""
-    return _result(call(o["type"].split(".")[0], {"op": o, **kw}), o["type"])
+def op(o, quiet=False, **kw):
+    """Runs one protocol op through its noun's tool. Returns (text, ok). `quiet` doesn't
+    print a refusal, for a probe whose failure is expected."""
+    return _result(call(o["type"].split(".")[0], {"op": o, **kw}), o["type"], quiet)
 
 
 def batch(edits, label=""):

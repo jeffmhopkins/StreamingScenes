@@ -12,7 +12,7 @@ two pictures, the planet at the bottom (pinned ahead) and its sun on top, pinned
 item's turn_deg and tilt_deg from the planet so the planet's lit side faces it
 (arrivals/sun_directions.json, written by arrivals/src/render_all.py). The sun is behind
 the ship's shoulder for most of them, so turning the ship finds it, and it is the one
-that lights the scene. That needs a JStream with ADR-0188's companions; an older one
+that lights the scene. That needs a JStream with ADR-0198's companions; an older one
 leaves out an item that shows a scene, so SUNS is off by default until that lands.
 
 Build from build_daw.py: `edits()` returns the scene, and `patch()` the sky's settings.
@@ -23,6 +23,9 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.join(HERE, "arrivals")
 SCENE = "arrivals"
+# The engine sizes a picture by its item's width over the program canvas's width, which
+# build_daw.py sets to 1920 x 1080. A project given another canvas width scales every
+# arrival by 1920 over it: change these to match.
 CANVAS_W, CANVAS_H = 1920, 1080
 SKY_DEG = 100.0
 # Each picture's width across the sky, in degrees (its item's width is this / SKY_DEG of
@@ -59,6 +62,7 @@ def _png_size(path):
 
 
 def _image(sid, name, path):
+    # mcp.asset() builds the same; importing mcp needs a token, and this stays importable without one.
     return {"type": "source.create", "source_id": sid, "name": name,
             "kind": {"type": "builtin", "kind": "image"},
             "settings": {"file": {"type": "asset", "root": "absolute", "path": path}}}

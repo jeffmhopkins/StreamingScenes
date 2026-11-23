@@ -283,7 +283,7 @@ if __name__ == "__main__":
         # With sequences, set the `holo` switch, so its edges and the keys stay in step;
         # without the channel, play the timeline.
         _, ok = op({"type": "channel.set_value", "channel_id": "holo",
-                    "value": 1.0 if cmd == "show" else 0.0})
+                    "value": 1.0 if cmd == "show" else 0.0}, quiet=True)
         if not ok:
             _must(op(show_action() if cmd == "show" else hide_action()), cmd)
     elif cmd == "source" and len(sys.argv) > 2:
