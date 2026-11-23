@@ -735,7 +735,7 @@ def prism_bm(outline, s0, s1):
 
 # The ledge over the bank: how far its nose stands out from the face, and how far it
 # climbs over the centre monitor, and over what width.
-LEDGE_NOSE, CROWN_RISE, CROWN_RUN = 0.07, 0.09, 0.09
+LEDGE_NOSE, CROWN_RISE, CROWN_RUN = 0.07, 0.024, 0.03
 
 
 def build_monitor_surround():
