@@ -35,6 +35,7 @@ scene's lights, so it will not look exactly like this there.
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
 | [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, so a scene can move it. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
+| [`model/light_bar.gltf`](model/light_bar.gltf) | The amber light bar along the ledge's front edge, by itself, so a scene can fill it from the centre out. See [The ledge light bar](#the-ledge-light-bar). |
 | [`model/textures/`](model/textures/) | 21 images: six tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and the screens' placeholder atlas. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
@@ -164,12 +165,27 @@ origin at the hinge inside the base. It is modelled upright, at the middle of it
 To animate it, put the lever in a group whose centre is the pivot, offset the lever by
 its bounds centre, and tilt the group.
 
+### The ledge light bar
+
+The light bar under the nose of the ledge over the monitors is `light_bar.gltf`, a second
+model in the cockpit's own coordinates (place it like `cockpit.gltf`, by its bounds). Its
+one material, `light_bar`, is unlit amber. Its UVs run u = 0 to 1 along the bar, left
+end to right end, with v = 0.5 everywhere, so a picture mapped onto it is read along one
+row through its middle.
+
+The build scripts give it a live texture: the `ledge_bar` scene, 1920 × 1080, a black
+background (`ledge_bar_bg`) under a white full-frame box (`ledge_bar_fill`). The box's
+`scale` motion is the bar's level: −1 is dark, 0 lights the whole bar, and in between the
+box covers the middle of the picture, so the bar lights from the centre outward. The DAW
+build drives it from the master meter (`data` modifier `level`, `LEVEL_MS` smoothing,
+default 220 ms). The desk and master light switches fade the box's opacity, so the bar goes dark with the desk lights.
+
 ### All materials
 
 `panel`, `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and `screens` above.
+`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and `screens` above. `light_bar` is in `light_bar.gltf`.
 
 ## In JStream
 

@@ -271,6 +271,38 @@ if os.path.exists(THROTTLE):
             geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
     ], "throttle"), "throttle")
 
+# The ledge's light bar, where the model ships one (light_bar.gltf): a second model at its
+# own place, lit by a small scene, `ledge_bar`, whose middle row it shows along its length
+# (u 0.5 over the centre monitor). One white box, `ledge_bar_fill`, centred in that scene
+# over black, lights it: its scale is the bar's level, so as it grows from nothing the bar
+# lights from the centre outward. Motion on the box's `scale` (from -1, out, to 0, full)
+# drives the level; motion on its opacity can switch it.
+LIGHT_BAR = os.path.join(os.path.dirname(MODEL), "light_bar.gltf")
+if os.path.exists(LIGHT_BAR):
+    from shots import _bounds
+    lo, hi = _bounds(LIGHT_BAR)
+    mid = p(*[(lo[i] + hi[i]) / 2 for i in range(3)])
+    must(batch([
+        {"type": "scene.create", "scene_id": "ledge_bar", "name": "Ledge light bar"},
+        src("ledge_bar_off", "Ledge bar: off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
+        add("ledge_bar", "ledge_bar_bg", "ledge_bar_off", geo(960, 540, 1920, 1080)),
+        src("ledge_bar_on", "Ledge bar: lit", "color", {"color": "#ffffffff", "width": 1920, "height": 1080}),
+        add("ledge_bar", "ledge_bar_fill", "ledge_bar_on", geo(960, 540, 1920, 1080)),
+        {"type": "source.create", "source_id": "ledge_bar_src", "name": "Ledge light bar",
+         "kind": {"type": "scene", "scene_id": "ledge_bar"}},
+        src("light_bar_model", "Ledge light bar", "model", {
+            "file": asset(LIGHT_BAR), "lighting": "scene",
+            "texture": {"type": "source", "source_id": "ledge_bar_src"}, "texture_material": "light_bar"}),
+        add("cockpit", "light_bar", "light_bar_model",
+            geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
+    ], "light bar"), "light bar")
+    # In the DAW cockpit the master's level drives it (ids starting `level`), and the desk
+    # and master switches fade it out like the desk lights.
+    must(op({"type": "item.set_motion", "scene_id": "ledge_bar", "item_id": "ledge_bar_fill",
+             "motion": [data("level", "scale", "meters", "master.0", -1.0, 0.0,
+                             smoothing=int(os.environ.get("LEVEL_MS", "220"))),
+                        *gates("desk")]}), "light bar level")
+
 
 def light(lid, name, settings, at, aim=None, size=60):
     q = p(*at)
