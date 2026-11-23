@@ -1,0 +1,37 @@
+{
+  "ocean_world": {
+    "sun": "sun_yellow",
+    "yaw_deg": -121.0,
+    "pitch_deg": 16.0
+  },
+  "moon_grey": {
+    "sun": "sun_yellow",
+    "yaw_deg": -102.1,
+    "pitch_deg": 14.7
+  },
+  "ringed_giant": {
+    "sun": "sun_yellow",
+    "yaw_deg": -141.0,
+    "pitch_deg": 17.5
+  },
+  "ice_giant": {
+    "sun": "sun_yellow",
+    "yaw_deg": 140.2,
+    "pitch_deg": 20.5
+  },
+  "red_desert": {
+    "sun": "sun_yellow",
+    "yaw_deg": 122.0,
+    "pitch_deg": 17.6
+  },
+  "lava_world": {
+    "sun": "sun_orange",
+    "yaw_deg": -116.6,
+    "pitch_deg": 48.2
+  },
+  "violet_giant": {
+    "sun": "sun_orange",
+    "yaw_deg": 139.5,
+    "pitch_deg": 2.9
+  }
+}
