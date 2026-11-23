@@ -606,6 +606,8 @@ def screen(name, width, loc, rot):
     face = 0.0
     if name in MAIN_MONITORS:
         face = MONITOR_FACE
+        if name != "screen_center":
+            face -= SIDE_RECESS  # on the side screens' deeper frames
     else:
         # Bezel: a plastic frame just behind the screen, and a housing behind that.
         bz = box(f"{name}_bezel", (width + 0.05, 0.03, h + 0.05), (0, 0, 0), material="plastic",
@@ -629,6 +631,7 @@ def screen(name, width, loc, rot):
 # The three main monitors, left to right, and their shared surround (see below).
 MAIN_MONITORS = ("screen_left", "screen_center", "screen_right")
 MONITOR_FACE = -0.008  # the surround's face, in front of the screens (local -y is out)
+SIDE_RECESS = 0.03  # how far the side screens' frames stand proud of the face
 WING_TURN, WING_LENGTH = 30, 0.035  # the surround's wrap round each end of the bank
 
 
@@ -768,6 +771,38 @@ def build_monitor_surround():
     mod.operation = "UNION"
     mod.solver = "EXACT"
     mod.object = cap
+    # The side screens sit back in a deeper frame: a ring standing SIDE_RECESS proud of
+    # the face round each, its inner walls splayed out toward the pilot, joined into the
+    # case. The screens do not move; the frame comes forward.
+    for n in (MAIN_MONITORS[0], MAIN_MONITORS[2]):
+        f = frame_matrix(*SCREENS[n][1:])
+        x0, z0, z1 = w / 2 + 0.02, -H - 0.03, H + 0.012   # outside: under the hood's strip
+        back, front = F + 0.002, F - SIDE_RECESS           # into the face, and proud of it
+        ib, ifr = 0.002, 0.02                              # inner margin, back and front
+        rects = [  # outer front, outer back, inner back, inner front: (half-width, z lo, z hi, s)
+            (x0, z0, z1, front), (x0, z0, z1, back),
+            (w / 2 + ib, -H - ib, H + ib, back), (w / 2 + ifr, -H - ifr, H + ifr, front)]
+        bm = bmesh.new()
+        loops = [[bm.verts.new((sx * hw, s_, zl if sz < 0 else zh))
+                  for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+                 for hw, zl, zh, s_ in rects]
+        for a, b in zip(loops, loops[1:] + loops[:1]):
+            for k in range(4):
+                bm.faces.new((a[k], a[(k + 1) % 4], b[(k + 1) % 4], b[k]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        me = bpy.data.meshes.new(f"{n}_frame")
+        bm.to_mesh(me)
+        bm.free()
+        ring = bpy.data.objects.new(f"{n}_frame", me)
+        bpy.context.collection.objects.link(ring)
+        ring.matrix_world = f
+        ring.hide_render = True
+        ring.display_type = "WIRE"
+        CUTTERS.append(ring)
+        mod = ob.modifiers.new(f"{n}_frame", "BOOLEAN")
+        mod.operation = "UNION"
+        mod.solver = "EXACT"
+        mod.object = ring
     for i, n in enumerate(MAIN_MONITORS):
         f = frame_matrix(*SCREENS[n][1:])  # the screen's own frame: the floor is behind it
         bm = bmesh.new()
