@@ -45,16 +45,16 @@ scene follows a real Bitwig with the JTunnel plugin.
 
 Five MIDI CCs switch the cockpit's lights in groups, each fading over `SWITCH_FADE_MS`
 (2000 ms, a one-pole fade: about two thirds of the way in that time). They come on
-channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`), from `SWITCH_FIRST` (30)
+channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`), from `SWITCH_FIRST` (40)
 up:
 
 | CC | Group | What it switches |
 |---|---|---|
-| 30 | Cabin | the overhead cabin light, the ambient fill and the starlight |
-| 31 | Desk | the six pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow) |
-| 32 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
-| 33 | Glow | the model's own LEDs and light strips: every material's glow strength |
-| 34 | Master | all four, so only the sky lights the cabin and reflects off it |
+| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight |
+| 41 | Desk | the six pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow) |
+| 42 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
+| 43 | Glow | the model's own LEDs and light strips: every material's glow strength |
+| 44 | Master | all four, so only the sky lights the cabin and reflects off it |
 
 A CC up (64 or more, 127 fully) switches its group off, and down switches it back on
 (`SWITCH_UP=off`, the default): JStream reads a CC as 0 until it is first sent, so the
@@ -108,7 +108,7 @@ What it makes:
 | Hologram | Ctrl+Alt+H shows or hides the hologram over the dash, Ctrl+Alt+Shift+H hides it. It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
-| Light switches | CCs 30 to 34 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
+| Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
 The app hears the hotkeys while another application, such as Bitwig, has the focus. An

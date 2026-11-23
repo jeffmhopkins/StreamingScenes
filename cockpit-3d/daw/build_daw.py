@@ -60,7 +60,7 @@ BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 # lit until a switch moves. The last CC, the master, fades every group out, so only the
 # sky lights the cabin. SWITCHES=0 builds without them.
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
-SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "30"))
+SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
 SWITCH_FADE_MS = int(os.environ.get("SWITCH_FADE_MS", "2000"))
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
