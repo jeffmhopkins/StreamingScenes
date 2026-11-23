@@ -50,8 +50,7 @@ NORMAL_SCALE = {"plastic": 0.35, "paint": 0.6, "paint_dark": 0.6}
 SCREENS = {
     # name: (width m, centre, euler degrees (x tilt, y, z yaw))
     # Three equal monitors wrapped around the pilot: one ahead, one angled in each side.
-    # The outer two are placed from the centre one below (BANK_TURN, BANK_GAP).
-    "screen_center": (0.52, (0.0, 1.44, 0.97), (-10, 0, 0)),
+    # The centre one is placed from MONITOR_TILT and the outer two from it, below.
     "screen_side_left": (0.22, (-0.95, 0.5, 0.86), (-50, 0, 75)),
     "screen_side_right": (0.22, (0.95, 0.5, 0.86), (-50, 0, -75)),
     # Lying on the tray in front of the pilot, its far edge raised a little and butted
@@ -68,8 +67,17 @@ SCREENS = {
 BANK_TURN, BANK_GAP = 22, 0.028
 
 
+# How far the monitors lean back from upright, in degrees, hinged on the centre screen's
+# bottom edge, which stays where it is.
+MONITOR_TILT = float(os.environ.get("MONITOR_TILT", 10))
+
+
 def _bank():
-    w, loc, rot = SCREENS["screen_center"]
+    w = 0.52
+    bottom = Vector((0.0, 1.44, 0.97)) + Euler((math.radians(-10), 0, 0)).to_matrix() @ Vector((0, 0, -w * 9 / 32))
+    rot = (-MONITOR_TILT, 0, 0)
+    loc = bottom - Euler((math.radians(-MONITOR_TILT), 0, 0)).to_matrix() @ Vector((0, 0, -w * 9 / 32))
+    SCREENS["screen_center"] = (w, tuple(loc), rot)
     c = Matrix.Translation(Vector(loc)) @ Euler([math.radians(a) for a in rot], "XYZ").to_matrix().to_4x4()
     for name, side in (("screen_left", -1), ("screen_right", 1)):
         hinge = Matrix.Translation((side * (w / 2 + BANK_GAP), 0, 0))
@@ -619,7 +627,7 @@ def screen(name, width, loc, rot):
 # The three main monitors, left to right, and their shared surround (see below).
 MAIN_MONITORS = ("screen_left", "screen_center", "screen_right")
 MONITOR_FACE = -0.008  # the surround's face, in front of the screens (local -y is out)
-WING_TURN, WING_LENGTH = 30, 0.09  # the surround's wrap round each end of the bank
+WING_TURN, WING_LENGTH = 30, 0.035  # the surround's wrap round each end of the bank
 
 
 def fillet(profile, radii, step=15):
@@ -706,7 +714,7 @@ def build_monitor_surround():
     h = w * 9 / 16
     H, F = h / 2, MONITOR_FACE
     frames = [frame_matrix(*SCREENS[n][1:]) for n in MAIN_MONITORS]
-    ends = (-(w / 2 + 0.05), w / 2 + 0.05)
+    ends = (-(w / 2 + 0.022), w / 2 + 0.022)
     # Past each outer monitor the surround turns a further WING_TURN toward the pilot
     # for WING_LENGTH, so it wraps round the ends of the bank: each wing is its monitor's
     # frame turned about its own up axis at the end of that monitor's segment.
@@ -716,16 +724,16 @@ def build_monitor_surround():
         wings.append(f @ hinge @ Matrix.Rotation(math.radians(turn), 4, "Z") @ hinge.inverted())
     shell_frames = [wings[0]] + frames + [wings[1]]
     shell_ends = (ends[0] - WING_LENGTH, ends[1] + WING_LENGTH)
-    shell = [
-        (F, -H - 0.045),        # the face's bottom edge
-        (0.12, -H - 0.035),     # the housing's back, under
-        (0.135, H + 0.045),
-        (0.15, H + 0.075),      # the hood's back
-        (-0.06, H + 0.075),     # the hood's nose, over the pilot's side
-        (-0.06, H + 0.03),      # under the nose
-        (F, H + 0.03),          # where the hood meets the face
+    shell = [  # thin, like a computer monitor's case
+        (F, -H - 0.03),         # the face's bottom edge, room for the soft keys
+        (0.035, -H - 0.022),    # the case's back, under
+        (0.035, H + 0.034),     # the case's back, over
+        (-0.03, H + 0.04),      # a slim hood over the screens, its nose toward the pilot
+        (-0.03, H + 0.022),     # under the nose
+        (F, H + 0.018),         # where the hood meets the face
     ]
-    profile = fillet(shell, [0.012, 0.02, 0.02, 0.015, 0.02, 0.008, 0.008])
+    # A rounded nose on the hood, the rest softened.
+    profile = fillet(shell, [0.006, 0.01, 0.012, 0.009, 0.006, 0.004])
     ob = sweep("monitor_surround", shell_frames, shell_ends, profile, "plastic")
     # The windows: over each screen, 16:9 like it and 1 mm wider each side, cut down to
     # 4 mm behind the screen so the floor's rounded edge stays behind the picture.
@@ -754,8 +762,8 @@ def build_monitor_surround():
     bev.limit_method = "ANGLE"
     bev.angle_limit = math.radians(40)
     # An amber strip under the hood's nose, the length of the bank, mitred with it.
-    led = fillet([(-0.054, H + 0.024), (-0.046, H + 0.024), (-0.046, H + 0.031),
-                  (-0.054, H + 0.031)], [0, 0, 0, 0])
+    led = fillet([(-0.022, H + 0.014), (-0.016, H + 0.014), (-0.016, H + 0.0215),
+                  (-0.022, H + 0.0215)], [0, 0, 0, 0])
     sweep("monitor_surround_led", frames, (ends[0] + 0.06, ends[1] - 0.06), led, "led_amber")
     return ob
 
