@@ -11,9 +11,10 @@
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
-- with CC=1, Bitwig CCs 20 to 29 on channel 16 that move, turn, roll, zoom and focus the
-  cockpit's camera in every view, and switch its autofocus off (CC=1 turns on the views'
-  depth of field and autofocus) (CAMERA_CCS below; needs a JStream whose cameras take MIDI, alpha.8 on);
+- with CC=1, Bitwig CCs 20 to 27 on channel 16 that move, turn, zoom and focus the
+  cockpit's camera in every view (CAMERA_CCS below; needs a JStream whose cameras take
+  MIDI, JStream #1631), and, where JStream has them (protocol 0.167), CC 28 for roll and
+  CC 29 to switch autofocus off; CC=1 turns on the views' depth of field, and autofocus;
 - and the studio keeps the scenes warm, so switching between 2D and 3D starts nothing.
 
     python3 import_show.py [project file]
@@ -107,11 +108,6 @@ mcp.S["sid"] = None
 init()
 
 from views import SHOTS, VIEWS  # noqa: E402
-
-if CC:
-    for cam in SHOTS.values():
-        if "focus_px" in cam:
-            cam["autofocus"] = True
 
 # ---- the camera views: keyframes of the cockpit, glided between ----
 must(op({"type": "transition.create", "preset_id": "glide", "name": f"Glide {GLIDE_MS} ms",
@@ -210,8 +206,26 @@ if CC:
                "from": 0, "to": to,
                "smoothing_ms": 0 if prop == "autofocus" else CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
-    must(op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion}),
-         "camera CCs (needs a JStream whose cameras take MIDI, alpha.8 on)")
+    # Roll and the autofocus switch are the last two: a JStream before protocol 0.167 caps
+    # a camera at 8 modifiers and has no autofocus, so it gets the first 8 only.
+    text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion})
+    if ok:
+        cams = []
+        for shot, _, _ in VIEWS:
+            cam = dict(SHOTS[shot], autofocus=True)
+            cams.append({"type": "scene.set_camera", "scene_id": view_scene(shot),
+                         "camera": hologram.stacking(cam) if HOLOGRAM else cam})
+        must(batch(cams, "autofocus"), "autofocus")
+        print("camera CCs: 20 to 29, autofocus on")
+    else:
+        text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit",
+                       "motion": motion[:8]})
+        if ok:
+            print("camera CCs: 20 to 27; this JStream has no roll CC or autofocus (before "
+                  "protocol 0.167)", file=sys.stderr)
+        else:
+            print("no camera CCs: this JStream's cameras don't take MIDI (JStream #1631); "
+                  "importing the rest", file=sys.stderr)
 
 # ---- the screens atlas is a picture for the model, not a scene to show: a group, out of
 # the scene list, and last, since opening the project puts its first scene on program ----
