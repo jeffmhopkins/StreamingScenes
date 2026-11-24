@@ -52,7 +52,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 147,313 (the optimised 147,201, then the soft keys' 112) | 2,000,000 |
+| Triangles | 147,301 (the optimised 147,201, then the soft keys' 100) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |

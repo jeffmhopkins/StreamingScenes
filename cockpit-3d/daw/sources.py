@@ -25,8 +25,8 @@ Each slot is a channel, `src_<screen>_<slot>` (1 shown, 0 not), that its item's 
 and its key's light follow. A sequence a slot, `<screen>_<slot>` ("Centre monitor:
 Mixer"), takes its screen's five channels to that slot in FADE_MS (150), from wherever
 they are, so a second press mid-fade glides on. Play one from the app's sequences, a
-hotkey (KEYS: Ctrl+Alt+Shift with 1 to 5 for the left monitor, 6 to 0 the centre, A to
-G the right and Z to B the hologram), a MIDI note (import_show.py's NOTES), a show cue or
+hotkey (KEYS: Ctrl+Alt+Shift with 1 to 5 for the left monitor, 6 to 0 the centre, Y to
+P the right and Z to B the hologram), a MIDI note (import_show.py's NOTES), a show cue or
 an agent's `timeline.play`.
 
 The keys' lights are the model's `softkey_lights` (cockpit-3d/tools/softkeys.py): a quad
@@ -62,7 +62,7 @@ SLOTS = [("transport", "Transport", "p_transport"), ("arrange", "Arrangement", "
 SCREENS = [
     ("left", "Left monitor", "a_left", "transport", ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5"]),
     ("center", "Centre monitor", "a_center", "arrange", ["Digit6", "Digit7", "Digit8", "Digit9", "Digit0"]),
-    ("right", "Right monitor", "a_right", "device", ["KeyA", "KeyS", "KeyD", "KeyF", "KeyG"]),
+    ("right", "Right monitor", "a_right", "device", ["KeyY", "KeyU", "KeyI", "KeyO", "KeyP"]),
     ("holo", "Hologram", "holo_card", "feed", ["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB"]),
 ]
 FEED = {"left": "feed", "center": "feed", "right": "feed", "holo": "holo_feed"}

@@ -1,5 +1,5 @@
 {
-  "schema_version": 23,
+  "schema_version": 22,
   "rev": 464,
   "canvas": {
     "width": 1920,
@@ -32279,13 +32279,6 @@
       }
     },
     {
-      "chord": "Ctrl+Alt+Shift+KeyA",
-      "action": {
-        "type": "timeline.play",
-        "timeline_id": "right_transport"
-      }
-    },
-    {
       "chord": "Ctrl+Alt+Shift+KeyB",
       "action": {
         "type": "timeline.play",
@@ -32300,32 +32293,18 @@
       }
     },
     {
-      "chord": "Ctrl+Alt+Shift+KeyD",
-      "action": {
-        "type": "timeline.play",
-        "timeline_id": "right_device"
-      }
-    },
-    {
-      "chord": "Ctrl+Alt+Shift+KeyF",
-      "action": {
-        "type": "timeline.play",
-        "timeline_id": "right_mixer"
-      }
-    },
-    {
-      "chord": "Ctrl+Alt+Shift+KeyG",
-      "action": {
-        "type": "timeline.play",
-        "timeline_id": "right_feed"
-      }
-    },
-    {
       "chord": "Ctrl+Alt+Shift+KeyH",
       "action": {
         "type": "channel.set_value",
         "channel_id": "holo",
         "value": 0.0
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyI",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_device"
       }
     },
     {
@@ -32343,7 +32322,21 @@
       }
     },
     {
-      "chord": "Ctrl+Alt+Shift+KeyS",
+      "chord": "Ctrl+Alt+Shift+KeyO",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_mixer"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyP",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_feed"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyU",
       "action": {
         "type": "timeline.play",
         "timeline_id": "right_arrange"
@@ -32368,6 +32361,13 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "holo_arrange"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyY",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_transport"
       }
     },
     {

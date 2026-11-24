@@ -160,7 +160,7 @@ What it makes:
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows a subscene, `src_holo`, which starts on the `holo_feed` source; see [The hologram](#the-hologram) and [Switching what the screens show](#switching-what-the-screens-show). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
-| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences). What each main monitor and the hologram show: Ctrl+Alt+Shift with 1 to 5 (left monitor), 6 to 0 (centre), A to G (right) and Z to B (hologram); see [Switching what the screens show](#switching-what-the-screens-show) |
+| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences). What each main monitor and the hologram show: Ctrl+Alt+Shift with 1 to 5 (left monitor), 6 to 0 (centre), Y to P (right) and Z to B (hologram); see [Switching what the screens show](#switching-what-the-screens-show) |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, then from 56 (G#2) up the screens' sources, five each for the left, centre and right monitors and the hologram (56 to 75), from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
@@ -269,13 +269,14 @@ screen, open its subscene in the app and point one of its items at that source (
 Each item is a channel, `src_<screen>_<slot>` (1 shown, 0 not), and a sequence a key,
 `<screen>_<slot>` ("Centre monitor: Mixer"), takes its screen's five channels to that
 key's in `SOURCE_FADE_MS` (150 ms), from wherever they are, so the pictures cross-fade.
-Play one from the app's sequences, a cue, an agent's `timeline.play`, or:
+Play one from the app's sequences, a cue, an agent's `timeline.play`, or these (the notes follow the
+views' and the cockpit sequences' notes, so they move up if those gain any):
 
 | Screen | Keys (after Ctrl+Alt+Shift) | MIDI notes (with `NOTES=1`) |
 |---|---|---|
 | Left monitor | 1 to 5 | 56 to 60 |
 | Centre monitor | 6 to 0 | 61 to 65 |
-| Right monitor | A, S, D, F, G | 66 to 70 |
+| Right monitor | Y, U, I, O, P | 66 to 70 |
 | Hologram | Z, X, C, V, B | 71 to 75 |
 
 The selected source's key lights amber under its screen: the five soft keys under each
@@ -284,7 +285,9 @@ lens. Each key's face is a quad on the model's `screens` material that maps one 
 the atlas's key strip (the bottom 16 px of the right side screen's cell, which that
 screen no longer shows; see the model's README), and the atlas has a lit block a key
 there, following its channel. The keys are LEDs: the Glow and Master switches darken them
-with the others. `KEY_LIT` and `KEY_UNLIT` set the two colours. It needs channels and
+with the others. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
+show each monitor's starting page, whatever its key picks, since a card glows only with a
+source's own frame, not a scene's. It needs channels and
 sequences (protocol 0.170); without them the screens show what they did before.
 
 ### Where a warp arrives
