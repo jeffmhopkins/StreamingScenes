@@ -15,10 +15,10 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `session.json` | That timeline, so a render needs no Jclap checkout. |
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`) the desk's note grid (`?view=iso&w=600`) and the console's small displays (`?view=panels&w=320`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
-| `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as sequences with a hotkey each, the cockpit's sequences (lights, monitors, hologram, warp), two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
+| `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as keyframes in a `Views` folder with a hotkey each, the cockpit's sequences (lights, monitors, hologram, warp), two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
 | `show_tour.py` | The Cockpit tour, a show (JStream ADR-0210) that runs through the cockpit for an audience: power up, the seat, the desk, the monitors, the consoles, warp, the hologram, the 2D desk and power down, with a script in every bookmark's note. See [The cockpit tour](#the-cockpit-tour). |
 | `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
-| `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
+| `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into keyframes of the cockpit (`keyframes()`), filed in a folder (`filing()`). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, and the jump to warp and back, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
@@ -115,9 +115,7 @@ sequences keep working beside it.
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
 CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
-Mod. The camera's channels (`cam_*`, see [Camera views](#camera-views)) have no Mod either,
-so Mods 20 to 32 stay free: assign one to a camera channel in JStream (the channel's
-inputs) to play it from Bitwig.
+Mod. Mods 20 to 32 stay free.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
@@ -153,8 +151,8 @@ What it makes:
 
 | | |
 |---|---|
-| Scenes | `DAW cockpit` (3D, with a sequence a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
-| Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
+| Scenes | `DAW cockpit` (3D, with a keyframe a view, in its `Views` folder), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
+| Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides to its keyframe in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
@@ -165,8 +163,8 @@ What it makes:
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
 The app hears the hotkeys while another application, such as Bitwig, has the focus. An
-agent switches the views with `timeline.play` on a `view_…` sequence (`view_cockpit` is
-the wide view). Without reflection probes in the JStream it runs on, the cockpit builds
+agent switches the views with `scene.switch` to a `view_…` keyframe with the preset
+`view_glide` (`view_cockpit` is the wide view). Without reflection probes in the JStream it runs on, the cockpit builds
 without reflections and says so.
 
 ### The cockpit tour
@@ -189,42 +187,34 @@ for whoever presents; Continue goes on.
 | Power down | the cockpit, wide | `monitors_off`, then `lights_off`; the end goes back to Pre-show |
 
 A small tag scene, `tour_tag` ("DAW COCKPIT · BITWIG OVER JTUNNEL"), sits over the cockpit
-on an overlay track. The views, lights, monitors, warp and hologram are cues on a sequence
-track that play the sequences above, so the show moves nothing a hotkey doesn't. On a
+on an overlay track. The views are markers on the show's keyframe track, each gliding to its
+keyframe with `view_glide`, and the lights, monitors, warp and hologram are cues on a
+sequence track that play the sequences above, so the show moves nothing a hotkey doesn't. On a
 JStream without the hologram's filter its two cues do nothing. A project imported before
 the show existed gets it with `python3 add_show.py`; save the project afterwards.
 
 ### Camera views
 
-Each view is a sequence (JStream ADR-0184), not a keyframe. The cockpit keeps one camera,
-the wide view's, and ten channels (ADR-0183) offset it, each named for what 1 does:
+Each view is a keyframe of the cockpit (JStream ADR-0049), `view_<shot>`, named `View: …`,
+with the view's camera. They sit in a folder under the cockpit, `Views` (ADR-0222; a
+JStream before scene folders, protocol 0.190, leaves them unfiled and says so). The wide
+view is a keyframe too, `view_cockpit`, with the same camera as the cockpit's own, so
+every view is in the folder; Ctrl+Alt+F1 puts the cockpit itself on, also wide.
 
-| Channel | Name | 0 to 1 spans |
-|---|---|---|
-| `cam_x`, `cam_y`, `cam_z` | Camera X (right), Camera Y (up), Camera Z (back) | the views' positions and 30 cm past them each way |
-| `cam_tx`, `cam_ty`, `cam_tz` | Camera aim X (right), aim Y (up), aim Z (back) | the point it looks at, the views' and 60 cm past them |
-| `cam_fov` | Camera field of view | 15° to 100° |
-| `cam_roll` | Camera roll (clockwise) | -45° to 45°, level at one half |
-| `cam_focus`, `cam_blur` | Camera focus, Camera blur | the views' focus and 60 cm past it; blur 0 to 20 px (only with `DOF=1` or `CC=1`) |
+A view's hotkey, note or show marker switches to its keyframe with `view_glide`, a Move of
+`GLIDE_MS` (1800), eased in and out: the camera glides from wherever it is, from a view or
+halfway through a glide to another (a switch mid-glide starts from what is on screen,
+JStream ADR-0029 §7). The Bitwig camera CCs belong to the cockpit's family, so they offset
+every view alike and carry through a glide. To change a view, edit its keyframe's camera
+in JStream, as any keyframe's; the hotkeys, notes and the tour follow it.
 
-Each default is the wide view. Any of them can be given an input in JStream, a JTunnel
-Mod or a CC, to play it by hand; it then takes the camera from where the views left it. A view's sequence, `view_<shot>`, has a lane on each channel with one
-point at `GLIDE_MS`, eased in and out, and no point at 0. So it starts from the channel's
-value at that moment and glides from wherever the camera is: from a view, halfway through
-a glide to another, or where the Bitwig camera CCs left it, which still add on top. The
-latest view to start takes the channels, and the one it interrupts lets go. A view never
-switches program: the cockpit stays on, and the sequence moves only the camera. So a
-view is also something a longer sequence, a cue or a trigger can start, and its channels
-are live values another control can take over.
-
-A JStream without sequences (before protocol 0.170) refuses them, and the import makes
-the views keyframes of the cockpit instead, switched with a `glide` move preset, as
-before; `SEQUENCES=0` does that on purpose. `VIEW_SMOOTHING_MS` (40) is how closely the
-camera follows its channels.
+While a glide runs, JStream draws the cockpit without its scene filters, the ambient
+occlusion and the bloom, and puts them back when it ends (JStream ADR-0180), so the glow
+around the screens dips for the length of a glide.
 
 ### Cockpit sequences
 
-With sequences, `import_show.py` adds `ship_sequences.py`'s sequences to the cockpit.
+With sequences (protocol 0.170), `import_show.py` adds `ship_sequences.py`'s sequences to the cockpit.
 Each moves the channels `build_daw.py` makes, so the Bitwig CCs on the same channels
 still work, and whichever moved last wins. An agent plays one with `timeline.play`.
 

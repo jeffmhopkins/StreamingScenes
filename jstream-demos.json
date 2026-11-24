@@ -1,6 +1,6 @@
 {
-  "schema_version": 22,
-  "rev": 288,
+  "schema_version": 23,
+  "rev": 327,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -14708,116 +14708,6 @@
       },
       "camera_motion": [
         {
-          "modifier_id": "view_x",
-          "property": "position_x",
-          "kind": "channel",
-          "channel_id": "cam_x",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -1460.0,
-          "to": 620.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_y",
-          "property": "position_y",
-          "kind": "channel",
-          "channel_id": "cam_y",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": 947.778,
-          "to": -300.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_z",
-          "property": "position_z",
-          "kind": "channel",
-          "channel_id": "cam_z",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -2004.604,
-          "to": 300.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_tx",
-          "property": "target_x",
-          "kind": "channel",
-          "channel_id": "cam_tx",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -1550.0,
-          "to": 1550.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_ty",
-          "property": "target_y",
-          "kind": "channel",
-          "channel_id": "cam_ty",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": 890.0,
-          "to": -1320.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_tz",
-          "property": "target_z",
-          "kind": "channel",
-          "channel_id": "cam_tz",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -2085.396,
-          "to": 1614.604,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_fov",
-          "property": "fov",
-          "kind": "channel",
-          "channel_id": "cam_fov",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -51.0,
-          "to": 34.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_roll",
-          "property": "roll",
-          "kind": "channel",
-          "channel_id": "cam_roll",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -45.0,
-          "to": 45.0,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_focus",
-          "property": "focus",
-          "kind": "channel",
-          "channel_id": "cam_focus",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": -2028.142,
-          "to": 1038.299,
-          "clock": "engine"
-        },
-        {
-          "modifier_id": "view_blur",
-          "property": "blur",
-          "kind": "channel",
-          "channel_id": "cam_blur",
-          "smoothing_ms": 40,
-          "curve": "linear",
-          "from": 0.0,
-          "to": 20.0,
-          "clock": "engine"
-        },
-        {
           "modifier_id": "cc_position_x",
           "property": "position_x",
           "kind": "midi",
@@ -15605,1554 +15495,6 @@
                   "at_ms": 1960,
                   "value": 1.0,
                   "curve": "ease_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_cockpit",
-          "name": "View: Wide",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.701923,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.759573,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.869826,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.402715,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.563621,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.6,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.661399,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_desk",
-          "name": "View: Desk: pads",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.390917,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.249329,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.271493,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.724324,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.458824,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.286199,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_desk_low",
-          "name": "View: Desk, low",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.653846,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.246661,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.236311,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.483871,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.271493,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.716216,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.411765,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.270111,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_monitor",
-          "name": "View: Centre monitor: arrangement",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.240427,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.130174,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.399195,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.590648,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.341176,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.287122,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_monitor_l",
-          "name": "View: Left monitor: transport",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.494762,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.240427,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.144969,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.317359,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.399195,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.610793,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.364706,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.346683,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_monitor_r",
-          "name": "View: Right monitor: device",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.505238,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.240427,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.144969,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.682641,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.399195,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.610793,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.364706,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.346683,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_out",
-          "name": "View: Out the windshield",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.439003,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.474964,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.574661,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.162162,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.529412,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.804333,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_overhead",
-          "name": "View: Overhead: mixer and scenes",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.583259,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.414216,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.728507,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.805405,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.435294,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.269524,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_seat",
-          "name": "View: Pilot's seat",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.439003,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.474964,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.434389,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.563621,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.435294,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.552385,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_seat_wide",
-          "name": "View: Behind the seat",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.503117,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.626834,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.411765,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.621622,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.552941,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.670229,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_side_l",
-          "name": "View: Left console: clip",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.144231,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.35886,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.284042,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.193548,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.348416,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.837838,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.317647,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.195667,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "timeline_id": "view_side_r",
-          "name": "View: Right console: notes",
-          "duration_ms": 1800,
-          "loop": "once",
-          "cues": [],
-          "lanes": [
-            {
-              "target": {
-                "channel": "cam_x"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.855769,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_y"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.35886,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_z"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.284042,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tx"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.806452,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_ty"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.348416,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_tz"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.837838,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_fov"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.317647,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_roll"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.5,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_focus"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.195667,
-                  "curve": "ease_in_out"
-                }
-              ]
-            },
-            {
-              "target": {
-                "channel": "cam_blur"
-              },
-              "points": [
-                {
-                  "at_ms": 1800,
-                  "value": 0.15,
-                  "curve": "ease_in_out"
                 }
               ]
             }
@@ -18972,6 +17314,302 @@
           "visible": true
         }
       ]
+    },
+    {
+      "id": "view_cockpit",
+      "name": "View: Wide",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 1380.0,
+          "y": -140.20882,
+          "z": 1207.7162
+        },
+        "target": {
+          "x": 960.0,
+          "y": 499.7912,
+          "z": -1216.8878
+        },
+        "fov_deg": 66.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 1767.7004,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_seat_wide",
+      "name": "View: Behind the seat",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 179.79118,
+          "z": 647.7162
+        },
+        "target": {
+          "x": 960.0,
+          "y": 479.7912,
+          "z": -1002.2838
+        },
+        "fov_deg": 62.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 1794.7756,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_seat",
+      "name": "View: Pilot's seat",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 259.7912,
+          "z": 297.7162
+        },
+        "target": {
+          "x": 960.0,
+          "y": 429.7912,
+          "z": -1216.8878
+        },
+        "fov_deg": 52.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 1433.4141,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_desk",
+      "name": "View: Desk: pads",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 319.7912,
+          "z": -222.2838
+        },
+        "target": {
+          "x": 960.0,
+          "y": 789.7912,
+          "z": -622.2838
+        },
+        "fov_deg": 54.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 617.17096,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_monitor",
+      "name": "View: Centre monitor: arrangement",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 507.5693,
+          "z": -496.88788
+        },
+        "target": {
+          "x": 960.0,
+          "y": 507.5693,
+          "z": -1116.8878
+        },
+        "fov_deg": 44.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 620.0,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_monitor_l",
+      "name": "View: Left monitor: transport",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 949.1048,
+          "y": 507.5693,
+          "z": -462.79248
+        },
+        "target": {
+          "x": 393.81342,
+          "y": 507.5693,
+          "z": -1042.348
+        },
+        "fov_deg": 46.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 802.64136,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_monitor_r",
+      "name": "View: Right monitor: device",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 970.8952,
+          "y": 507.5693,
+          "z": -462.79248
+        },
+        "target": {
+          "x": 1526.1866,
+          "y": 507.5693,
+          "z": -1042.348
+        },
+        "fov_deg": 46.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 802.64136,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_overhead",
+      "name": "View: Overhead: mixer and scenes",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 79.79119,
+          "z": 157.7162
+        },
+        "target": {
+          "x": 960.0,
+          "y": -220.20882,
+          "z": -322.2838
+        },
+        "fov_deg": 52.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 566.0389,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_out",
+      "name": "View: Out the windshield",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 960.0,
+          "y": 259.7912,
+          "z": 297.7162
+        },
+        "target": {
+          "x": 960.0,
+          "y": 119.79119,
+          "z": -2702.2837
+        },
+        "fov_deg": 60.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 2205.9993,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_desk_low",
+      "name": "View: Desk, low",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 1280.0,
+          "y": 499.7912,
+          "z": -252.2838
+        },
+        "target": {
+          "x": 910.0,
+          "y": 789.7912,
+          "z": -652.2838
+        },
+        "fov_deg": 50.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 567.8394,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_side_l",
+      "name": "View: Left console: clip",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 220.0,
+          "y": 359.7912,
+          "z": -142.2838
+        },
+        "target": {
+          "x": 10.0,
+          "y": 619.7912,
+          "z": -202.2838
+        },
+        "fov_deg": 42.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 339.55853,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
+    },
+    {
+      "id": "view_side_r",
+      "name": "View: Right console: notes",
+      "folder": "cockpit_views",
+      "camera": {
+        "position": {
+          "x": 1700.0,
+          "y": 359.7912,
+          "z": -142.2838
+        },
+        "target": {
+          "x": 1910.0,
+          "y": 619.7912,
+          "z": -202.2838
+        },
+        "fov_deg": 42.0,
+        "roll_deg": 0.0,
+        "depth_sort": false,
+        "focus_px": 339.55853,
+        "blur_px": 3.0,
+        "autofocus": true
+      },
+      "variant_of": "cockpit",
+      "items": []
     },
     {
       "id": "desk_2d",
@@ -28568,6 +27206,11 @@
     {
       "id": "f_overlays",
       "name": "Tour overlays"
+    },
+    {
+      "id": "cockpit_views",
+      "name": "Views",
+      "scene": "cockpit"
     }
   ],
   "labels": [
@@ -28831,85 +27474,97 @@
     {
       "chord": "Ctrl+Shift+Digit0",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_desk_low"
+        "type": "scene.switch",
+        "scene_id": "view_desk_low",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit1",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_cockpit"
+        "type": "scene.switch",
+        "scene_id": "view_cockpit",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit2",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_seat_wide"
+        "type": "scene.switch",
+        "scene_id": "view_seat_wide",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit3",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_seat"
+        "type": "scene.switch",
+        "scene_id": "view_seat",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit4",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_desk"
+        "type": "scene.switch",
+        "scene_id": "view_desk",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit5",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor"
+        "type": "scene.switch",
+        "scene_id": "view_monitor",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit6",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor_l"
+        "type": "scene.switch",
+        "scene_id": "view_monitor_l",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit7",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor_r"
+        "type": "scene.switch",
+        "scene_id": "view_monitor_r",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit8",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_overhead"
+        "type": "scene.switch",
+        "scene_id": "view_overhead",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Digit9",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_out"
+        "type": "scene.switch",
+        "scene_id": "view_out",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Equal",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_side_r"
+        "type": "scene.switch",
+        "scene_id": "view_side_r",
+        "preset_id": "view_glide"
       }
     },
     {
       "chord": "Ctrl+Shift+Minus",
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_side_l"
+        "type": "scene.switch",
+        "scene_id": "view_side_l",
+        "preset_id": "view_glide"
       }
     }
   ],
@@ -28931,8 +27586,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_cockpit"
+        "type": "scene.switch",
+        "scene_id": "view_cockpit",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -28952,8 +27608,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_seat_wide"
+        "type": "scene.switch",
+        "scene_id": "view_seat_wide",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -28973,8 +27630,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_seat"
+        "type": "scene.switch",
+        "scene_id": "view_seat",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -28995,8 +27653,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_desk"
+        "type": "scene.switch",
+        "scene_id": "view_desk",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29006,8 +27665,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor"
+        "type": "scene.switch",
+        "scene_id": "view_monitor",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29017,8 +27677,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor_l"
+        "type": "scene.switch",
+        "scene_id": "view_monitor_l",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29028,8 +27689,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_monitor_r"
+        "type": "scene.switch",
+        "scene_id": "view_monitor_r",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29039,8 +27701,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_overhead"
+        "type": "scene.switch",
+        "scene_id": "view_overhead",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29050,8 +27713,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_out"
+        "type": "scene.switch",
+        "scene_id": "view_out",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29061,8 +27725,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_desk_low"
+        "type": "scene.switch",
+        "scene_id": "view_desk_low",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29072,8 +27737,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_side_l"
+        "type": "scene.switch",
+        "scene_id": "view_side_l",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29083,8 +27749,9 @@
         "channel": 16
       },
       "action": {
-        "type": "timeline.play",
-        "timeline_id": "view_side_r"
+        "type": "scene.switch",
+        "scene_id": "view_side_r",
+        "preset_id": "view_glide"
       }
     },
     {
@@ -29179,116 +27846,6 @@
     }
   ],
   "channels": [
-    {
-      "channel_id": "cam_blur",
-      "name": "Camera blur",
-      "default": 0.0,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_focus",
-      "name": "Camera focus",
-      "default": 0.661399,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_fov",
-      "name": "Camera field of view",
-      "default": 0.6,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_roll",
-      "name": "Camera roll (clockwise)",
-      "default": 0.5,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_tx",
-      "name": "Camera aim X (right)",
-      "default": 0.5,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_ty",
-      "name": "Camera aim Y (up)",
-      "default": 0.402715,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_tz",
-      "name": "Camera aim Z (back)",
-      "default": 0.563621,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_x",
-      "name": "Camera X (right)",
-      "default": 0.701923,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_y",
-      "name": "Camera Y (up)",
-      "default": 0.759573,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "cam_z",
-      "name": "Camera Z (back)",
-      "default": 0.869826,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
     {
       "channel_id": "glow",
       "name": "Glow",
@@ -30743,19 +29300,97 @@
           ]
         }
       ],
+      "keyframes": [
+        {
+          "marker_id": "power_view",
+          "at_ms": 15000,
+          "keyframe_id": "view_cockpit",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "seat_wide",
+          "at_ms": 29000,
+          "keyframe_id": "view_seat_wide",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "seat_close",
+          "at_ms": 36000,
+          "keyframe_id": "view_seat",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "desk_view",
+          "at_ms": 44000,
+          "keyframe_id": "view_desk",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "desk_low",
+          "at_ms": 53000,
+          "keyframe_id": "view_desk_low",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "mon_centre",
+          "at_ms": 62000,
+          "keyframe_id": "view_monitor",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "mon_left",
+          "at_ms": 70000,
+          "keyframe_id": "view_monitor_l",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "mon_right",
+          "at_ms": 78000,
+          "keyframe_id": "view_monitor_r",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "con_over",
+          "at_ms": 86000,
+          "keyframe_id": "view_overhead",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "con_left",
+          "at_ms": 94000,
+          "keyframe_id": "view_side_l",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "con_right",
+          "at_ms": 102000,
+          "keyframe_id": "view_side_r",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "warp_view",
+          "at_ms": 110000,
+          "keyframe_id": "view_out",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "holo_view",
+          "at_ms": 132000,
+          "keyframe_id": "view_seat",
+          "preset_id": "view_glide"
+        },
+        {
+          "marker_id": "down_view",
+          "at_ms": 160000,
+          "keyframe_id": "view_cockpit",
+          "preset_id": "view_glide"
+        }
+      ],
       "sequences": [
         {
           "track_id": "s1",
-          "name": "Views, lights and ship",
+          "name": "Lights and ship",
           "cues": [
-            {
-              "cue_id": "power_view",
-              "at_ms": 15000,
-              "action": {
-                "timeline_id": "view_cockpit",
-                "type": "timeline.play"
-              }
-            },
             {
               "cue_id": "power_lights",
               "at_ms": 15300,
@@ -30769,94 +29404,6 @@
               "at_ms": 18000,
               "action": {
                 "timeline_id": "monitors_on",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "seat_wide",
-              "at_ms": 29000,
-              "action": {
-                "timeline_id": "view_seat_wide",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "seat_close",
-              "at_ms": 36000,
-              "action": {
-                "timeline_id": "view_seat",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "desk_view",
-              "at_ms": 44000,
-              "action": {
-                "timeline_id": "view_desk",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "desk_low",
-              "at_ms": 53000,
-              "action": {
-                "timeline_id": "view_desk_low",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "mon_centre",
-              "at_ms": 62000,
-              "action": {
-                "timeline_id": "view_monitor",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "mon_left",
-              "at_ms": 70000,
-              "action": {
-                "timeline_id": "view_monitor_l",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "mon_right",
-              "at_ms": 78000,
-              "action": {
-                "timeline_id": "view_monitor_r",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "con_over",
-              "at_ms": 86000,
-              "action": {
-                "timeline_id": "view_overhead",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "con_left",
-              "at_ms": 94000,
-              "action": {
-                "timeline_id": "view_side_l",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "con_right",
-              "at_ms": 102000,
-              "action": {
-                "timeline_id": "view_side_r",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "warp_view",
-              "at_ms": 110000,
-              "action": {
-                "timeline_id": "view_out",
                 "type": "timeline.play"
               }
             },
@@ -30877,14 +29424,6 @@
               }
             },
             {
-              "cue_id": "holo_view",
-              "at_ms": 132000,
-              "action": {
-                "timeline_id": "view_seat",
-                "type": "timeline.play"
-              }
-            },
-            {
               "cue_id": "holo_on",
               "at_ms": 133500,
               "action": {
@@ -30897,14 +29436,6 @@
               "at_ms": 143000,
               "action": {
                 "timeline_id": "holo_hide",
-                "type": "timeline.play"
-              }
-            },
-            {
-              "cue_id": "down_view",
-              "at_ms": 160000,
-              "action": {
-                "timeline_id": "view_cockpit",
                 "type": "timeline.play"
               }
             },
@@ -30945,7 +29476,7 @@
           "bookmark_id": "seat",
           "name": "The pilot's seat",
           "at_ms": 29000,
-          "note": "Let's sit down. The camera views are sequences too: each one glides the scene camera from wherever it is to the view, so I can cut between them on a key, a MIDI note or a cue in this show.\n\nFrom the pilot's seat you see the three monitors wrapped around you, and the desk below them."
+          "note": "Let's sit down. The camera views are keyframes of the scene: each one glides the camera from wherever it is to the view, so I can move between them on a key, a MIDI note or a marker in this show.\n\nFrom the pilot's seat you see the three monitors wrapped around you, and the desk below them."
         },
         {
           "bookmark_id": "desk",
@@ -31255,6 +29786,19 @@
             "type": "scene"
           },
           "stagger_ms": 0
+        }
+      },
+      {
+        "id": "view_glide",
+        "name": "View glide 1800 ms",
+        "kind": "move",
+        "kind_version": 1,
+        "duration_ms": 1800,
+        "easing": "ease_in_out",
+        "settings": {
+          "camera_path": "line",
+          "stagger_ms": 0,
+          "unmatched": "fade"
         }
       }
     ],

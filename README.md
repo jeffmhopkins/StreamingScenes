@@ -23,8 +23,9 @@ set it up in JStream, and demo videos and stills.
 | Lightning tour (no pauses) | The title, Keyframes, the 3D cockpit stills and Thanks, looping. |
 
 Open it from a checkout of this repo (**File › Open project…**): its pictures, fonts and the
-cockpit's model are found by their paths from the root. It needs a JStream with shows
-(protocol 0.177). The cockpit's screens follow Bitwig once the app receives from the
+cockpit's model are found by their paths from the root. It needs a JStream with scene folders
+(protocol 0.190, the alpha.13 train), where the cockpit's views are keyframes in a `Views`
+folder under it. The cockpit's screens follow Bitwig once the app receives from the
 JTunnel sender `Bitwig` ([its README](cockpit-3d/daw/README.md#importing-the-show)).
 
 Bitwig: the cockpit is built with every Bitwig input its import offers, all on MIDI
