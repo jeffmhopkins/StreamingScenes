@@ -1,6 +1,6 @@
 {
   "schema_version": 22,
-  "rev": 288,
+  "rev": 297,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -14960,6 +14960,228 @@
       ],
       "timelines": [
         {
+          "timeline_id": "drift",
+          "name": "Drift",
+          "duration_ms": 150000,
+          "loop": "loop",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "drift_yaw"
+              },
+              "points": [
+                {
+                  "at_ms": 25950,
+                  "value": 0.3384,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 33500,
+                  "value": 0.3997,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 42550,
+                  "value": 0.2844,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 55875,
+                  "value": 0.6795,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 78775,
+                  "value": 0.0645,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 94225,
+                  "value": 0.5974,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 100350,
+                  "value": 0.5554,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 111375,
+                  "value": 0.7186,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 134850,
+                  "value": 0.3447,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 150000,
+                  "value": 0.95,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "drift_pitch"
+              },
+              "points": [
+                {
+                  "at_ms": 26425,
+                  "value": 0.8497,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 43375,
+                  "value": 0.3753,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 55225,
+                  "value": 0.7113,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 81250,
+                  "value": 0.05,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 96775,
+                  "value": 0.7988,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 125450,
+                  "value": 0.4787,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 136875,
+                  "value": 0.7237,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 150000,
+                  "value": 0.0661,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "drift_roll"
+              },
+              "points": [
+                {
+                  "at_ms": 19450,
+                  "value": 0.2248,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 32200,
+                  "value": 0.8431,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 50425,
+                  "value": 0.1832,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 59925,
+                  "value": 0.4138,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 64700,
+                  "value": 0.3816,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 74900,
+                  "value": 0.5915,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 94150,
+                  "value": 0.05,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 108100,
+                  "value": 0.7759,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 124875,
+                  "value": 0.2821,
+                  "curve": "ease_in_out"
+                },
+                {
+                  "at_ms": 150000,
+                  "value": 0.8227,
+                  "curve": "ease_in_out"
+                }
+              ]
+            }
+          ],
+          "stops": [
+            {
+              "type": "timeline",
+              "timeline_id": "drift_settle",
+              "edge": "starts"
+            }
+          ]
+        },
+        {
+          "timeline_id": "drift_settle",
+          "name": "Hold steady",
+          "duration_ms": 6000,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "drift_yaw"
+              },
+              "points": [
+                {
+                  "at_ms": 6000,
+                  "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "drift_pitch"
+              },
+              "points": [
+                {
+                  "at_ms": 6000,
+                  "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "drift_roll"
+              },
+              "points": [
+                {
+                  "at_ms": 6000,
+                  "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "timeline_id": "holo_hide",
           "name": "Hologram off",
           "duration_ms": 750,
@@ -17514,6 +17736,17 @@
               "from": 0.0,
               "to": -360.0,
               "clock": "engine"
+            },
+            {
+              "modifier_id": "drift_roll",
+              "property": "rotation",
+              "kind": "channel",
+              "channel_id": "drift_roll",
+              "smoothing_ms": 200,
+              "curve": "linear",
+              "from": 6.0,
+              "to": -6.0,
+              "clock": "engine"
             }
           ]
         },
@@ -18439,6 +18672,17 @@
               "from": 0.0,
               "to": 360.0,
               "clock": "engine"
+            },
+            {
+              "modifier_id": "drift_pitch",
+              "property": "tilt",
+              "kind": "channel",
+              "channel_id": "drift_pitch",
+              "smoothing_ms": 200,
+              "curve": "linear",
+              "from": -5.0,
+              "to": 5.0,
+              "clock": "engine"
             }
           ]
         }
@@ -18485,6 +18729,17 @@
               "curve": "linear",
               "from": 0.0,
               "to": -360.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "drift_yaw",
+              "property": "turn",
+              "kind": "channel",
+              "channel_id": "drift_yaw",
+              "smoothing_ms": 200,
+              "curve": "linear",
+              "from": 8.0,
+              "to": -8.0,
               "clock": "engine"
             }
           ]
@@ -28722,6 +28977,13 @@
       ]
     },
     {
+      "chord": "Ctrl+Alt+KeyD",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "drift"
+      }
+    },
+    {
       "chord": "Ctrl+Alt+KeyH",
       "action": {
         "type": "channel.set_value",
@@ -28789,6 +29051,13 @@
       "labels": [
         "tour"
       ]
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyD",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "drift_settle"
+      }
     },
     {
       "chord": "Ctrl+Alt+Shift+KeyH",
@@ -29176,6 +29445,28 @@
         "type": "timeline.play",
         "timeline_id": "warp_out"
       }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 56,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "drift"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 57,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "drift_settle"
+      }
     }
   ],
   "channels": [
@@ -29282,6 +29573,39 @@
       "channel_id": "cam_z",
       "name": "Camera Z (back)",
       "default": 0.869826,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "drift_pitch",
+      "name": "Drift pitch",
+      "default": 0.5,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "drift_roll",
+      "name": "Drift roll",
+      "default": 0.5,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "drift_yaw",
+      "name": "Drift yaw",
+      "default": 0.5,
       "combine": "latest",
       "average_ms": 0,
       "rise_ms": 0,

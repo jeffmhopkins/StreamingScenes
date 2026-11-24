@@ -34,6 +34,7 @@ from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
+from ship_sequences import DRIFT_DEG  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -532,6 +533,17 @@ if CHANNELS:
         for cid, name, ccn, _, _ in ship], "ship channels"), "ship channels")
     for cid, _, _, prop, turn in ship:
         motion[cid] = [follow(cid[5:], prop, cid, 0.0, turn)]
+    # The drift (ship_sequences.py's `drift`): one more small turn on each of the rig's
+    # groups, added to the heading, pitch and roll, from DRIFT_DEG one way at 0 to the other
+    # at 1, none at the channel's default of a half. So the ship drifts around wherever it
+    # points, and the CCs still turn it while it does.
+    must(batch([{"type": "channel.set", "channel": {
+        "channel_id": f"drift_{a}", "name": f"Drift {a}", "default": 0.5}} for a in DRIFT_DEG],
+        "drift channels"), "drift channels")
+    for cid, _, _, prop, turn in ship:
+        a = cid[5:]
+        motion[cid].append(follow(f"drift_{a}", prop, f"drift_{a}", -DRIFT_DEG[a] * (turn / 360.0),
+                                  DRIFT_DEG[a] * (turn / 360.0), smoothing=200))
 else:
     motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
 if not CHANNELS:
