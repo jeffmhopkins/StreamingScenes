@@ -220,7 +220,9 @@ A view's hotkey, note or show marker switches to its keyframe with `view_glide`,
 `GLIDE_MS` (1800), eased in and out as the view sequences were (smoothstep, as a cubic
 Bézier, since a Move's own `ease_in_out` is steeper): the camera glides from wherever it is, from a view or
 halfway through a glide to another (a switch mid-glide starts from what is on screen,
-JStream ADR-0029 §7). The Bitwig camera CCs belong to the cockpit's family, so they offset
+JStream ADR-0029 §7). Each view's own transition in is `view_glide` too, so a view
+glides in however it is switched to: from the Scenes list, Studio's take or a Stream Deck
+key as well. The Bitwig camera CCs belong to the cockpit's family, so they offset
 every view alike and carry through a glide. To change a view, edit its keyframe's camera
 in JStream, as any keyframe's; the hotkeys, notes and the tour follow it.
 

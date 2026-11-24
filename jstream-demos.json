@@ -1,6 +1,6 @@
 {
   "schema_version": 23,
-  "rev": 573,
+  "rev": 585,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -18843,6 +18843,7 @@
     {
       "id": "view_cockpit",
       "name": "View: Wide",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18867,6 +18868,7 @@
     {
       "id": "view_seat_wide",
       "name": "View: Behind the seat",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18891,6 +18893,7 @@
     {
       "id": "view_seat",
       "name": "View: Pilot's seat",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18915,6 +18918,7 @@
     {
       "id": "view_desk",
       "name": "View: Desk: pads",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18940,6 +18944,7 @@
     {
       "id": "view_monitor",
       "name": "View: Centre monitor: arrangement",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18965,6 +18970,7 @@
     {
       "id": "view_monitor_l",
       "name": "View: Left monitor: transport",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -18990,6 +18996,7 @@
     {
       "id": "view_monitor_r",
       "name": "View: Right monitor: device",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -19015,6 +19022,7 @@
     {
       "id": "view_overhead",
       "name": "View: Overhead: mixer and scenes",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -19040,6 +19048,7 @@
     {
       "id": "view_out",
       "name": "View: Out the windshield",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -19064,6 +19073,7 @@
     {
       "id": "view_desk_low",
       "name": "View: Desk, low",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -19089,6 +19099,7 @@
     {
       "id": "view_side_l",
       "name": "View: Left console: clip",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {
@@ -19114,6 +19125,7 @@
     {
       "id": "view_side_r",
       "name": "View: Right console: notes",
+      "transition_in": "view_glide",
       "folder": "cockpit_views",
       "camera": {
         "position": {

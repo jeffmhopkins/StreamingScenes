@@ -135,6 +135,10 @@ must(op({"type": "transition.create", "preset_id": GLIDE, "name": f"View glide {
          "kind": "move", "duration_ms": GLIDE_MS, "easing": SMOOTHSTEP}), "glide")
 must(batch([{"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS["cockpit"]}]
            + keyframes(), "views"), "views")
+# Each view glides in however it is switched to (the Scenes list, Studio's take, a Stream
+# Deck key), not only from its hotkey: its own transition in is the glide.
+must(batch([{"type": "scene.set_transitions", "scene_id": view_id(shot), "transition_in": GLIDE}
+            for shot, _, _ in VIEWS], "views' glide"), "views' glide")
 text, ok = batch(filing(), "views folder")
 if not ok:
     print("no scene folders in this JStream (protocol 0.190): the views are left unfiled",
