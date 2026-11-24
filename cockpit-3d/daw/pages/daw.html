@@ -3,7 +3,7 @@
 <body><canvas id="c" width="640" height="360"></canvas><script>
 // One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
-// transport, arrange, device, notes, mixer, clip, scenes, iso, isopads or panels (or `window.DAW_VIEW`, set by a
+// transport, arrange, device, notes, mixer, clip, scenes, iso, isopads, bridge, bridgepads or panels (or `window.DAW_VIEW`, set by a
 // script ahead of this one when the page is given to JStream inline). Everything that moves or
 // blinks follows the data (the clock key's beats), never the page's own clock, so a
 // render on a held clock draws the same picture every time. `?w=` (or `window.DAW_W`) sets
@@ -14,8 +14,8 @@ const x = cv.getContext('2d');
 const W = +(window.DAW_W || new URLSearchParams(location.search).get('w')) || 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
 const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';
 cv.width = W; document.documentElement.style.width = document.body.style.width = W + 'px';
-// The note grid's lit pads go on a clear page, over its unlit pads (`isopads`).
-if (VIEW === 'iso') document.documentElement.style.background = document.body.style.background = 'transparent';
+// The desk's lit pads go on a clear page, over their unlit pads (`isopads`, `bridgepads`).
+if (VIEW === 'iso' || VIEW === 'bridge') document.documentElement.style.background = document.body.style.background = 'transparent';
 let D = {}, dirty = true;
 const lowest = {};   // isomorphic view: the lowest pitch each track has played
 const history = [];  // notes view: [beat start, beat end or null, pitch, track]
@@ -56,10 +56,82 @@ function section() {
   return { cur, next, all: m };
 }
 function selected() { const g = D.grid || {}; return g.selectedTrack >= 0 ? g.selectedTrack : 0; }
+// ---- the desk's pads and meter segments: raised, lit silicone ----
+// A pad is a raised silicone cap: matte and dark when unlit, its top edge catching the
+// light and its foot casting a short shadow; lit, its light comes up through it, brightest
+// in the middle, and spills a little onto the desk around it. A pad lights at once and dims
+// over FADE_MS (`?fade=` or `window.DAW_FADE_MS`, default 350) when it turns off. The fade
+// is timed by the data's clock while the transport plays, so a render on a held clock draws
+// the same picture every time, and by the page's own clock while it is stopped.
+const FADE_MS = +(window.DAW_FADE_MS || new URLSearchParams(location.search).get('fade')) || 350;
+const DESK_DARK = '#05080c', ROOT_GLOW = 0.3;
+const glow = {};      // desk views: each pad's light, by key, [level 0 to 1, colour]
+let deskAt = null, fading = false;  // [beats, page ms] at the last draw; a pad still dimming
+function deskDt() {   // seconds since the last draw, at most 1
+  const c = clock(), ms = performance.now();
+  let dt = 0;
+  if (deskAt) dt = c.playing && c.tempo > 0 ? ((c.beats || 0) - deskAt[0]) * 60 / c.tempo : (ms - deskAt[1]) / 1000;
+  deskAt = [c.beats || 0, ms];
+  return Math.min(1, Math.max(0, dt));
+}
+// Brings each pad's light to `want` (key -> [level, colour]): up at once, down over
+// FADE_MS. Returns whether a pad is still dimming.
+function fadeTo(wanted, dt) {
+  const want = new Map([...wanted].map(([key, v]) => [String(key), v]));  // keys as `glow`'s
+  const k = Math.exp(-dt * 3000 / FADE_MS);
+  let still = false;
+  for (const [key, [lv, col]] of want) { const g = glow[key]; if (!g || lv >= g[0]) glow[key] = [lv, col]; else g[1] = col; }
+  for (const key of Object.keys(glow)) {
+    const g = glow[key], to = want.has(key) ? want.get(key)[0] : 0;
+    if (g[0] > to) { g[0] = to + (g[0] - to) * k; if (g[0] - to < 0.01) g[0] = to; else still = true; }
+    if (g[0] <= 0) delete glow[key];
+  }
+  return still;
+}
+function rr(px, py, w, h, r) { x.beginPath(); x.roundRect(px, py, w, h, r); }
+// An unlit pad; `s` scales its edge and shadow for small pads.
+function siliconePad(px, py, w, h, r, s = 1) {
+  x.fillStyle = 'rgba(0,0,0,.6)'; rr(px, py + 2.5 * s, w, h, r); x.fill();
+  const g = x.createLinearGradient(0, py, 0, py + h);
+  g.addColorStop(0, '#2a323d'); g.addColorStop(Math.min(.5, 5 * s / h), '#1d242d'); g.addColorStop(1, '#12171e');
+  x.fillStyle = g; rr(px, py, w, h, r); x.fill();
+  x.strokeStyle = 'rgba(255,255,255,.08)'; x.lineWidth = 1; rr(px + .5, py + .5, w - 1, h - 1, r); x.stroke();
+}
+// A lit pad, `lv` 0 to 1, in `col`: opaque from ROOT_GLOW up, so it hides the unlit pad
+// under it, and fading out below that.
+function litPad(px, py, w, h, r, col, lv, s = 1) {
+  x.save();
+  x.globalAlpha = Math.min(1, lv / ROOT_GLOW);
+  x.shadowColor = rgba(col, Math.min(1, .9 * lv)); x.shadowBlur = 16 * s * lv;
+  x.fillStyle = '#0c1016'; rr(px, py, w, h, r); x.fill();
+  x.shadowBlur = 0;
+  x.fillStyle = rgba(col, Math.min(1, lv)); rr(px, py, w, h, r); x.fill();
+  const cx = px + w / 2, cy = py + h * .45, g = x.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * .62);
+  g.addColorStop(0, `rgba(255,255,255,${.34 * s * s * lv})`); g.addColorStop(.55, `rgba(255,255,255,${.08 * s * s * lv})`); g.addColorStop(1, 'rgba(0,0,0,.22)');
+  x.fillStyle = g; rr(px, py, w, h, r); x.fill();
+  x.strokeStyle = `rgba(255,255,255,${.12 + .25 * lv})`; x.lineWidth = 1; rr(px + .5, py + .5, w - 1, h - 1, r); x.stroke();
+  x.restore();
+}
+function mixHex(a, b, t) {
+  const p = h => parseInt(h.slice(1, 7), 16), A = p(a), B = p(b), m = sh => Math.round(((A >> sh) & 255) * (1 - t) + ((B >> sh) & 255) * t);
+  return '#' + [16, 8, 0].map(sh => m(sh).toString(16).padStart(2, '0')).join('');
+}
 // Calls `f(px, py, w, h, row, column)` for each of the desk's 8 x 8 pads, row 0 at the foot.
 function isoPads(f) {
   const cols = 8, rows = 8, gap = 6, cw = (W - gap * (cols + 1)) / cols, ch = (H - gap * (rows + 1)) / rows;
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) f(gap + c * (cw + gap), H - (r + 1) * (ch + gap), cw, ch, r, c);
+}
+// Calls `f(key, px, py, w, h, column, segment, segments, height 0 to 1)` for each of the
+// meter bridge's segments: six tracks of two bars in the first 290 px, the master's two
+// in the last 56, 18 segments each, segment 0 at the foot.
+const BRIDGE = [];
+for (let i = 0; i < 6; i++) for (let sub = 0; sub < 2; sub++) BRIDGE.push({ i, sub, low: '#2fe08a', high: '#ff4a3a', x0: 8 + i * (281 / 6) + sub * ((281 / 6 - 8) / 2 + 2), w: (281 / 6 - 8) / 2 - 2 });
+for (let i = 0; i < 2; i++) BRIDGE.push({ master: true, i, low: '#6ee0ff', high: '#ffb040', x0: 298 + i * 25, w: 19 });
+function bridgeSegs(f) {
+  const n = 18, gap = 4, y0 = 8, sh = (H - 2 * y0 - gap * (n - 1)) / n;
+  BRIDGE.forEach((col, ci) => {
+    for (let s = 0; s < n; s++) f(ci * n + s, col.x0, H - y0 - (s + 1) * sh - s * gap, col.w, sh, col, s, n, (s + .5) / n);
+  });
 }
 function bar(px, py, w, h, v, col) {
   x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(px, py, w, h);
@@ -196,7 +268,11 @@ const views = {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
     const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
-    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
+    // The position at 92 px, smaller when it would run into the play lamp (a long song's
+    // bar count, or Bitwig's four-part position at high counts).
+    x.font = `700 92px ${MONO}`;
+    const fit = Math.min(92, Math.floor(92 * 510 / Math.max(1, x.measureText(pos).width)));
+    txt(pos, 30, 140 - (92 - fit) / 3, fit, `rgba(${CYAN},.95)`, 'left', 700);
     // play / stop
     x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
     x.beginPath();
@@ -344,7 +420,8 @@ const views = {
   // starts on the C at or below the lowest note the track has played, and a note out of its
   // range folds onto it by octaves. Only the lit pads are drawn, on a clear page: the unlit
   // pads are `isopads`, a picture of their own under this one, so the scene can dim them
-  // with its lights and leave the lit ones glowing.
+  // with its lights and leave the lit ones glowing. A pad lights at once and dims over
+  // FADE_MS when its note ends.
   iso() {
     const g = D.grid || {}, sel = g.selectedTrack >= 0 ? g.selectedTrack : 0;
     const t = D['track/' + sel] || {}, playing = ((D.notes && D.notes.tracks) || [])[sel] || [];
@@ -358,24 +435,50 @@ const views = {
       while (q < base) q += 12;
       vel.set(q, Math.max(vel.get(q) || 0, v));
     }
+    const want = new Map(), roots = new Map();
+    isoPads((px, py, cw, ch, r, c) => {
+      const pitch = base + c + 5 * r, key = r * 8 + c;
+      if (vel.has(pitch)) want.set(key, [0.55 + 0.45 * Math.min(1, (vel.get(pitch) || 127) / 127), t.color]);
+      else if (pitch % 12 === 0) want.set(key, [ROOT_GLOW, t.color]);
+      if (pitch % 12 === 0) roots.set(key, 'C' + (pitch / 12 - 2));
+    });
+    fading = fadeTo(want, deskDt());
     x.clearRect(0, 0, W, H);
     isoPads((px, py, cw, ch, r, c) => {
-      const pitch = base + c + 5 * r, on = vel.has(pitch), root = pitch % 12 === 0;
-      if (!on && !root) return;
-      // A lit pad is opaque, the page's dark under its colour, so it looks the same
-      // whatever lies under the page.
-      x.fillStyle = '#05080c'; x.beginPath(); x.roundRect(px, py, cw, ch, 5); x.fill();
-      x.fillStyle = on ? rgba(t.color, 0.55 + 0.45 * Math.min(1, (vel.get(pitch) || 127) / 127)) : rgba(t.color, 0.3);
-      x.beginPath(); x.roundRect(px, py, cw, ch, 5); x.fill();
-      if (root) txt('C' + (pitch / 12 - 2), px + 6, py + ch - 7, 11, on ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.35)', 'left', 700);
+      const key = r * 8 + c, gl = glow[key];
+      if (gl) litPad(px, py, cw, ch, 6, gl[1], gl[0]);
+      const name = roots.get(key);
+      if (name && gl) {
+        x.globalAlpha = Math.min(1, gl[0] / ROOT_GLOW);
+        txt(name, px + 7, py + ch - 8, 11, gl[0] > ROOT_GLOW + 0.05 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.4)', 'left', 700);
+        x.globalAlpha = 1;
+      }
     });
   },
   // The desk's unlit pads, under `iso`: the same 8 x 8 pads, every one unlit, on the
-  // page's dark. It needs no data and never changes.
+  // desk's dark. It needs no data and never changes.
   isopads() {
-    x.fillStyle = '#05080c'; x.fillRect(0, 0, W, H);
-    x.fillStyle = '#1a2028';
-    isoPads((px, py, cw, ch) => { x.beginPath(); x.roundRect(px, py, cw, ch, 5); x.fill(); });
+    x.fillStyle = DESK_DARK; x.fillRect(0, 0, W, H);
+    isoPads((px, py, cw, ch) => siliconePad(px, py, cw, ch, 6));
+  },
+  // The desk's meter bridge, beside the pads: the six tracks (left and right each) and the
+  // master, in 18 segments, lit from the foot by `meters`, green to red (the master cyan
+  // to amber). Each segment is a small lit pad that dims over FADE_MS as the level falls.
+  // Only the lit segments are drawn, on a clear page, over `bridgepads`.
+  bridge() {
+    const m = D.meters || {}, tr = m.tracks || [], ms = m.master || [], want = new Map();
+    bridgeSegs((key, px, py, w, h, col, s, n, at) => {
+      const v = col.master ? ms[col.i] : (tr[col.i] || [])[col.sub];
+      if (+v >= (s + 1) / n - 0.5 / n) want.set(key, [1, mixHex(col.low, col.high, at)]);
+    });
+    fading = fadeTo(want, deskDt());
+    x.clearRect(0, 0, W, H);
+    bridgeSegs((key, px, py, w, h) => { const gl = glow[key]; if (gl) litPad(px, py, w, h, 2, gl[1], gl[0], 0.5); });
+  },
+  // The meter bridge's unlit segments, under `bridge`.
+  bridgepads() {
+    x.fillStyle = DESK_DARK; x.fillRect(0, 0, W, H);
+    bridgeSegs((key, px, py, w, h) => siliconePad(px, py, w, h, 2, 0.5));
   },
   // The console's small displays, live: one 320 x 360 picture holding every panel, each in
   // the cell the model's live-panel quads map (cockpit-3d/tools/live_panels.py, PANELS).
@@ -441,8 +544,8 @@ function take() {
   dirty = true;
 }
 function draw() {
-  if (VIEW === 'isopads') { if (dirty) { views.isopads(); dirty = false; } }
-  else if (window.jstream && jstream.data) { if (dirty) { views[VIEW](); if (VIEW !== 'iso' && VIEW !== 'panels') scan(); dirty = false; } }
+  if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (dirty || fading) { views[VIEW](); if (!['iso', 'bridge', 'panels'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }

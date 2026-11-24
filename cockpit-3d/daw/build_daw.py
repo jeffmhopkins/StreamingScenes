@@ -245,11 +245,12 @@ for item, view, x, y, w, h in PAGES_AT:
         **page(view), "width": 640, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
-# The desk: the pads (the selected track's notes, or the clip launcher), the tracks' meters
-# and the master's. The note grid and the meters draw only their lit pads and segments, on
-# a clear picture, over a picture of their unlit ones (`DESK_UNLIT`): the unlit pads show
-# by the cabin's and the desk's light, so they dim with those switches, and go fully dark
-# with both off, while the lit ones stay lit.
+# The desk: the pads (the selected track's notes, or the clip launcher), and the meter
+# bridge, the tracks' meters and the master's, raised silicone pads lit from under (the
+# page's `iso` and `bridge`). The note grid and the bridge draw only their lit pads, on a
+# clear page, over a page of their unlit ones (`DESK_UNLIT`): the unlit pads show by the
+# cabin's and the desk's light, so they dim with those switches and go fully dark with
+# both off, while the lit ones stay lit.
 DESK_UNLIT = []  # (item, source, x, y, w, h): under the desk's lit pads, dimmed by the lights
 CLEAR = "#00000000"
 if DESK_GRID == "notes":
@@ -273,28 +274,17 @@ ed += [src("panels", "Console panels", "browser", {
         **page("panels", PW), "width": PW, "height": PH, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
-METER_PAD = "#11161dff"
-METERS = {"input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",
-          "field": "tracks", "segments": 18, "gap": 8, "radius": 2}
-MASTER = {"input": INPUT, "mode": "bars", "width": 56, "height": 360, "columns": 2, "key": "meters",
-          "field": "master", "segments": 18, "gap": 6, "radius": 2}
-# A meter's unlit segments: the same bars, every segment the pad's colour.
-UNLIT = {"pad": METER_PAD, "color_low": METER_PAD, "color_high": METER_PAD, "background": "#05080cff"}
-ed += [
-    src("meters", "Track meters", "grid", {
-        **METERS, "pad": CLEAR, "color_low": "#2fe08aff", "color_high": "#ff4a3aff", "background": CLEAR}),
-    src("master", "Master meter", "grid", {
-        **MASTER, "pad": CLEAR, "color_low": "#6ee0ffff", "color_high": "#ffb040ff", "background": CLEAR}),
-    src("meters_unlit", "Track meters, unlit", "grid", {**METERS, **UNLIT}),
-    src("master_unlit", "Master meter, unlit", "grid", {**MASTER, **UNLIT}),
-]
-DESK_UNLIT += [("a_meters_unlit", "meters_unlit", 612, 720, 290, 360),
-               ("a_master_unlit", "master_unlit", 904, 720, 56, 360)]
+# The meter bridge: the tracks' meters and the master's, as one page of lit segments.
+ed += [src("bridge", "Meter bridge", "browser", {
+        **page("bridge", 348), "width": 348, "height": 360, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       src("bridge_unlit", "Meter bridge, unlit", "browser", {
+        **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
+DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
 ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
 ed += [
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
-    add("atlas", "a_meters", "meters", geo(612 + 145, 900, 290, 360)),
-    add("atlas", "a_master", "master", geo(904 + 28, 900, 56, 360)),
+    add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
     {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
      "kind": {"type": "scene", "scene_id": "atlas"}},
 ]
@@ -355,8 +345,7 @@ must(batch([
 if GLOW and GLOW_CARDS:
     from glow import card_at
     ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
-    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("meters", 612, 720, 290, 360, GLOW_DESK),
-                   ("master", 904, 720, 56, 360, GLOW_DESK)]
+    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("bridge", 612, 720, 348, 360, GLOW_DESK)]
     cards = []
     for sid, x, y, w, h, glow in ON_SCREENS:
         g = card_at(x, y, x + w, y + h)

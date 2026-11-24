@@ -218,9 +218,12 @@ must(batch([
     add("desk_2d", "bg", "bg_2d", 960, 540, 1920, 1080),
     add("desk_2d", "title", "title_2d", 960, 70, 1200, 80, fit_mode="fit"),
     # The launcher and the meters as the desk shows them, big, with the pages around.
+    # The note grid and the bridge draw only their lit pads, over their unlit ones.
+    *([add("desk_2d", "launcher_unlit", "launcher_unlit", 520, 560, 800, 480)]
+      if os.environ.get("DESK_GRID", "notes") == "notes" else []),
     add("desk_2d", "launcher", "launcher", 520, 560, 800, 480),
-    add("desk_2d", "meters", "meters", 1080, 560, 290, 480, fit_mode="stretch"),
-    add("desk_2d", "master", "master", 1270, 560, 56, 480, fit_mode="stretch"),
+    add("desk_2d", "bridge_unlit", "bridge_unlit", 1120, 560, 464, 480, fit_mode="stretch"),
+    add("desk_2d", "bridge", "bridge", 1120, 560, 464, 480, fit_mode="stretch"),
     add("desk_2d", "transport", "p_transport", 1620, 330, 480, 270, fit_mode="stretch"),
     add("desk_2d", "mixer", "p_mixer", 1620, 640, 480, 270, fit_mode="stretch"),
     add("desk_2d", "arrange", "p_arrange", 960, 960, 1760, 180, fit_mode="fill"),
