@@ -1,6 +1,6 @@
 {
   "schema_version": 22,
-  "rev": 288,
+  "rev": 291,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -18675,6 +18675,32 @@
           "visible": true
         },
         {
+          "id": "arr_emission_nebula_2",
+          "source_id": "arr_emission_nebula",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1536.0,
+              "height": 1023.0
+            },
+            "fit_mode": "fit",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true
+        },
+        {
           "id": "arr_spiral_galaxy",
           "source_id": "arr_spiral_galaxy",
           "geometry": {
@@ -18701,7 +18727,59 @@
           "visible": true
         },
         {
+          "id": "arr_spiral_galaxy_2",
+          "source_id": "arr_spiral_galaxy",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1440.0,
+              "height": 959.0625
+            },
+            "fit_mode": "fit",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true
+        },
+        {
           "id": "arr_blue_nebula",
+          "source_id": "arr_blue_nebula",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1344.0,
+              "height": 895.125
+            },
+            "fit_mode": "fit",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true
+        },
+        {
+          "id": "arr_blue_nebula_2",
           "source_id": "arr_blue_nebula",
           "geometry": {
             "center": {

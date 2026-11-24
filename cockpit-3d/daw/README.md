@@ -260,6 +260,11 @@ the `warp` channel, so it never sits above its own setting, and before JStream's
 unpicked until the warp reached rest, where it popped in, and a warp aimed ahead dropped
 the last one within half a second of starting. With ADR-0224 both fade with the deep sky.
 
+The big hazy ones (the emission and reflection nebulae and the spiral galaxy), which
+melt into the sky, come up twice as often as the rest (`WEIGHT` in `sky_arrivals.py`,
+an item each time), so now and then one follows itself. The ring nebula is rendered
+hazy too: its shell's light is spread wide, so its rim melts into a broad halo.
+
 Each is sized for what it is (`SIZE` in `sky_arrivals.py`, its width across the sky):
 
 | Picture | Width |
