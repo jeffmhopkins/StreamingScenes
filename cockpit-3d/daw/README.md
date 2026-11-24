@@ -19,7 +19,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `show_tour.py` | The Cockpit tour, a show (JStream ADR-0210) that runs through the cockpit for an audience: power up, the seat, the desk, the monitors, the consoles, warp, the hologram, the 2D desk and power down, with a script in every bookmark's note. See [The cockpit tour](#the-cockpit-tour). |
 | `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
-| `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, and the jump to warp and back, with their keys. See [Cockpit sequences](#cockpit-sequences). |
+| `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
 | `serve_pages.py` | Serves `pages/` with threads and a deep accept queue, for `PAGES=…` while editing a page: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
@@ -166,8 +166,8 @@ What it makes:
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
-| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences) |
-| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp, Ctrl+Alt+D drift, Ctrl+Alt+Shift+D hold steady; see [Cockpit sequences](#cockpit-sequences) |
+| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
@@ -244,6 +244,8 @@ still work, and whichever moved last wins. An agent plays one with `timeline.pla
 | `holo_show`, `holo_hide` | H shows, Shift+H hides | The hologram projecting in and dissolving out; see [The hologram](#the-hologram). |
 | `warp_in` | W | The sky's warp from wherever it is to full over 4 s, slow at first. |
 | `warp_out` | Shift+W | Back to rest over 2.5 s, slowing at the end. |
+| `drift` | D | The ship drifting, as if adrift in space: it yaws, pitches and rolls a few degrees at a time, slowly and aimlessly, around wherever it points, and keeps going until held steady. See [The drift](#the-drift). |
+| `drift_settle` | Shift+D | Hold steady: stops the drift and eases the ship back to where it points over 6 s. |
 
 The lights and the monitors are separate: lights off leaves the monitors lit, and the
 master switch is the lights' alone in a sequence, though its CC still darkens everything.
@@ -251,6 +253,26 @@ The warp is a channel, `warp`, that CC 30 and Mod 6 are also inputs of; the head
 and roll are channels too (`ship_yaw`, `ship_pitch`, `ship_roll`, CCs 31 to 33, Mods 8 to
 10). With JStream's
 ADR-0187 it travels where the ship points (see [What follows the data](#what-follows-the-data)).
+
+### The drift
+
+`drift` is a loop of 2.5 minutes (`DRIFT_MS`) that turns the ship a little on its own, so
+the view out of the windshield wanders as if the ship were adrift. It moves three channels
+of its own, `drift_yaw`, `drift_pitch` and `drift_roll`, which `build_daw.py` adds on top
+of the heading, pitch and roll on the same three groups of the rig: each turns the ship
+`DRIFT_DEG` either way over its 0 to 1 (yaw 8°, pitch 5°, roll 6°), and none at its middle,
+where it rests. So the ship drifts around wherever it points: the arrival, pinned within
+9° of where the warp ended, stays in the windshield, the ship's CCs still turn it while it
+drifts, and a jump to warp goes where it points at that moment.
+
+Each angle is a sum of four slow waves, a whole number of them a loop, with random phases
+from a fixed seed (`DRIFT_WAVES`, `DRIFT_SEED` in `ship_sequences.py`), so the three angles
+never line up and the drift has no visible pattern. The lane holds the waves' turning
+points, eased in and out between them, so the ship slows to a stop each time it turns on
+one axis while the others keep moving, every 5 to 30 s; the loop starts and ends on the
+same turning point, so it has no seam. The first pass glides in from wherever the ship is.
+`drift_settle` (Hold steady) stops `drift` as it starts (a `stops` trigger) and eases the
+three back to the middle over 6 s.
 
 ### Where a warp arrives
 
