@@ -35,7 +35,7 @@ subprocess.run([sys.executable, os.path.join(ROOT, "feature-tour", "tools", "mak
                 os.path.join(BUILD, "tour.json")], check=True)
 
 # ---- the cockpit, recorded, with every Bitwig input import_show.py offers: the camera
-# CCs 20 to 29 (CC=1, which also gives each view its depth of field and autofocus) and the
+# CCs 20 to 29 (CC=1, which also gives each view its depth of field) and the
 # notes that switch the views and play the sequences (NOTES=1), all on channel 16, beside
 # the light switches, the ship's CCs, the JTunnel Mods and the data it always maps ----
 os.environ.setdefault("CC", "1")

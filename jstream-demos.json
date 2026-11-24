@@ -14703,8 +14703,7 @@
         "fov_deg": 66.0,
         "roll_deg": 0.0,
         "depth_sort": false,
-        "focus_px": 1767.7004,
-        "autofocus": true
+        "focus_px": 1767.7004
       },
       "camera_motion": [
         {
@@ -14954,7 +14953,7 @@
           "smoothing_ms": 0,
           "curve": "linear",
           "from": 0.0,
-          "to": -1.0,
+          "to": 1.0,
           "clock": "engine"
         }
       ],

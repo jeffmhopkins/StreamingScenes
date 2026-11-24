@@ -31,7 +31,7 @@ Bitwig: the cockpit is built with every Bitwig input its import offers, all on M
 channel 16 from the JTunnel sender `Bitwig`:
 - the live data on its screens, readouts, desk lights and LEDs
 - the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
-- the camera CCs 20 to 29, which also give each view its depth of field and autofocus
+- the camera CCs 20 to 29, which also give each view its depth of field (CC 29 switches autofocus on)
 - notes from 36 up that switch the views and play the cockpit's sequences
 - the JTunnel Mods
 

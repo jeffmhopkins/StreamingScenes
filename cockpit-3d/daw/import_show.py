@@ -15,7 +15,8 @@
 - with CC=1, Bitwig CCs 20 to 27 on channel 16 that move, turn, zoom and focus the
   cockpit's camera in every view (CAMERA_CCS below; needs a JStream whose cameras take
   MIDI, JStream #1631), and, where JStream has them (protocol 0.167), CC 28 for roll and
-  CC 29 to switch autofocus off; CC=1 turns on the views' depth of field, and autofocus;
+  CC 29 to switch autofocus on; CC=1 turns on the views' depth of field, each view focused
+  where it looks;
 - the Cockpit tour, a show that runs through the views, the lights, the monitors, the
   warp, the hologram and the 2D desk, with a script in each bookmark (show_tour.py; needs
   a JStream with shows, protocol 0.177);
@@ -75,10 +76,13 @@ CAMERA_CCS = [
     ("focus", 600),        # focus further away
     ("blur", 16),          # aperture: more depth-of-field blur
     ("roll", 15),          # clockwise
-    ("autofocus", -1),     # past its middle: autofocus off, the focus stays put
+    ("autofocus", 1),      # past its middle: autofocus on
 ]
 if CC:
-    # Every view gets its depth of field (shots.py's DOF) and starts autofocusing.
+    # Every view gets its depth of field (shots.py's DOF), focused on what it looks at.
+    # Autofocus starts off: JStream's autofocus meets a model at its item's flat box
+    # (ADR-0176), not its surface, so from inside the cockpit it meets nothing, or the
+    # wrong plane, and holds a focus far from the dash, which blurs most views.
     os.environ.setdefault("DOF", "1")
 
 
@@ -279,14 +283,7 @@ if CC:
     base = VIEW_MOTION if SEQ else []
     text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": base + motion})
     if ok:
-        cams = []
-        for sid, view in VIEW_CAMERAS.items():
-            # Only a camera with a focus can autofocus (DOF=0 gives none).
-            cam = dict(view, autofocus="focus_px" in view)
-            cams.append({"type": "scene.set_camera", "scene_id": sid,
-                         "camera": hologram.stacking(cam) if HOLOGRAM else cam})
-        must(batch(cams, "autofocus"), "autofocus")
-        print("camera CCs: 20 to 29, autofocus on")
+        print("camera CCs: 20 to 29, autofocus off until CC 29 passes its middle")
     else:
         text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit",
                        "motion": base + motion[:8]})
