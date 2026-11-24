@@ -444,7 +444,10 @@ const views = {
   transport() {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
-    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
+    // Bar, beat and sixteenth: the ticks are dropped whichever separator the host writes
+    // (Bitwig's own text uses ':', the simulator '.').
+    const sep = /:/.test(t.positionText || '') ? ':' : '.';
+    const pos = t.positionText ? t.positionText.split(sep).slice(0, 3).join(sep) : `${c.bar}.${c.beat}.1`;
     // The position at 92 px, smaller when it would run into the play lamp (a long song's
     // bar count, or Bitwig's four-part position at high counts).
     x.font = `700 92px ${MONO}`;
