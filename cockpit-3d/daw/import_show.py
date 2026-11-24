@@ -193,6 +193,16 @@ except SystemExit as e:
     HOLOGRAM = False
 
 
+# ---- what the monitors and the hologram show (sources.py): each shows a subscene that
+# holds a source a soft key, switched by a sequence a key, its key lit ----
+import sources  # noqa: E402
+
+SOURCES = SEQ and CHANNELS
+if SOURCES:
+    must(batch(sources.edits(HOLOGRAM, [BUILT["gate"]("glow"), BUILT["gate"]("master")]),
+               "screen sources"), "screen sources")
+
+
 # ---- two 2D scenes from the same live data ----
 def src(sid, name, kind, settings):
     return {"type": "source.create", "source_id": sid, "name": name,
@@ -263,6 +273,13 @@ if NOTES:
                    "action": action}
                   for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
                   if HOLOGRAM or action.get("channel_id") != "holo"]
+    if SOURCES:
+        # The screens' sources after those, from 56 (G#2): each screen's five keys in turn.
+        first = 36 + len(VIEWS) + len(ship_sequences.CONTROLS)
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(sources.controls(HOLOGRAM))]
     must(batch(notes, "notes"), "notes")
 
 if CC:

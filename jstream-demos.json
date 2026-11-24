@@ -1,6 +1,6 @@
 {
-  "schema_version": 22,
-  "rev": 288,
+  "schema_version": 23,
+  "rev": 464,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -13940,7 +13940,7 @@
         },
         {
           "id": "a_left",
-          "source_id": "p_transport",
+          "source_id": "src_left",
           "geometry": {
             "center": {
               "x": 320.0,
@@ -13966,7 +13966,7 @@
         },
         {
           "id": "a_center",
-          "source_id": "p_arrange",
+          "source_id": "src_center",
           "geometry": {
             "center": {
               "x": 960.0,
@@ -13992,7 +13992,7 @@
         },
         {
           "id": "a_right",
-          "source_id": "p_device",
+          "source_id": "src_right",
           "geometry": {
             "center": {
               "x": 1600.0,
@@ -14678,6 +14678,1252 @@
               "smoothing_ms": 30,
               "curve": "linear",
               "from": 1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "keys_unlit",
+          "source_id": "key_unlit",
+          "geometry": {
+            "center": {
+              "x": 1600.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 640.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true
+        },
+        {
+          "id": "key_left_transport",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1296.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_left_arrange",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1328.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_left_device",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1360.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_left_mixer",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1392.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_left_feed",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1424.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_center_transport",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1456.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_center_arrange",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1488.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_center_device",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1520.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_center_mixer",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1552.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_center_feed",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1584.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_right_transport",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1616.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_right_arrange",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1648.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_right_device",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1680.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_right_mixer",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1712.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_right_feed",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1744.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_holo_transport",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1776.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_holo_arrange",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1808.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_holo_device",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1840.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_holo_mixer",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1872.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "key_holo_feed",
+          "source_id": "key_lit",
+          "geometry": {
+            "center": {
+              "x": 1904.0,
+              "y": 1072.0
+            },
+            "size": {
+              "width": 32.0,
+              "height": 16.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_glow",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
               "to": 0.0,
               "clock": "engine"
             }
@@ -18232,7 +19478,7 @@
         },
         {
           "id": "holo_card",
-          "source_id": "holo_feed",
+          "source_id": "src_holo",
           "geometry": {
             "center": {
               "x": 960.0,
@@ -18970,6 +20216,2102 @@
             "bottom": 0
           },
           "visible": true
+        }
+      ]
+    },
+    {
+      "id": "src_left",
+      "name": "Left monitor source",
+      "role": "group",
+      "timelines": [
+        {
+          "timeline_id": "left_arrange",
+          "name": "Left monitor: Arrangement",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_left_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "left_device",
+          "name": "Left monitor: Device",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_left_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "left_feed",
+          "name": "Left monitor: Camera feed",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_left_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "left_mixer",
+          "name": "Left monitor: Mixer",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_left_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "left_transport",
+          "name": "Left monitor: Transport",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_left_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_left_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "src_left_transport",
+          "source_id": "p_transport",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_left_arrange",
+          "source_id": "p_arrange",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_left_device",
+          "source_id": "p_device",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_left_mixer",
+          "source_id": "p_mixer",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_left_feed",
+          "source_id": "feed",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_left_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src_center",
+      "name": "Centre monitor source",
+      "role": "group",
+      "timelines": [
+        {
+          "timeline_id": "center_arrange",
+          "name": "Centre monitor: Arrangement",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_center_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "center_device",
+          "name": "Centre monitor: Device",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_center_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "center_feed",
+          "name": "Centre monitor: Camera feed",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_center_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "center_mixer",
+          "name": "Centre monitor: Mixer",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_center_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "center_transport",
+          "name": "Centre monitor: Transport",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_center_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_center_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "src_center_transport",
+          "source_id": "p_transport",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_center_arrange",
+          "source_id": "p_arrange",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_center_device",
+          "source_id": "p_device",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_center_mixer",
+          "source_id": "p_mixer",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_center_feed",
+          "source_id": "feed",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_center_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src_right",
+      "name": "Right monitor source",
+      "role": "group",
+      "timelines": [
+        {
+          "timeline_id": "right_arrange",
+          "name": "Right monitor: Arrangement",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_right_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "right_device",
+          "name": "Right monitor: Device",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_right_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "right_feed",
+          "name": "Right monitor: Camera feed",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_right_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "right_mixer",
+          "name": "Right monitor: Mixer",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_right_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "right_transport",
+          "name": "Right monitor: Transport",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_right_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_right_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "src_right_transport",
+          "source_id": "p_transport",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_right_arrange",
+          "source_id": "p_arrange",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_right_device",
+          "source_id": "p_device",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_right_mixer",
+          "source_id": "p_mixer",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_right_feed",
+          "source_id": "feed",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_right_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src_holo",
+      "name": "Hologram source",
+      "role": "group",
+      "timelines": [
+        {
+          "timeline_id": "holo_arrange",
+          "name": "Hologram: Arrangement",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_holo_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "holo_device",
+          "name": "Hologram: Device",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_holo_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "holo_feed",
+          "name": "Hologram: Camera feed",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_holo_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "holo_mixer",
+          "name": "Hologram: Mixer",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_holo_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "holo_transport",
+          "name": "Hologram: Transport",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_holo_transport"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_arrange"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_device"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_mixer"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_holo_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "src_holo_transport",
+          "source_id": "p_transport",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_transport",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_holo_arrange",
+          "source_id": "p_arrange",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_arrange",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_holo_device",
+          "source_id": "p_device",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_device",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_holo_mixer",
+          "source_id": "p_mixer",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_mixer",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_holo_feed",
+          "source_id": "holo_feed",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 1080.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_holo_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
         }
       ]
     },
@@ -21473,6 +24815,22 @@
       "kind_version": 1
     },
     {
+      "id": "feed",
+      "name": "Monitor camera feed (swap for a camera or capture)",
+      "kind": {
+        "type": "builtin",
+        "kind": "image"
+      },
+      "kind_version": 1,
+      "settings": {
+        "file": {
+          "path": "starship-cockpit/pages/caller.png",
+          "root": "collection",
+          "type": "asset"
+        }
+      }
+    },
+    {
       "id": "flt_bar",
       "name": "Feed lower third: bar",
       "kind": {
@@ -22044,6 +25402,34 @@
           "root": "collection",
           "type": "asset"
         }
+      }
+    },
+    {
+      "id": "key_lit",
+      "name": "Soft key, lit",
+      "kind": {
+        "type": "builtin",
+        "kind": "color"
+      },
+      "kind_version": 1,
+      "settings": {
+        "color": "#ffb347ff",
+        "height": 16,
+        "width": 32
+      }
+    },
+    {
+      "id": "key_unlit",
+      "name": "Soft keys, unlit",
+      "kind": {
+        "type": "builtin",
+        "kind": "color"
+      },
+      "kind_version": 1,
+      "settings": {
+        "color": "#2a2219ff",
+        "height": 16,
+        "width": 64
       }
     },
     {
@@ -28203,11 +31589,43 @@
       }
     },
     {
+      "id": "src_center",
+      "name": "Centre monitor source",
+      "kind": {
+        "type": "scene",
+        "scene_id": "src_center"
+      }
+    },
+    {
       "id": "src_feed_lt",
       "name": "Scene: feed lower third",
       "kind": {
         "type": "scene",
         "scene_id": "s_feed_lt"
+      }
+    },
+    {
+      "id": "src_holo",
+      "name": "Hologram source",
+      "kind": {
+        "type": "scene",
+        "scene_id": "src_holo"
+      }
+    },
+    {
+      "id": "src_left",
+      "name": "Left monitor source",
+      "kind": {
+        "type": "scene",
+        "scene_id": "src_left"
+      }
+    },
+    {
+      "id": "src_right",
+      "name": "Right monitor source",
+      "kind": {
+        "type": "scene",
+        "scene_id": "src_right"
       }
     },
     {
@@ -28791,6 +32209,118 @@
       ]
     },
     {
+      "chord": "Ctrl+Alt+Shift+Digit0",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_feed"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit1",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_transport"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit2",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_arrange"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit3",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_device"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit4",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_mixer"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit5",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_feed"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit6",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_transport"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit7",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_arrange"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit8",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_device"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+Digit9",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_mixer"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyA",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_transport"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyB",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_feed"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyC",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_device"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyD",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_device"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyF",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_mixer"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyG",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_feed"
+      }
+    },
+    {
       "chord": "Ctrl+Alt+Shift+KeyH",
       "action": {
         "type": "channel.set_value",
@@ -28813,10 +32343,38 @@
       }
     },
     {
+      "chord": "Ctrl+Alt+Shift+KeyS",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_arrange"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyV",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_mixer"
+      }
+    },
+    {
       "chord": "Ctrl+Alt+Shift+KeyW",
       "action": {
         "type": "timeline.play",
         "timeline_id": "warp_out"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyX",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_arrange"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyZ",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_transport"
       }
     },
     {
@@ -29175,6 +32733,226 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "warp_out"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 56,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_transport"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 57,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_arrange"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 58,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_device"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 59,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_mixer"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 60,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "left_feed"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 61,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_transport"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 62,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_arrange"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 63,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_device"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 64,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_mixer"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 65,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "center_feed"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 66,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_transport"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 67,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_arrange"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 68,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_device"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 69,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_mixer"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 70,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "right_feed"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 71,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_transport"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 72,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_arrange"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 73,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_device"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 74,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_mixer"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 75,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "holo_feed"
       }
     }
   ],
@@ -29961,6 +33739,226 @@
           "to": 1.0
         }
       ],
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_center_arrange",
+      "name": "Centre monitor: Arrangement",
+      "default": 1.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_center_device",
+      "name": "Centre monitor: Device",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_center_feed",
+      "name": "Centre monitor: Camera feed",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_center_mixer",
+      "name": "Centre monitor: Mixer",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_center_transport",
+      "name": "Centre monitor: Transport",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_holo_arrange",
+      "name": "Hologram: Arrangement",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_holo_device",
+      "name": "Hologram: Device",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_holo_feed",
+      "name": "Hologram: Camera feed",
+      "default": 1.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_holo_mixer",
+      "name": "Hologram: Mixer",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_holo_transport",
+      "name": "Hologram: Transport",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_left_arrange",
+      "name": "Left monitor: Arrangement",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_left_device",
+      "name": "Left monitor: Device",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_left_feed",
+      "name": "Left monitor: Camera feed",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_left_mixer",
+      "name": "Left monitor: Mixer",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_left_transport",
+      "name": "Left monitor: Transport",
+      "default": 1.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_right_arrange",
+      "name": "Right monitor: Arrangement",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_right_device",
+      "name": "Right monitor: Device",
+      "default": 1.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_right_feed",
+      "name": "Right monitor: Camera feed",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_right_mixer",
+      "name": "Right monitor: Mixer",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_right_transport",
+      "name": "Right monitor: Transport",
+      "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
       "rise_ms": 0,
