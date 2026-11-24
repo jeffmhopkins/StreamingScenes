@@ -139,7 +139,7 @@ def _build():
         else:
             tags.append(c)
     return {
-        "show_id": "cockpit_tour",
+        "show_id": "tour_cockpit",
         "name": "Cockpit tour",
         "program": program,
         "overlays": [{"track_id": "v2", "name": "Tag", "clips": tags}],

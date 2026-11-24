@@ -19,7 +19,11 @@ from PIL import Image
 W, H = 1920, 1080
 TAN = math.tan(math.radians(22.5))
 OUT = sys.argv[1] if len(sys.argv) > 1 else "feature-tour.json"
-MEDIA = os.path.join(os.path.dirname(os.path.abspath(OUT)), "media")
+TOUR_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+MEDIA = os.path.join(TOUR_DIR, "media")
+# Asset paths are relative to the project file, which sits at the repo's root beside this
+# folder (../../jstream-demos.json), so they start with the folder's name.
+PREFIX = "feature-tour/"
 
 # Design tokens: the app's own (crates/jstream-ui/style.css), per design-language.md.
 T = {
@@ -60,7 +64,7 @@ def source(sid, name, kind, settings, **extra):
 def text_src(sid, name, text, size, color=None, face="regular", align="left", **kw):
     bundled = "bold" if face in ("bold", "mono_bold") else "regular"
     st = {"text": text, "size": float(size), "color": color or TXT, "face": bundled, "align": align,
-          "font": {"type": "asset", "root": "collection", "path": f"fonts/{FONTS[face]}"}}
+          "font": {"type": "asset", "root": "collection", "path": f"{PREFIX}fonts/{FONTS[face]}"}}
     st.update(kw)
     return source(sid, name, "text", st)
 
@@ -74,7 +78,7 @@ def shape_src(sid, name, w, h, color, shape="rectangle", radius=0.0, **kw):
 
 def image_src(sid, name, file):
     return source(sid, name, "image", {"file": {"type": "asset", "root": "collection",
-                                                "path": f"media/{file}"}})
+                                                "path": f"{PREFIX}media/{file}"}})
 
 
 def geom(cx, cy, w, h, fit="fit", **kw):
@@ -344,7 +348,7 @@ text_src("hold_sub", "Holding: subtitle", "A short tour of JStream, a live strea
          color=TXT2, align="center")
 source("hold_timer", "Holding: countdown", "timer", {"mode": "countdown", "duration": 600,
        "format": "mm:ss", "end_text": "Starting", "size": 56.0, "face": "regular",
-       "font": {"type": "asset", "root": "collection", "path": f"fonts/{FONTS['mono']}"},
+       "font": {"type": "asset", "root": "collection", "path": f"{PREFIX}fonts/{FONTS['mono']}"},
        "color": T["text_soft"], "align": "center", "letter_spacing": 2.0})
 shape_src("hold_rule", "Holding: rule", 120, 2, T["border"])
 hold_eb = eyebrow("hold", None, "JStream feature tour", 0, 360)
@@ -450,7 +454,7 @@ text_src("mf_head", "What you make: header", "MISSION FEED", 24, color=LINK, fac
 shape_src("mf_live", "What you make: live pill", 92, 34, "#d23c3cff", radius=17.0)
 text_src("mf_live_t", "What you make: live", "LIVE", 18, face="mono_bold", letter_spacing=2.0, align="center")
 source("mf_clock", "What you make: clock", "timer", {"mode": "clock", "clock_format": "24h", "size": 26.0,
-       "face": "regular", "font": {"type": "asset", "root": "collection", "path": f"fonts/{FONTS['mono']}"},
+       "face": "regular", "font": {"type": "asset", "root": "collection", "path": f"{PREFIX}fonts/{FONTS['mono']}"},
        "color": T["text_soft"], "align": "right", "letter_spacing": 1.0})
 text_src("mf_made", "What you make: made of", "Image, text, shape, timer and scene sources. No browser source.",
          22, color=TXT2, wrap_width=560)
@@ -1108,7 +1112,7 @@ hotkeys = [
     {"chord": "Ctrl+Alt+Period", "action": act("show.stop")},
     {"chord": "Ctrl+Alt+BracketLeft", "action": act("show.back")},
     {"chord": "Ctrl+Alt+BracketRight", "action": act("show.skip")},
-    {"chord": "Ctrl+Alt+KeyL", "action": act("overlay.toggle", scene_id="s_lower")},
+    {"chord": "Ctrl+Alt+KeyT", "action": act("overlay.toggle", scene_id="s_lower")},
     {"chord": "Ctrl+Alt+KeyB", "action": act("overlay.toggle", scene_id="s_bug")},
     {"chord": "Ctrl+Alt+KeyK", "action": act("item.trigger_motion", item_id="mo_i_impulse", modifier_id="kick")},
 ] + [{"chord": f"Ctrl+Alt+Digit{n}", "action": act("show.go_to_number", number=n)} for n in range(1, 9)] + [
@@ -1143,7 +1147,7 @@ transitions = {"presets": [
 # (or centre, or right edge, by the text's alignment).
 from PIL import ImageFont
 
-FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(OUT)), "fonts")
+FONT_DIR = os.path.join(TOUR_DIR, "fonts")
 
 
 def text_box(st):

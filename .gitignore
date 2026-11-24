@@ -1,3 +1,6 @@
 __pycache__/
 # Projects import_show.py saves beside cockpit-3d/
 cockpit-3d/DAW show*.json
+
+# tools/build_demos.py writes here
+build/

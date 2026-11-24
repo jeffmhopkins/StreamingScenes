@@ -21,10 +21,12 @@ cockpit itself.
 
 ## Open it
 
-**File › Open project…** and pick `feature-tour.json`. Keep the `media/` and `fonts/`
-folders beside it. Opening a project replaces the one that is open, and JStream saves into
-this file from then on, so copy the folder somewhere first if you want to keep this one
-clean.
+The tour is one of three shows in [`jstream-demos.json`](../jstream-demos.json) at the
+repo's root, which also holds the [DAW cockpit](../cockpit-3d/daw/) and its Cockpit tour.
+**File › Open project…** and pick that file in a checkout of this repo: it finds the tour's
+`media/` and `fonts/` and the cockpit's model and pictures from there. Opening a project
+replaces the one that is open, and JStream saves into this file from then on, so copy the
+repo somewhere first if you want to keep this one clean.
 
 ## Run it
 
@@ -39,7 +41,7 @@ pre-release. Open the Show panel, pick **Feature tour** and press Play, or press
 | `Ctrl+Alt+1` … `Ctrl+Alt+8` | | Go to bookmark 1 to 8 |
 | `Ctrl+Alt+0` | | Go to the Thanks bookmark |
 | `Ctrl+Alt+.` | | Stop the show |
-| `Ctrl+Alt+L` / `Ctrl+Alt+B` | 39 (lower third) | Toggle the title lower third / the status tag, with or without a show |
+| `Ctrl+Alt+T` / `Ctrl+Alt+B` | 39 (lower third) | Toggle the title lower third / the status tag, with or without a show |
 | `Ctrl+Alt+K` | | Fire the impulse in the Motion chapter |
 
 ## The Feature tour show
@@ -84,16 +86,12 @@ chapters show them, and the bookmark notes name the film.
 
 ## Changing it
 
-The project is generated. `tools/make_tour.py` writes it, and reads `media/` and `fonts/`
-beside the file it writes:
+The project is generated. `tools/make_tour.py` writes the tour's part, reading `media/` and
+`fonts/` here, and `../tools/build_demos.py` puts it together with the cockpit; see the
+root README.
 
-    python3 tools/make_tour.py feature-tour.json
-
-The committed file is in the canonical form JStream saves, so open and save it once in
-JStream after regenerating to keep diffs small. JStream loads either form.
-
-- `tools/preview.py feature-tour.json OUT_DIR` draws rough stills of every chapter and
-  keyframe with a pinhole camera (layout only: no effects, lights or blending).
-- `tools/make_storyboard.py feature-tour.json storyboard.md` rewrites
+- `tools/preview.py ../jstream-demos.json OUT_DIR` draws rough stills of every chapter
+  and keyframe with a pinhole camera (layout only: no effects, lights or blending).
+- `tools/make_storyboard.py ../jstream-demos.json storyboard.md` rewrites
   [storyboard.md](storyboard.md), the chapter-by-chapter run order with every bookmark's
   script.

@@ -132,6 +132,10 @@ close to the desk, a screen or a side console (`CLOSE` in `render_daw.py`).
 
 ## Importing the show
 
+The cockpit is also baked into [`jstream-demos.json`](../../jstream-demos.json) at the repo's
+root, beside the feature tour, with its views on Ctrl+Shift+1 to 0, - and = there; open that
+to skip the import. To build it into a project of its own:
+
 `import_show.py` puts everything into a running JStream over MCP, with no other step: no
 page server, and no files copied, since the screens' pages go into the project inline and
 the models are read from this checkout.
