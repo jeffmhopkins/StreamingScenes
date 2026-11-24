@@ -28,7 +28,10 @@ import os
 import struct
 import sys
 
-import numpy as np
+try:  # the layout constants alone (build_scene.py, build_daw.py) need no numpy
+    import numpy as np
+except ImportError:
+    np = None
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
