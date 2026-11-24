@@ -34,7 +34,7 @@ from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
-from live_readouts import READOUTS_AT, SIDE_AT  # noqa: E402
+from live_readouts import SIDE_AT  # noqa: E402
 from ship_sequences import DRIFT_DEG  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
@@ -302,14 +302,6 @@ ed += [src("bridge", "Meter bridge", "browser", {
         **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
 DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
 ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
-# The consoles' amber readouts and small LEDs: one page, `readouts`, in the space the side
-# monitors gave up; each readout and LED of the model maps its own cell of it
-# (tools/live_readouts.py).
-RX, RY, RW, RH = READOUTS_AT
-ed += [src("readouts", "Console readouts and LEDs", "browser", {
-        **page("readouts", RW, RH), "width": RW, "height": RH, "fps": 30,
-        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
-       add("atlas", "a_readouts", "readouts", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 ed += [
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
     add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
@@ -334,16 +326,7 @@ if CHANNELS or SWITCHES:
     else:
         ed += [cover("a_off", 0, 0, 1920, 1080)]
     ed += [cover("off_master", 0, 0, 1920, 1080)]
-# The readouts and LEDs belong to the Glow switch, as the model's glowing materials do: a
-# black cover over their page, cleared while the glow is on (`off_master` covers them with
-# the rest while the master is off).
-if SWITCHES or CHANNELS:
-    ed += [src("readouts_off", "Readouts off", "color", {"color": "#000000ff", "width": 64, "height": 64}),
-           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 must(batch(ed, "atlas"), "atlas")
-if SWITCHES or CHANNELS:
-    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_readouts",
-             "motion": [uncover("glow")]}), "readouts switch")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
