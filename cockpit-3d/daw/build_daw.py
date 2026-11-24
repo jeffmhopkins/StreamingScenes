@@ -410,10 +410,19 @@ L += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "in
            (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0}, scene=SHIP)
 L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.2, "range_px": 3200},
            (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
+# The warp's glow: a blue-white light from ahead, out of the windshield, that comes up
+# with the warp (it follows the `warp` channel below) and goes nowhere near a switch, so
+# a jump to warp lights a dark cabin. WARP_LIGHT sets its strength at full warp; 0 leaves
+# it out.
+WARP_LIGHT = float(os.environ.get("WARP_LIGHT", "3.0"))
+if WARP_LIGHT > 0:
+    L += light("l_warp", "Warp glow", {"type": "directional", "color": "#a9c8ff", "intensity": WARP_LIGHT},
+               (0.0, 2.0, -4.0), aim={"tilt_deg": -20.0, "turn_deg": 180.0})
 # A model is lit by at most 8 lights (the ambient and the environment aside), the first
-# in stacking order. With GLOW the 8 are the sun, the cabin and the launcher's six pad
-# lights, which light the cabin in the band's colours from the desk; without it, the
-# screens' glow, a light a track around the cabin and the desk's glow.
+# in stacking order. With GLOW the 8 are the sun, the cabin, the warp's glow and the
+# launcher's pad lights (the two lead tracks' columns share one), which light the cabin
+# in the band's colours from the desk; without it, the warp's glow, the screens' glow and
+# the first four of the lights a track around the cabin.
 if not GLOW:
     L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
                (0.0, 1.0, -1.15))
@@ -436,15 +445,17 @@ if not GLOW:
 # The launcher throws its pads' colours on the desk and the screens above it: a small
 # light a track over its column, in the track's colour (the launcher's first 600 px of the
 # desk's 960 px cell, the desk 0.72 m wide, so a column is 75 px, 56 mm).
+# The lead and its echo share one light over their two columns, in between their colours,
+# so the warp's glow has a slot.
 PAD_LIGHTS = []
 if GLOW:
-    for ti, (_, color) in enumerate([("Drums", "#ff7a1a"), ("Hats", "#ffc23d"), ("Bass", "#2fd27a"),
-                                     ("Keys", "#3aa0ff"), ("Lead", "#c45cff"), ("Lead Echo", "#ff4f9a")]):
-        x = -0.36 + (ti + 0.5) * 0.05625
-        lid = f"l_pad{ti}"
-        PAD_LIGHTS.append((lid, ti))
-        L += light(lid, f"Pad light {ti + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
-                                                 "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
+    for n, (tracks, color) in enumerate([((0,), "#ff7a1a"), ((1,), "#ffc23d"), ((2,), "#2fd27a"),
+                                         ((3,), "#3aa0ff"), ((4, 5), "#e05ccd")]):
+        x = -0.36 + (sum(tracks) / len(tracks) + 0.5) * 0.05625
+        lid = f"l_pad{n}"
+        PAD_LIGHTS.append((lid, tracks))
+        L += light(lid, f"Pad light {n + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
+                                                "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
 # The warp goes where the ship points (JStream ADR-0187): each jump travels straight ahead
 # from wherever the heading, pitch and roll have turned the sky, and at warp they swing it
@@ -486,8 +497,10 @@ if ARRIVALS:
 LEVEL_MS = int(os.environ.get("LEVEL_MS", "220"))
 motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.5, 0.0, smoothing=LEVEL_MS)]
           for lid, _, _, _, ti, _, _ in TRACK_LIGHTS}
-for lid, ti in PAD_LIGHTS:
-    motion[lid] = [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.45, 0.0, smoothing=LEVEL_MS)]
+for lid, tracks in PAD_LIGHTS:
+    # A shared light follows each of its tracks for its share, so it keeps one's floor.
+    motion[lid] = [data(f"level{ti}" if len(tracks) > 1 else "level", "opacity", "meters", f"tracks.{ti}.0",
+                        -0.45 / len(tracks), 0.0, smoothing=LEVEL_MS) for ti in tracks]
 if not GLOW:
     motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
     # The screens' glow pulses on every beat: brightest on it, fading through it.
@@ -521,6 +534,9 @@ if CHANNELS:
                             channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]
         + mod_inputs("warp", SHIP_CC_SMOOTHING_MS)}}), "warp channel")
     motion["l_env"].append(follow("warp", "source", "warp", 0.0, 1.0, source={"param": "warp"}))
+    if WARP_LIGHT > 0:
+        # Dark at rest, full at full warp: it swells as the warp builds.
+        motion["l_warp"] = [follow("warp", "opacity", "warp", -1.0, 0.0)]
     # The heading, pitch and roll too: a whole turn over the channel's 0 to 1, from rest.
     ship = [("ship_yaw", "Ship heading", SHIP_CC_YAW, "turn", -360.0),
             ("ship_pitch", "Ship pitch", SHIP_CC_PITCH, "tilt", 360.0),
@@ -534,6 +550,8 @@ if CHANNELS:
         motion[cid] = [follow(cid[5:], prop, cid, 0.0, turn)]
 else:
     motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
+    if WARP_LIGHT > 0:
+        motion["l_warp"] = [cc("warp", "opacity", SHIP_CC_WARP, -1.0, 0.0)]
 if not CHANNELS:
     motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
     motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
@@ -562,7 +580,7 @@ motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0
 LIGHT_GROUP = {"l_ambient": "cabin", "l_sun": "cabin", "l_cabin": "cabin", "l_glow": "desk",
                "l_desk": "desk"}
 LIGHT_GROUP.update({lid: "desk" for lid, *_ in TRACK_LIGHTS})
-LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})
+LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})  # the warp's glow is none's
 for lid, group in LIGHT_GROUP.items():
     if any(e.get("item_id") == lid for e in L):
         motion.setdefault(lid, []).extend(gates(group))

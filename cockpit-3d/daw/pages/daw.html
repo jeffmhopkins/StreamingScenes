@@ -188,8 +188,13 @@ const views = {
   transport() {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
-    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
-    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
+    // Bars, beats and sixteenths, whichever of . or : the DAW separates them with.
+    const sep = t.positionText && t.positionText.includes(':') ? ':' : '.';
+    const pos = t.positionText ? t.positionText.split(/[.:]/).slice(0, 3).join(sep) : `${c.bar}.${c.beat}.1`;
+    // Shrinks to fit before the play lamp, so a high bar count stays on the screen.
+    x.font = `700 92px ${MONO}`;
+    const posSize = Math.min(92, Math.floor(92 * 515 / Math.max(1, x.measureText(pos).width)));
+    txt(pos, 30, 140, posSize, `rgba(${CYAN},.95)`, 'left', 700);
     // play / stop
     x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
     x.beginPath();
