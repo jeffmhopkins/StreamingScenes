@@ -1,6 +1,6 @@
 {
   "schema_version": 22,
-  "rev": 512,
+  "rev": 539,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -13939,6 +13939,32 @@
           "visible": true
         },
         {
+          "id": "a_desk",
+          "source_id": "src_desk",
+          "geometry": {
+            "center": {
+              "x": 480.0,
+              "y": 900.0
+            },
+            "size": {
+              "width": 960.0,
+              "height": 360.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true
+        },
+        {
           "id": "a_left",
           "source_id": "src_left",
           "geometry": {
@@ -14147,128 +14173,6 @@
           "visible": true
         },
         {
-          "id": "a_launcher_unlit",
-          "source_id": "launcher_unlit",
-          "geometry": {
-            "center": {
-              "x": 300.0,
-              "y": 900.0
-            },
-            "size": {
-              "width": 600.0,
-              "height": 360.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "switch_cabin",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_cabin",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -0.5,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "a_bridge_unlit",
-          "source_id": "bridge_unlit",
-          "geometry": {
-            "center": {
-              "x": 786.0,
-              "y": 900.0
-            },
-            "size": {
-              "width": 348.0,
-              "height": 360.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "switch_cabin",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_cabin",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -0.5,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
           "id": "a_readouts",
           "source_id": "readouts",
           "geometry": {
@@ -14281,58 +14185,6 @@
               "height": 540.0
             },
             "fit_mode": "stretch",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true
-        },
-        {
-          "id": "a_launcher",
-          "source_id": "launcher",
-          "geometry": {
-            "center": {
-              "x": 300.0,
-              "y": 900.0
-            },
-            "size": {
-              "width": 600.0,
-              "height": 360.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true
-        },
-        {
-          "id": "a_bridge",
-          "source_id": "bridge",
-          "geometry": {
-            "center": {
-              "x": 786.0,
-              "y": 900.0
-            },
-            "size": {
-              "width": 348.0,
-              "height": 360.0
-            },
-            "fit_mode": "fit",
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
@@ -22836,6 +22688,338 @@
       ]
     },
     {
+      "id": "src_desk",
+      "name": "Desk source",
+      "role": "group",
+      "timelines": [
+        {
+          "timeline_id": "desk_feed",
+          "name": "Desk: Camera feed",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_desk_grid"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_desk_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "desk_grid",
+          "name": "Desk: Pads and meters",
+          "duration_ms": 150,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "src_desk_grid"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "src_desk_feed"
+              },
+              "points": [
+                {
+                  "at_ms": 150,
+                  "value": 0.0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "src_desk_grid_launcher_unlit",
+          "source_id": "launcher_unlit",
+          "geometry": {
+            "center": {
+              "x": 600.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1200.0,
+              "height": 720.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_desk_grid",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_cabin",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_cabin",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -0.5,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_desk",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_desk",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_desk_grid_bridge_unlit",
+          "source_id": "bridge_unlit",
+          "geometry": {
+            "center": {
+              "x": 1572.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 696.0,
+              "height": 720.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_desk_grid",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_cabin",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_cabin",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -0.5,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_desk",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_desk",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "switch_master",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "power_master",
+              "smoothing_ms": 30,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_desk_grid_launcher",
+          "source_id": "launcher",
+          "geometry": {
+            "center": {
+              "x": 600.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1200.0,
+              "height": 720.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_desk_grid",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_desk_grid_bridge",
+          "source_id": "bridge",
+          "geometry": {
+            "center": {
+              "x": 1572.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 696.0,
+              "height": 720.0
+            },
+            "fit_mode": "stretch",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_desk_grid",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
+        {
+          "id": "src_desk_feed",
+          "source_id": "desk_feed",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 540.0
+            },
+            "size": {
+              "width": 1920.0,
+              "height": 720.0
+            },
+            "fit_mode": "fill",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": 0.0
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": true,
+          "motion": [
+            {
+              "modifier_id": "source",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "src_desk_feed",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "desk_2d",
       "name": "DAW desk 2D",
       "items": [
@@ -25643,6 +25827,22 @@
         "kind": "desktop_audio"
       },
       "kind_version": 1
+    },
+    {
+      "id": "desk_feed",
+      "name": "Desk camera feed (swap for a camera, such as one over a controller)",
+      "kind": {
+        "type": "builtin",
+        "kind": "image"
+      },
+      "kind_version": 1,
+      "settings": {
+        "file": {
+          "path": "starship-cockpit/pages/caller.png",
+          "root": "collection",
+          "type": "asset"
+        }
+      }
     },
     {
       "id": "feed",
@@ -32483,6 +32683,14 @@
       }
     },
     {
+      "id": "src_desk",
+      "name": "Desk source",
+      "kind": {
+        "type": "scene",
+        "scene_id": "src_desk"
+      }
+    },
+    {
       "id": "src_feed_lt",
       "name": "Scene: feed lower third",
       "kind": {
@@ -33244,6 +33452,13 @@
       }
     },
     {
+      "chord": "Ctrl+Alt+Shift+KeyK",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_feed"
+      }
+    },
+    {
       "chord": "Ctrl+Alt+Shift+KeyL",
       "action": {
         "type": "timeline.play",
@@ -33255,6 +33470,13 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "monitors_off"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyN",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_grid"
       }
     },
     {
@@ -33911,6 +34133,28 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "holo_feed"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 78,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_grid"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 79,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_feed"
       }
     },
     {
@@ -34809,6 +35053,28 @@
       "channel_id": "src_center_transport",
       "name": "Centre monitor: Transport",
       "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_desk_feed",
+      "name": "Desk: Camera feed",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "src_desk_grid",
+      "name": "Desk: Pads and meters",
+      "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
       "rise_ms": 0,
