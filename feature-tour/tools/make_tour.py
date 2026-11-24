@@ -1120,10 +1120,10 @@ hotkeys = [
 for h in hotkeys:
     h["labels"] = LABEL
 bindings = [
-    {"trigger": {"kind": "midi_note", "note": 36}, "action": act("show.continue")},
-    {"trigger": {"kind": "midi_note", "note": 37}, "action": act("show.back")},
-    {"trigger": {"kind": "midi_note", "note": 38}, "action": act("show.skip")},
-    {"trigger": {"kind": "midi_note", "note": 39}, "action": act("overlay.toggle", scene_id="s_lower")},
+    {"trigger": {"kind": "midi_note", "note": 36, "channel": 1}, "action": act("show.continue")},
+    {"trigger": {"kind": "midi_note", "note": 37, "channel": 1}, "action": act("show.back")},
+    {"trigger": {"kind": "midi_note", "note": 38, "channel": 1}, "action": act("show.skip")},
+    {"trigger": {"kind": "midi_note", "note": 39, "channel": 1}, "action": act("overlay.toggle", scene_id="s_lower")},
 ]
 transitions = {"presets": [
     {"id": "cut", "name": "Cut", "kind": "cut", "kind_version": 1, "duration_ms": 0, "easing": "linear"},

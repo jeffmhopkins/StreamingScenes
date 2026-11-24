@@ -1,6 +1,6 @@
 {
   "schema_version": 22,
-  "rev": 264,
+  "rev": 288,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -14702,7 +14702,9 @@
         },
         "fov_deg": 66.0,
         "roll_deg": 0.0,
-        "depth_sort": false
+        "depth_sort": false,
+        "focus_px": 1767.7004,
+        "autofocus": true
       },
       "camera_motion": [
         {
@@ -14791,6 +14793,168 @@
           "curve": "linear",
           "from": -45.0,
           "to": 45.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "view_focus",
+          "property": "focus",
+          "kind": "channel",
+          "channel_id": "cam_focus",
+          "smoothing_ms": 40,
+          "curve": "linear",
+          "from": -2028.142,
+          "to": 1038.299,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "view_blur",
+          "property": "blur",
+          "kind": "channel",
+          "channel_id": "cam_blur",
+          "smoothing_ms": 40,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 20.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_position_x",
+          "property": "position_x",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 20,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 300.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_position_y",
+          "property": "position_y",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 21,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": -200.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_position_z",
+          "property": "position_z",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 22,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": -300.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_pan",
+          "property": "pan",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 23,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 30.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_tilt",
+          "property": "tilt",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 24,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 20.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_fov",
+          "property": "fov",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 25,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": -25.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_focus",
+          "property": "focus",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 26,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 600.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_blur",
+          "property": "blur",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 27,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 16.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_roll",
+          "property": "roll",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 28,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 50,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 15.0,
+          "clock": "engine"
+        },
+        {
+          "modifier_id": "cc_autofocus",
+          "property": "autofocus",
+          "kind": "midi",
+          "control": "cc",
+          "controller": 29,
+          "channel": 16,
+          "input": "Bitwig",
+          "smoothing_ms": 0,
+          "curve": "linear",
+          "from": 0.0,
+          "to": -1.0,
           "clock": "engine"
         }
       ],
@@ -15548,6 +15712,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.661399,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.0,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -15650,6 +15838,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.286199,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
                   "curve": "ease_in_out"
                 }
               ]
@@ -15758,6 +15970,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.270111,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -15860,6 +16096,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.287122,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
                   "curve": "ease_in_out"
                 }
               ]
@@ -15968,6 +16228,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.346683,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -16070,6 +16354,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.346683,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16178,6 +16486,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.804333,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.0,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -16280,6 +16612,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.269524,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16388,6 +16744,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.552385,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.0,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -16490,6 +16870,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.670229,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.0,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16598,6 +17002,30 @@
                   "curve": "ease_in_out"
                 }
               ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.195667,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
+                  "curve": "ease_in_out"
+                }
+              ]
             }
           ]
         },
@@ -16700,6 +17128,30 @@
                 {
                   "at_ms": 1800,
                   "value": 0.5,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_focus"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.195667,
+                  "curve": "ease_in_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "cam_blur"
+              },
+              "points": [
+                {
+                  "at_ms": 1800,
+                  "value": 0.15,
                   "curve": "ease_in_out"
                 }
               ]
@@ -28465,7 +28917,8 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 36
+        "note": 36,
+        "channel": 1
       },
       "action": {
         "type": "show.continue"
@@ -28474,7 +28927,19 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 37
+        "note": 36,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_cockpit"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 37,
+        "channel": 1
       },
       "action": {
         "type": "show.back"
@@ -28483,7 +28948,19 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 38
+        "note": 37,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_seat_wide"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 38,
+        "channel": 1
       },
       "action": {
         "type": "show.skip"
@@ -28492,15 +28969,238 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 39
+        "note": 38,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_seat"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 39,
+        "channel": 1
       },
       "action": {
         "type": "overlay.toggle",
         "scene_id": "s_lower"
       }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 39,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_desk"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 40,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_monitor"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 41,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_monitor_l"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 42,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_monitor_r"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 43,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_overhead"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 44,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_out"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 45,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_desk_low"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 46,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_side_l"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 47,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "view_side_r"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 48,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "lights_on"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 49,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "lights_off"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 50,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "monitors_on"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 51,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "monitors_off"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 52,
+        "channel": 16
+      },
+      "action": {
+        "type": "channel.set_value",
+        "channel_id": "holo",
+        "value": 1.0
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 53,
+        "channel": 16
+      },
+      "action": {
+        "type": "channel.set_value",
+        "channel_id": "holo",
+        "value": 0.0
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 54,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "warp_in"
+      }
+    },
+    {
+      "trigger": {
+        "kind": "midi_note",
+        "note": 55,
+        "channel": 16
+      },
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "warp_out"
+      }
     }
   ],
   "channels": [
+    {
+      "channel_id": "cam_blur",
+      "name": "Camera blur",
+      "default": 0.0,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "cam_focus",
+      "name": "Camera focus",
+      "default": 0.661399,
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
     {
       "channel_id": "cam_fov",
       "name": "Camera field of view",

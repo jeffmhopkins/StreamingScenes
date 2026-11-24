@@ -27,6 +27,17 @@ cockpit's model are found by their paths from the root. It needs a JStream with 
 (protocol 0.177). The cockpit's screens follow Bitwig once the app receives from the
 JTunnel sender `Bitwig` ([its README](cockpit-3d/daw/README.md#importing-the-show)).
 
+Bitwig: the cockpit is built with every Bitwig input its import offers, all on MIDI
+channel 16 from the JTunnel sender `Bitwig`:
+- the live data on its screens, readouts, desk lights and LEDs
+- the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
+- the camera CCs 20 to 29, which also give each view its depth of field and autofocus
+- notes from 36 up that switch the views and play the cockpit's sequences
+- the JTunnel Mods
+
+See [its README](cockpit-3d/daw/README.md#what-follows-the-data). The tour's MIDI pads
+(notes 36 to 39) listen on channel 1, so they don't answer those notes.
+
 Keys: the tour's keys are in [its README](feature-tour/README.md#run-it). The cockpit's are as
 [its README](cockpit-3d/daw/README.md#importing-the-show) gives them, except its camera views, which are on
 Ctrl+Shift+1 to 0, - and = here, since the tour's Go to keys hold Ctrl+Alt+1 to 8 and 0.

@@ -34,7 +34,7 @@ It needs a build with the show runner and the Show panel, which arrive in the ne
 pre-release. Open the Show panel, pick **Feature tour** and press Play, or press
 `Ctrl+Alt+P`. Every bookmark's note is a short script for whoever presents it.
 
-| Key | MIDI note | Does |
+| Key | MIDI note (channel 1) | Does |
 |---|---|---|
 | `Ctrl+Alt+Space` | 36 | Continue |
 | `Ctrl+Alt+[` / `Ctrl+Alt+]` | 37 / 38 | Back / Skip |

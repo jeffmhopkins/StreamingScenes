@@ -11,7 +11,10 @@ writes, in build/ (not committed):
   name files by their path from the repo's root, so the project finds them from the
   root. The cockpit's view keys move from Ctrl+Alt+digit to Ctrl+Shift+digit (and - and
   =), since the tour's Go to keys hold Ctrl+Alt+1 to 8 and 0; the tour's title lower third
-  moves to Ctrl+Alt+T, since the cockpit's lights-on key is Ctrl+Alt+L.
+  moves to Ctrl+Alt+T, since the cockpit's lights-on key is Ctrl+Alt+L. The cockpit is
+  recorded with CC=1 and NOTES=1, so every Bitwig input it has is mapped; the tour's MIDI
+  pads (notes 36 to 39) listen on channel 1, so they don't answer the cockpit's notes on
+  channel 16.
 
 Then tools/bake_demos.rs applies the edits to the tour with JStream's own collection code
 and saves the project in the canonical form JStream writes; see that file.
@@ -31,7 +34,12 @@ os.makedirs(BUILD, exist_ok=True)
 subprocess.run([sys.executable, os.path.join(ROOT, "feature-tour", "tools", "make_tour.py"),
                 os.path.join(BUILD, "tour.json")], check=True)
 
-# ---- the cockpit, recorded ----
+# ---- the cockpit, recorded, with every Bitwig input import_show.py offers: the camera
+# CCs 20 to 29 (CC=1, which also gives each view its depth of field and autofocus) and the
+# notes that switch the views and play the sequences (NOTES=1), all on channel 16, beside
+# the light switches, the ship's CCs, the JTunnel Mods and the data it always maps ----
+os.environ.setdefault("CC", "1")
+os.environ.setdefault("NOTES", "1")
 RECORDED = []
 mcp = types.ModuleType("mcp")
 mcp.S, mcp.W, mcp.H = {"sid": None, "id": 0}, 1920, 1080
