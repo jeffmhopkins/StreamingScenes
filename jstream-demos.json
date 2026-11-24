@@ -15088,6 +15088,13 @@
                 "item_id": "holo_flare",
                 "type": "item.hide"
               }
+            },
+            {
+              "at_ms": 750,
+              "action": {
+                "item_id": "holo_light",
+                "type": "item.hide"
+              }
             }
           ],
           "lanes": [
@@ -15166,6 +15173,13 @@
               "at_ms": 120,
               "action": {
                 "item_id": "holo_haze",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "holo_light",
                 "type": "item.show"
               }
             }
@@ -16635,7 +16649,7 @@
               "points": [
                 {
                   "at_ms": 1800,
-                  "value": 0.583259,
+                  "value": 0.567231,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16647,7 +16661,7 @@
               "points": [
                 {
                   "at_ms": 1800,
-                  "value": 0.414216,
+                  "value": 0.440251,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16695,7 +16709,7 @@
               "points": [
                 {
                   "at_ms": 1800,
-                  "value": 0.435294,
+                  "value": 0.529412,
                   "curve": "ease_in_out"
                 }
               ]
@@ -16719,7 +16733,7 @@
               "points": [
                 {
                   "at_ms": 1800,
-                  "value": 0.269524,
+                  "value": 0.289631,
                   "curve": "ease_in_out"
                 }
               ]
@@ -17325,6 +17339,63 @@
         ]
       },
       "items": [
+        {
+          "id": "holo_light",
+          "source_id": "holo_light",
+          "geometry": {
+            "center": {
+              "x": 960.0,
+              "y": 479.7912
+            },
+            "size": {
+              "width": 40.0,
+              "height": 40.0
+            },
+            "fit_mode": "fit",
+            "rotation_deg": 0.0,
+            "tilt_deg": 0.0,
+            "turn_deg": 0.0,
+            "depth_px": -802.2838
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0
+          },
+          "visible": false,
+          "transition": {
+            "delay_ms": 0,
+            "easing": "inherit",
+            "glide": "auto",
+            "appear": "fade",
+            "disappear": "fade"
+          },
+          "motion": [
+            {
+              "modifier_id": "beam",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "holo_beam",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": 0.0,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "panel",
+              "property": "opacity",
+              "kind": "channel",
+              "channel_id": "holo_panel",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -0.5,
+              "to": 0.0,
+              "clock": "engine"
+            }
+          ]
+        },
         {
           "id": "model",
           "source_id": "cockpit_model",
@@ -18131,7 +18202,7 @@
           "geometry": {
             "center": {
               "x": 960.0,
-              "y": 689.7912
+              "y": 703.7912
             },
             "size": {
               "width": 90.0,
@@ -18141,7 +18212,7 @@
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
-            "depth_px": -982.2838,
+            "depth_px": -902.2838,
             "billboard": true
           },
           "crop": {
@@ -18193,7 +18264,7 @@
           "geometry": {
             "center": {
               "x": 960.0,
-              "y": 689.7912
+              "y": 703.7912
             },
             "size": {
               "width": 140.0,
@@ -18203,7 +18274,7 @@
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
-            "depth_px": -982.2838,
+            "depth_px": -902.2838,
             "billboard": true
           },
           "crop": {
@@ -18255,17 +18326,17 @@
           "geometry": {
             "center": {
               "x": 960.0,
-              "y": 473.2287
+              "y": 489.2912
             },
             "size": {
-              "width": 700.0,
-              "height": 433.125
+              "width": 640.0,
+              "height": 429.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
-            "depth_px": -982.2838
+            "depth_px": -902.2838
           },
           "crop": {
             "left": 0,
@@ -18332,17 +18403,17 @@
           "geometry": {
             "center": {
               "x": 960.0,
-              "y": 59.791187
+              "y": 94.79119
             },
             "size": {
-              "width": 700.0,
-              "height": 393.75
+              "width": 640.0,
+              "height": 360.0
             },
             "fit_mode": "fill",
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
-            "depth_px": -982.2838
+            "depth_px": -902.2838
           },
           "crop": {
             "left": 0,
@@ -18419,17 +18490,17 @@
           "geometry": {
             "center": {
               "x": 960.0,
-              "y": 59.791187
+              "y": 94.79119
             },
             "size": {
-              "width": 756.0,
-              "height": 425.25
+              "width": 691.2,
+              "height": 388.8
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
             "tilt_deg": 0.0,
             "turn_deg": 0.0,
-            "depth_px": -922.2838
+            "depth_px": -842.2838
           },
           "crop": {
             "left": 0,
@@ -21956,6 +22027,44 @@
           "root": "collection",
           "type": "asset"
         }
+      }
+    },
+    {
+      "id": "holo_light",
+      "name": "Hologram light",
+      "kind": {
+        "type": "builtin",
+        "kind": "light"
+      },
+      "kind_version": 1,
+      "settings": {
+        "backdrop": false,
+        "color": "#5ad2ff",
+        "cone_deg": 45.0,
+        "galaxy": 0.0,
+        "ground_color": "#3a3a3a",
+        "horizon_color": "#ffffff",
+        "image": null,
+        "intensity": 1.6,
+        "nebula": 0.0,
+        "nebula_color": "#8c2e9e",
+        "nebula_color_2": "#2471a8",
+        "range_px": 1000.0,
+        "shadow_softness": 0.3,
+        "shadows": false,
+        "sky_color": "#9cc2e8",
+        "sky_picture_deg": 30.0,
+        "sky_picture_light": 1.0,
+        "sky_pictures": null,
+        "sky_seed": 0,
+        "softness": 0.2,
+        "star_brightness": 1.0,
+        "stars": 0.0,
+        "type": "point",
+        "warp": 0.0,
+        "warp_aim": "sky",
+        "warp_look_deg": 10.0,
+        "warp_ramp_s": 1.5
       }
     },
     {
