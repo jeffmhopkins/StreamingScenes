@@ -29794,7 +29794,14 @@
         "kind": "move",
         "kind_version": 1,
         "duration_ms": 1800,
-        "easing": "ease_in_out",
+        "easing": {
+          "cubic_bezier": {
+            "x1": 0.33333334,
+            "y1": 0.0,
+            "x2": 0.6666667,
+            "y2": 1.0
+          }
+        },
         "settings": {
           "camera_path": "line",
           "stagger_ms": 0,

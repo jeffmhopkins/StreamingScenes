@@ -124,8 +124,12 @@ SEQ = CHANNELS
 GLIDE = "view_glide"
 must(op({"type": "transition.create", "preset_id": "fade", "name": f"Fade {FADE_MS} ms",
          "kind": "fade", "duration_ms": FADE_MS, "easing": "ease_in_out"}), "fade")
+# Eased in and out as the views were when they were sequences: a lane's `ease_in_out` is
+# smoothstep, 3t² - 2t³, which is exactly this cubic Bézier; a Move's own `ease_in_out` is a
+# steeper cubic.
+SMOOTHSTEP = {"cubic_bezier": {"x1": 1 / 3, "y1": 0.0, "x2": 2 / 3, "y2": 1.0}}
 must(op({"type": "transition.create", "preset_id": GLIDE, "name": f"View glide {GLIDE_MS} ms",
-         "kind": "move", "duration_ms": GLIDE_MS, "easing": "ease_in_out"}), "glide")
+         "kind": "move", "duration_ms": GLIDE_MS, "easing": SMOOTHSTEP}), "glide")
 must(batch([{"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS["cockpit"]}]
            + keyframes(), "views"), "views")
 text, ok = batch(filing(), "views folder")

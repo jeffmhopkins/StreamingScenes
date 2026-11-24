@@ -202,15 +202,17 @@ view is a keyframe too, `view_cockpit`, with the same camera as the cockpit's ow
 every view is in the folder; Ctrl+Alt+F1 puts the cockpit itself on, also wide.
 
 A view's hotkey, note or show marker switches to its keyframe with `view_glide`, a Move of
-`GLIDE_MS` (1800), eased in and out: the camera glides from wherever it is, from a view or
+`GLIDE_MS` (1800), eased in and out as the view sequences were (smoothstep, as a cubic
+Bézier, since a Move's own `ease_in_out` is steeper): the camera glides from wherever it is, from a view or
 halfway through a glide to another (a switch mid-glide starts from what is on screen,
 JStream ADR-0029 §7). The Bitwig camera CCs belong to the cockpit's family, so they offset
 every view alike and carry through a glide. To change a view, edit its keyframe's camera
 in JStream, as any keyframe's; the hotkeys, notes and the tour follow it.
 
-While a glide runs, JStream draws the cockpit without its scene filters, the ambient
-occlusion and the bloom, and puts them back when it ends (JStream ADR-0180), so the glow
-around the screens dips for the length of a glide.
+A JStream with ADR-0226 draws such a glide as the cockpit itself, its ambient occlusion,
+bloom and reflections running throughout, through a moving camera, so it looks as the
+sequences did. An older one draws the cockpit without those scene filters while a glide
+runs (ADR-0180), so the glow around the screens dips for the length of a glide.
 
 ### Cockpit sequences
 
