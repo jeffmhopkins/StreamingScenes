@@ -37,7 +37,7 @@ keys are LEDs, so the Glow and Master switches darken them as they do the others
 
 The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pads and
 meter bridge, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
-Ctrl+Alt+Shift+J and K. It has no keys to light.
+Ctrl+Alt+Shift+N and K. It has no keys to light.
 
 Everything here is generic JStream: group scenes as sources, channels, sequences with
 lanes, hotkeys and `channel` motion modifiers.
@@ -176,7 +176,7 @@ def edits(hologram=True, gates=()):
 DESK = (0, 720, 960, 360)
 DESK_H = W * 3 / 8
 # (slot, its name, its key after Ctrl+Alt+Shift)
-DESK_SLOTS = [("grid", "Pads and meters", "KeyJ"), ("feed", "Camera feed", "KeyK")]
+DESK_SLOTS = [("grid", "Pads and meters", "KeyN"), ("feed", "Camera feed", "KeyK")]
 
 
 def desk_controls():

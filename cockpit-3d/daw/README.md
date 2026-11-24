@@ -279,7 +279,7 @@ views' and the cockpit sequences' notes, so they move up if those gain any):
 | Centre monitor | 6 to 0 | 61 to 65 |
 | Right monitor | Y, U, I, O, P | 66 to 70 |
 | Hologram | Z, X, C, V, B | 71 to 75 |
-| Desk (below) | J, K | 76, 77 |
+| Desk (below) | N (pads and meters), K (camera) | 76, 77 |
 
 The selected source's key lights amber under its screen: the five soft keys under each
 monitor, and a row of five on the dash just in front of and right of the hologram's
@@ -296,7 +296,7 @@ The desk's grid controller switches the same way: its subscene, `src_desk`, draw
 pads and the meter bridge (with their unlit pages under them, which still dim with the
 lights) or a camera feed, `desk_feed`, over the whole 8:3 surface, which suits a camera
 looking down on a long grid controller. Point `src_desk_feed` at the camera in the app.
-Ctrl+Alt+Shift+J shows the pads and meters, Ctrl+Alt+Shift+K the camera (the sequences
+Ctrl+Alt+Shift+N shows the pads and meters, Ctrl+Alt+Shift+K the camera (the sequences
 `desk_grid` and `desk_feed`; MIDI notes 76 and 77). The desk has no soft keys to light.
 
 ### Where a warp arrives

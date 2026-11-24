@@ -32664,13 +32664,6 @@
       }
     },
     {
-      "chord": "Ctrl+Alt+Shift+KeyJ",
-      "action": {
-        "type": "timeline.play",
-        "timeline_id": "desk_grid"
-      }
-    },
-    {
       "chord": "Ctrl+Alt+Shift+KeyK",
       "action": {
         "type": "timeline.play",
@@ -32689,6 +32682,13 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "monitors_off"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyN",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_grid"
       }
     },
     {
