@@ -16,6 +16,8 @@ import sys
 
 from mcp import init, op, batch, asset
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from live_readouts import SIDE_AT  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -83,21 +85,24 @@ must(op({"type": "item.set_motion", "scene_id": "feed", "item_id": "bar", "motio
      "period_ms": int(4000 * F), "phase": 0.0}]}), "feed motion")
 
 # With PAGES_URL, every screen of the model shares one material, `screens`, mapped onto
-# a 1920 x 1080 atlas of 640 x 360 cells (the model's README). The atlas is a 2D scene:
-# the feed on the centre screen, the 2D cockpit's screen pages on the others.
+# a 1920 x 1080 atlas (the model's README). The atlas is a 2D scene: the feed on the
+# centre screen, the 2D cockpit's screen pages on the others, over the model's own
+# placeholder atlas, so the console's live panels, readouts and LEDs show the pictures
+# the model was made with.
 ATLAS = [  # (item, page or None for the feed, x, y, w, h)
     ("a_left", "screen-radar", 0, 0, 640, 360),
     ("a_center", None, 640, 0, 640, 360),
     ("a_right", "screen-spectrum", 1280, 0, 640, 360),
     ("a_ovl", "screen-nav", 0, 360, 640, 360),
     ("a_ovr", "screen-shields", 640, 360, 640, 360),
-    ("a_side_l", "screen-telemetry", 1280, 360, 640, 360),
+    ("a_side_l", "screen-telemetry", *SIDE_AT["screen_side_left"]),
     ("a_desk", "desk", 0, 720, 960, 360),
-    ("a_side_r", "screen-camhud-1", 1280, 720, 640, 360),
+    ("a_side_r", "screen-camhud-1", *SIDE_AT["screen_side_right"]),
 ]
 if PAGES_URL:
     ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
-          src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
+          src("atlas_bg", "Atlas background", "image",
+              {"file": asset(os.path.join(os.path.dirname(MODEL), "textures", "screens.jpg"))}),
           add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080)),
           {"type": "source.create", "source_id": "feed_in_atlas", "name": "Feed",
            "kind": {"type": "scene", "scene_id": "feed"}}]
