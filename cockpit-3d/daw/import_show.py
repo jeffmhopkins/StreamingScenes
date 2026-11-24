@@ -9,6 +9,8 @@
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows it, Ctrl+Alt+Shift+H hides it (before sequences, Ctrl+Alt+H shows or hides it), and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
+- the Sound Journal title (title.py): the cockpit darkened and slightly blurred under the
+  JMH shield and "Sound Journal", faded in by Ctrl+Alt+J and out by Ctrl+Alt+Shift+J;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
@@ -250,6 +252,19 @@ if SHIP:
             for _, key, action in ship_sequences.CONTROLS if key]
     must(batch(seq, "ship sequences"), "ship sequences")
 
+# ---- the Sound Journal title (title.py): the cockpit darkened and blurred under the JMH
+# shield and "Sound Journal", faded in on Ctrl+Alt+J and out on Ctrl+Alt+Shift+J ----
+import title  # noqa: E402
+
+TITLE = False
+if SHIP:
+    try:
+        title.add("cockpit", [BUILT["cc_input"](title.TITLE_CC, 0.0, 1.0, 50)]
+                  + BUILT["mod_inputs"]("title"))
+        TITLE = True
+    except SystemExit as e:
+        print(f"no Sound Journal title ({e}); importing the rest", file=sys.stderr)
+
 if NOTES:
     notes = [{"type": "binding.set",
               "trigger": {"kind": "midi_note", "note": 36 + i, "channel": NOTE_CHANNEL},
@@ -263,6 +278,12 @@ if NOTES:
                    "action": action}
                   for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
                   if HOLOGRAM or action.get("channel_id") != "holo"]
+        # Then the title's on and off.
+        first += len(ship_sequences.CONTROLS)
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(title.CONTROLS if TITLE else [])]
     must(batch(notes, "notes"), "notes")
 
 if CC:
@@ -301,7 +322,7 @@ if CC:
 # the scene list, and last, since opening the project puts its first scene on program ----
 must(batch([{"type": "scene.set_role", "scene_id": "atlas", "role": "group"},
             {"type": "scene.reorder", "scene_id": "atlas",
-             "index": (1 if SEQ else len(VIEWS)) + 2}], "atlas"), "atlas")
+             "index": (1 if SEQ else len(VIEWS)) + 2 + TITLE}], "atlas"), "atlas")
 
 # ---- the cockpit tour, a show (show_tour.py) that runs through all of it; a JStream
 # without shows (before protocol 0.177) imports the rest ----
@@ -322,5 +343,6 @@ print("imported: views Ctrl+Alt+1..0, -, =" + (" (sequences)" if SEQ else " (key
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ
           else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram")
+      + ("; Sound Journal title Ctrl+Alt+J on, Ctrl+Alt+Shift+J off" if TITLE else "")
       + ("; show: Cockpit tour" if TOUR else ""))
 print("saved to", PROJECT)

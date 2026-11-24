@@ -92,7 +92,7 @@ MOD = {  # channel: its Mod number. 1 on and 0 off for the switches, 1 full for 
     "warp": 6, "holo": 7, "ship_yaw": 8, "ship_pitch": 9, "ship_roll": 10,
     "screen_center": 11, "screen_left": 12, "screen_right": 13, "screen_ovl": 14,
     "screen_ovr": 15, "screen_side_l": 16, "screen_side_r": 17, "screen_desk": 18,
-    "screen_panels": 19,
+    "screen_panels": 19, "title": 20,
 }
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))

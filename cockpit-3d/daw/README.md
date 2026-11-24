@@ -19,6 +19,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `show_tour.py` | The Cockpit tour, a show (JStream ADR-0210) that runs through the cockpit for an audience: power up, the seat, the desk, the monitors, the consoles, warp, the hologram, the 2D desk and power down, with a script in every bookmark's note. See [The cockpit tour](#the-cockpit-tour). |
 | `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
+| `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, and the jump to warp and back, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
@@ -112,11 +113,12 @@ sequences keep working beside it.
 | 9 | `ship_pitch` | pitch at rest | a whole turn nose up |
 | 10 | `ship_roll` | roll at rest | a whole turn right wing down |
 | 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
+| 20 | `title` | Sound Journal title out (crossing one half plays the fade out) | in (crossing one half plays the fade in) |
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
 CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
 Mod. The camera's channels (`cam_*`, see [Camera views](#camera-views)) have no Mod either,
-so Mods 20 to 32 stay free: assign one to a camera channel in JStream (the channel's
+so Mods 21 to 32 stay free: assign one to a camera channel in JStream (the channel's
 inputs) to play it from Bitwig.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
@@ -153,14 +155,15 @@ What it makes:
 
 | | |
 |---|---|
-| Scenes | `DAW cockpit` (3D, with a sequence a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
+| Scenes | `DAW cockpit` (3D, with a sequence a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport), `Sound Journal` (the cockpit under the Sound Journal title, which its switch puts on program) |
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences) |
-| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| Sound Journal title | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out; CC 45 on channel 16 and Mod 20 too; see [The Sound Journal title](#the-sound-journal-title) |
+| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, then the Sound Journal title on and off, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
@@ -276,6 +279,36 @@ alone: the black hole is ray traced through a Schwarzschild metric, the planets 
 spheres with atmospheres and ring shadows, and the nebulae and galaxy are layers of gas,
 dust and stars. It writes them at 1024 pixels (rendered at 2048) and writes
 `arrivals/sun_directions.json`, each planet's sun and where it is.
+
+## The Sound Journal title
+
+The title card from Jeff's streams, over the live cockpit: the picture darkens and blurs
+slightly, and the JMH shield and "Sound Journal" fade in, centred. `title.py` builds it and
+`import_show.py` calls it.
+
+![The cockpit under the Sound Journal title](title/title-on.jpg)
+
+| | |
+|---|---|
+| In, out | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out. CC `TITLE_CC` (45) on channel 16 from `Bitwig` does too (up is in), as do Mod 20 and, with `NOTES=1`, the two notes after the cockpit's sequences'. An agent sends `channel.set_value` on `title` (1 in, 0 out), as `python3 title.py on` and `off` do |
+| How long | in over `TITLE_IN_MS` (1200), out over `TITLE_OUT_MS` (900), eased at both ends |
+| How it looks | the blur's radius goes to `TITLE_BLUR_PX` (6 px), and the picture to `1 - TITLE_DIM` (0.38) of its brightness, as the card comes up to opaque |
+| The card | `title/title.png`, drawn by `title/make_title.py`: the monogram over the words in Ubuntu Light (`title/Ubuntu-Light.ttf`, under the Ubuntu Font Licence in `title/UFL.txt`). The monogram is the font `Crepitus-monogram.ttf`'s ligature for `1jMh`; with that font in `title/`, the script draws it from the font, and without it, from a traced outline that stands in for it. `WORDS` changes the words |
+
+JStream draws a 3D scene through its camera, so a fixed overlay can't sit in the cockpit
+itself: a 2D scene, `sound_journal`, nests the cockpit over the whole canvas and puts the
+card above it (JStream ADR-0094 decision 5). The cockpit item carries a `blur` and a
+`color_correction` whose radius and multiply colour follow the channel `title_fade`, as
+the card's opacity does.
+
+The switch is the channel `title` (0 out, starting out), and its CC and Mod are inputs of
+it. Rising past one half plays the sequence `title_in`: it cuts to `sound_journal`, which
+looks exactly like the cockpit while `title_fade` is 0, and fades `title_fade` up.
+Falling plays `title_out`, which fades it down and cuts back to `DAW cockpit` at the end.
+Each stops the other, so flipping the switch mid-fade turns round from where it is. The
+views, the lights, the warp and the hologram keep working underneath, since they move
+the cockpit's channels and camera, not the program. Turning the title off always returns
+to the cockpit, even if the switch was turned on from another scene.
 
 ## The hologram
 
