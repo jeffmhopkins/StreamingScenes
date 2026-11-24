@@ -29,9 +29,9 @@ no page server and no copies, since the screens' pages go in inline and the mode
 read from this checkout. JS_TOKEN and JS_MCP are as for ../jstream/mcp.py; build_daw.py's
 variables tune the cockpit.
 
-Bitwig's state reaches the scene once the app receives from the JTunnel sender named
-`Bitwig` (the app's own setting, "Receive from JTunnel senders", which only a person
-changes). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
+Bitwig's state reaches the scene once the app receives from its JTunnel sender (the app's
+own setting, "Receive from JTunnel senders", which only a person changes). The cockpit
+reads that sender as the input `JTunnel`, whatever its name (JStream #1784). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
 views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
 plugin's sender too: an accepted sender's MIDI reaches the bindings.
 """
@@ -53,7 +53,7 @@ WARM = int(os.environ.get("WARM", "3"))
 CC = os.environ.get("CC", "0") == "1"
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
 CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
-CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_INPUT = os.environ.get("CC_INPUT", "JTunnel")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
 # How the camera follows its view channels: a little smoothing hides the values thread's
 # ticks, which aren't in step with the frames.

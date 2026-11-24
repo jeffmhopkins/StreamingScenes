@@ -25,10 +25,10 @@ set it up in JStream, and demo videos and stills.
 Open it from a checkout of this repo (**File › Open project…**): its pictures, fonts and the
 cockpit's model are found by their paths from the root. It needs a JStream with shows
 (protocol 0.177). The cockpit's screens follow Bitwig once the app receives from the
-JTunnel sender `Bitwig` ([its README](cockpit-3d/daw/README.md#importing-the-show)).
+Bitwig's JTunnel sender, read as the input `JTunnel` whatever the sender's name (JStream #1784 and later) ([its README](cockpit-3d/daw/README.md#importing-the-show)).
 
 Bitwig: the cockpit is built with every Bitwig input its import offers, all on MIDI
-channel 16 from the JTunnel sender `Bitwig`:
+channel 16 from the input `JTunnel`, the live JTunnel sender:
 - the live data on its screens, readouts, desk lights and LEDs
 - the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
 - the camera CCs 20 to 29, which also give each view its depth of field and autofocus

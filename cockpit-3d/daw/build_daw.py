@@ -37,7 +37,7 @@ from live_panels import PANELS_AT  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
-INPUT = os.environ.get("DAW_INPUT", "Bitwig")
+INPUT = os.environ.get("DAW_INPUT", "JTunnel")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
@@ -51,7 +51,7 @@ SHIP_PITCH = float(os.environ.get("SHIP_PITCH", "0"))
 SHIP_ROLL = float(os.environ.get("SHIP_ROLL", "0"))
 WARP = float(os.environ.get("WARP", "0"))
 SHIP_CC_CHANNEL = int(os.environ.get("SHIP_CC_CHANNEL", "16"))
-SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "Bitwig")
+SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "JTunnel")
 SHIP_CC_WARP = int(os.environ.get("SHIP_CC_WARP", "30"))
 SHIP_CC_YAW = int(os.environ.get("SHIP_CC_YAW", "31"))
 SHIP_CC_PITCH = int(os.environ.get("SHIP_CC_PITCH", "32"))
@@ -99,7 +99,7 @@ SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
 SWITCH_FADE_MS = int(os.environ.get("SWITCH_FADE_MS", "2000"))
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
-CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_INPUT = os.environ.get("CC_INPUT", "JTunnel")
 # The groups, in CC order, then the master.
 GROUPS = ["cabin", "desk", "screens", "glow"]
 SWITCH_CC = {g: SWITCH_FIRST + i for i, g in enumerate(GROUPS + ["master"])}
