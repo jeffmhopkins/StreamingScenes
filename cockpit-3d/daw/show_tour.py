@@ -76,8 +76,10 @@ CHAPTERS = [
     ],
      "Overhead, the mixer and Bitwig's scenes. On the left console, the clip that's playing; "
      "on the right, the notes it's sending.\n\n"
-     "Even the small readouts on the consoles are live: the last note and its velocity, how "
-     "busy the track is, and the level traces."),
+     "Every small readout and LED on the consoles is live too: the last note and its velocity, "
+     "how busy the track is, the level traces, the device's parameters as bar graphs, scopes "
+     "of the notes, and LEDs and dot matrices that step on every 3rd, 5th or 7th note, so the "
+     "patterns keep shifting."),
     ("warp", "Warp", "cockpit", 22 * S, True, [
         (0, "warp_view", _view("out")),
         (2 * S, "warp_go", _play("warp_in")),

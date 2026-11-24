@@ -42,6 +42,10 @@ SIZE = {
     "moon_grey": 16,
     "lava_world": 15,
 }
+# How often each comes up: the big hazy ones, which blend into the sky, twice as often as
+# the rest, by an item each time (any not named once). A picture can then follow itself
+# now and then, as another item of the same source.
+WEIGHT = {"emission_nebula": 2, "spiral_galaxy": 2, "blue_nebula": 2}
 SUN_DEG = 8  # the sun picture's width; its disc is about a tenth of it
 NAMES = {
     "emission_nebula": "Emission nebula", "spiral_galaxy": "Spiral galaxy",
@@ -88,7 +92,8 @@ def edits(suns=False):
         sid = f"arr_{name}"
         out.append(_image(sid, NAMES[name], path))
         if not (suns and name in sun_of):
-            out.append(_item(SCENE, sid, sid, deg, h / w))
+            for k in range(WEIGHT.get(name, 1)):
+                out.append(_item(SCENE, sid if k == 0 else f"{sid}_{k + 1}", sid, deg, h / w))
             continue
         s = sun_of[name]
         star = f"arr_{s['sun']}"

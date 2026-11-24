@@ -3,17 +3,23 @@
 <body><canvas id="c" width="640" height="360"></canvas><script>
 // One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
-// transport, arrange, device, notes, mixer, clip, scenes, iso or panels (or `window.DAW_VIEW`, set by a
+// transport, arrange, device, notes, mixer, clip, scenes, iso, isopads, bridge, bridgepads, panels or readouts (or `window.DAW_VIEW`, set by a
 // script ahead of this one when the page is given to JStream inline). Everything that moves or
 // blinks follows the data (the clock key's beats), never the page's own clock, so a
 // render on a held clock draws the same picture every time. `?w=` (or `window.DAW_W`) sets
-// the width; the desk's note grid is 600 wide.
+// the width and `?h=` (or `window.DAW_H`) the height; the desk's note grid is 600 wide, and the
+// `readouts` view (the consoles' amber readouts and small LEDs) is 640 x 540.
 const VIEW = window.DAW_VIEW || new URLSearchParams(location.search).get('view') || 'transport';
 const cv = document.getElementById('c');
 const x = cv.getContext('2d');
-const W = +(window.DAW_W || new URLSearchParams(location.search).get('w')) || 640, H = 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
+const W = +(window.DAW_W || new URLSearchParams(location.search).get('w')) || 640,
+  H = +(window.DAW_H || new URLSearchParams(location.search).get('h')) || 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
 const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';
-cv.width = W; document.documentElement.style.width = document.body.style.width = W + 'px';
+cv.width = W; cv.height = H;
+document.documentElement.style.width = document.body.style.width = W + 'px';
+document.documentElement.style.height = document.body.style.height = H + 'px';
+// The desk's lit pads go on a clear page, over their unlit pads (`isopads`, `bridgepads`).
+if (VIEW === 'iso' || VIEW === 'bridge') document.documentElement.style.background = document.body.style.background = 'transparent';
 let D = {}, dirty = true;
 const lowest = {};   // isomorphic view: the lowest pitch each track has played
 const history = [];  // notes view: [beat start, beat end or null, pitch, track]
@@ -22,6 +28,11 @@ let lastBeats = -1;
 const last = {};     // panels view: the last note each track started, [pitch, velocity]
 const waves = { master: [], sel: [] }; // panels view: recent levels, newest last
 const onsets = {};   // panels view: the beats each track started a note on, the last bar's
+const counts = [0, 0, 0, 0, 0, 0, 0, 0]; // readouts view: the notes each track has started
+let total = 0;       // ... and all of them
+const started = [];  // ... the last notes started, newest first: [pitch, velocity, track]
+const chroma = new Array(12).fill(0); // ... each pitch class's glow, lit by a note, fading
+const regs = {};     // ... the dot matrices' shift registers, a row each
 
 function txt(t, px, py, size, col, al = 'left', wt = 600, face = MONO) {
   x.font = `${wt} ${size}px ${face}`; x.textAlign = al; x.fillStyle = col; x.fillText(t, px, py);
@@ -54,6 +65,83 @@ function section() {
   return { cur, next, all: m };
 }
 function selected() { const g = D.grid || {}; return g.selectedTrack >= 0 ? g.selectedTrack : 0; }
+// ---- the desk's pads and meter segments: raised, lit silicone ----
+// A pad is a raised silicone cap: matte and dark when unlit, its top edge catching the
+// light and its foot casting a short shadow; lit, its light comes up through it, brightest
+// in the middle, and spills a little onto the desk around it. A pad lights at once and dims
+// over FADE_MS (`?fade=` or `window.DAW_FADE_MS`, default 350) when it turns off. The fade
+// is timed by the data's clock while the transport plays, so a render on a held clock draws
+// the same picture every time, and by the page's own clock while it is stopped.
+const FADE_MS = +(window.DAW_FADE_MS || new URLSearchParams(location.search).get('fade')) || 350;
+const DESK_DARK = '#05080c', ROOT_GLOW = 0.3;
+const glow = {};      // desk views: each pad's light, by key, [level 0 to 1, colour]
+let deskAt = null, fading = false;  // [beats, page ms] at the last draw; a pad still dimming
+function deskDt() {   // seconds since the last draw, at most 1
+  const c = clock(), ms = performance.now();
+  let dt = 0;
+  if (deskAt) dt = c.playing && c.tempo > 0 ? ((c.beats || 0) - deskAt[0]) * 60 / c.tempo : (ms - deskAt[1]) / 1000;
+  deskAt = [c.beats || 0, ms];
+  return Math.min(1, Math.max(0, dt));
+}
+// Brings each pad's light to `want` (key -> [level, colour]): up at once, down over
+// FADE_MS. Returns whether a pad is still dimming.
+function fadeTo(wanted, dt) {
+  const want = new Map([...wanted].map(([key, v]) => [String(key), v]));  // keys as `glow`'s
+  const k = Math.exp(-dt * 3000 / FADE_MS);
+  let still = false;
+  for (const [key, [lv, col]] of want) { const g = glow[key]; if (!g || lv >= g[0]) glow[key] = [lv, col]; else g[1] = col; }
+  for (const key of Object.keys(glow)) {
+    const g = glow[key], to = want.has(key) ? want.get(key)[0] : 0;
+    if (g[0] > to) { g[0] = to + (g[0] - to) * k; if (g[0] - to < 0.01) g[0] = to; else still = true; }
+    if (g[0] <= 0) delete glow[key];
+  }
+  return still;
+}
+function rr(px, py, w, h, r) { x.beginPath(); x.roundRect(px, py, w, h, r); }
+// An unlit pad; `s` scales its edge and shadow for small pads.
+function siliconePad(px, py, w, h, r, s = 1) {
+  x.fillStyle = 'rgba(0,0,0,.6)'; rr(px, py + 2.5 * s, w, h, r); x.fill();
+  const g = x.createLinearGradient(0, py, 0, py + h);
+  g.addColorStop(0, '#2a323d'); g.addColorStop(Math.min(.5, 5 * s / h), '#1d242d'); g.addColorStop(1, '#12171e');
+  x.fillStyle = g; rr(px, py, w, h, r); x.fill();
+  x.strokeStyle = 'rgba(255,255,255,.08)'; x.lineWidth = 1; rr(px + .5, py + .5, w - 1, h - 1, r); x.stroke();
+}
+// A lit pad, `lv` 0 to 1, in `col`: opaque from ROOT_GLOW up, so it hides the unlit pad
+// under it, and fading out below that.
+function litPad(px, py, w, h, r, col, lv, s = 1) {
+  x.save();
+  x.globalAlpha = Math.min(1, lv / ROOT_GLOW);
+  x.shadowColor = rgba(col, Math.min(1, .9 * lv)); x.shadowBlur = 16 * s * lv;
+  x.fillStyle = '#0c1016'; rr(px, py, w, h, r); x.fill();
+  x.shadowBlur = 0;
+  x.fillStyle = rgba(col, Math.min(1, lv)); rr(px, py, w, h, r); x.fill();
+  const cx = px + w / 2, cy = py + h * .45, g = x.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * .62);
+  g.addColorStop(0, `rgba(255,255,255,${.34 * s * s * lv})`); g.addColorStop(.55, `rgba(255,255,255,${.08 * s * s * lv})`); g.addColorStop(1, 'rgba(0,0,0,.22)');
+  x.fillStyle = g; rr(px, py, w, h, r); x.fill();
+  x.strokeStyle = `rgba(255,255,255,${.12 + .25 * lv})`; x.lineWidth = 1; rr(px + .5, py + .5, w - 1, h - 1, r); x.stroke();
+  x.restore();
+}
+function mixHex(a, b, t) {
+  const p = h => parseInt(h.slice(1, 7), 16), A = p(a), B = p(b), m = sh => Math.round(((A >> sh) & 255) * (1 - t) + ((B >> sh) & 255) * t);
+  return '#' + [16, 8, 0].map(sh => m(sh).toString(16).padStart(2, '0')).join('');
+}
+// Calls `f(px, py, w, h, row, column)` for each of the desk's 8 x 8 pads, row 0 at the foot.
+function isoPads(f) {
+  const cols = 8, rows = 8, gap = 6, cw = (W - gap * (cols + 1)) / cols, ch = (H - gap * (rows + 1)) / rows;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) f(gap + c * (cw + gap), H - (r + 1) * (ch + gap), cw, ch, r, c);
+}
+// Calls `f(key, px, py, w, h, column, segment, segments, height 0 to 1)` for each of the
+// meter bridge's segments: six tracks of two bars in the first 290 px, the master's two
+// in the last 56, 18 segments each, segment 0 at the foot.
+const BRIDGE = [];
+for (let i = 0; i < 6; i++) for (let sub = 0; sub < 2; sub++) BRIDGE.push({ i, sub, low: '#2fe08a', high: '#ff4a3a', x0: 8 + i * (281 / 6) + sub * ((281 / 6 - 8) / 2 + 2), w: (281 / 6 - 8) / 2 - 2 });
+for (let i = 0; i < 2; i++) BRIDGE.push({ master: true, i, low: '#6ee0ff', high: '#ffb040', x0: 298 + i * 25, w: 19 });
+function bridgeSegs(f) {
+  const n = 18, gap = 4, y0 = 8, sh = (H - 2 * y0 - gap * (n - 1)) / n;
+  BRIDGE.forEach((col, ci) => {
+    for (let s = 0; s < n; s++) f(ci * n + s, col.x0, H - y0 - (s + 1) * sh - s * gap, col.w, sh, col, s, n, (s + .5) / n);
+  });
+}
 function bar(px, py, w, h, v, col) {
   x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(px, py, w, h);
   x.fillStyle = col; x.fillRect(px, py, w * Math.max(0, Math.min(1, v)), h);
@@ -67,6 +155,12 @@ const PANEL_AT = {
   trackWave: [160, 240, 160, 80], activity: [0, 320, 80, 40], position: [80, 320, 80, 40],
   beats: [160, 320, 80, 40], strips: [240, 320, 80, 40],
 };
+// @readouts-begin: written by cockpit-3d/tools/live_readouts.py; don't edit by hand.
+// READOUTS: [readout atlas cell, look (KINDS), under a live panel, width in cm]
+// LEDS: [colour (LED_COLOURS), x, y, z in cm]
+const READOUTS = [[54,0,0,13],[106,4,0,28],[59,5,0,8],[30,0,0,12],[20,2,0,9],[113,5,0,9],[71,5,0,3],[80,2,0,7],[36,0,0,10],[24,0,0,8],[29,5,0,10],[25,1,0,12],[38,2,0,8],[69,3,0,7],[117,3,1,4],[0,0,1,11],[53,5,1,8],[108,0,1,9],[92,2,1,16],[72,0,1,10],[2,2,0,3],[82,4,1,7],[113,5,1,6],[28,4,1,8],[103,1,1,9],[108,0,0,4],[56,2,0,30],[38,2,0,16],[95,5,0,25],[112,4,0,14],[114,0,0,6],[15,3,0,32],[118,4,0,60],[115,1,0,6],[111,3,0,4]];
+const LEDS = [[1,-100,32,101],[1,-101,32,98],[1,-101,35,101],[1,-100,44,102],[1,-100,46,102],[1,-100,46,97],[1,-100,29,82],[1,-100,29,80],[1,-100,31,85],[1,101,32,78],[1,101,32,81],[1,101,32,87],[1,101,35,81],[1,101,35,84],[1,101,35,90],[1,100,47,90],[1,100,54,86],[1,100,54,88],[1,100,51,100],[1,-44,181,73],[1,-44,181,76],[1,-37,181,86],[1,43,180,70],[1,36,180,72],[1,54,180,72],[1,38,180,74],[1,58,180,74],[1,54,180,76],[1,44,181,22],[1,37,181,49],[1,40,181,49],[0,-101,32,96],[0,-101,35,98],[0,-101,35,96],[0,-100,44,100],[0,-100,29,88],[0,-100,31,88],[0,-100,31,82],[0,-100,34,88],[0,-100,34,85],[0,-100,34,80],[0,-100,36,85],[0,-100,36,82],[0,-100,36,80],[0,-101,68,102],[0,-101,68,99],[0,-101,68,96],[0,-101,68,93],[0,-101,67,90],[0,-101,68,87],[0,-101,68,84],[0,-101,68,81],[0,-101,68,78],[0,101,32,84],[0,101,32,90],[0,101,35,78],[0,101,35,87],[0,100,43,82],[0,100,43,84],[0,100,43,90],[0,100,45,77],[0,100,45,88],[0,100,45,90],[0,100,47,77],[0,100,47,82],[0,100,47,84],[0,100,50,77],[0,100,50,80],[0,100,50,82],[0,100,50,84],[0,100,50,88],[0,100,50,90],[0,100,52,77],[0,100,52,84],[0,100,52,86],[0,100,54,77],[0,100,54,80],[0,100,54,84],[0,100,54,90],[0,100,33,98],[0,100,47,100],[0,100,47,102],[0,100,49,98],[0,99,49,102],[0,100,51,98],[0,99,51,102],[0,-41,181,76],[0,-38,181,76],[0,-42,181,83],[0,-37,181,83],[0,-41,181,96],[0,-37,181,96],[0,36,180,70],[0,38,180,70],[0,40,180,70],[0,45,180,70],[0,47,180,70],[0,54,180,70],[0,40,180,72],[0,43,180,72],[0,45,180,72],[0,47,180,72],[0,49,180,72],[0,51,180,72],[0,58,180,72],[0,43,180,74],[0,45,180,74],[0,47,180,74],[0,49,180,74],[0,51,180,74],[0,36,180,76],[0,38,180,76],[0,40,180,76],[0,45,180,76],[0,51,180,76],[0,56,180,76],[0,45,180,78],[0,47,180,78],[0,51,180,78],[0,54,180,78],[0,56,180,78],[0,58,180,78],[0,40,180,81],[0,45,180,81],[0,37,181,97],[0,42,181,97],[0,37,181,99],[0,40,181,99],[0,45,181,99],[0,38,181,22],[0,41,181,22],[0,37,181,46],[0,40,181,46],[0,49,180,42],[0,49,180,45],[0,57,182,46],[3,-100,46,100],[3,-100,29,77],[3,-100,31,80],[3,-100,36,77],[3,100,43,77],[3,100,45,86],[3,100,47,86],[3,100,47,88],[3,100,36,98],[3,100,54,100],[3,-44,181,70],[3,40,181,97],[3,49,180,51],[2,100,52,80],[2,100,36,101],[2,-39,181,86],[2,58,180,70],[2,40,180,74],[2,43,180,76],[2,36,180,81],[2,38,180,81],[2,43,180,81],[2,54,180,81],[2,45,181,97],[0,-86,81,-60],[0,93,81,-37],[0,37,66,-78],[0,-22,162,-67],[0,54,162,-67],[0,27,81,-140],[0,-29,81,-137],[0,82,81,-123],[0,-16,78,-125],[0,-12,78,-125],[0,-8,78,-125],[0,-4,78,-125],[0,3,76,-121],[0,7,76,-121],[0,27,76,-115],[0,31,76,-115],[0,36,76,-115],[0,38,76,-115],[0,40,76,-115],[0,27,76,-117],[0,31,76,-117],[0,33,76,-117],[0,38,76,-117],[0,40,76,-117],[0,40,77,-119],[0,27,77,-121],[0,29,77,-121],[0,33,77,-121],[0,36,77,-121],[0,31,78,-124],[0,40,78,-123],[0,27,78,-126],[0,29,78,-126],[0,31,78,-126],[0,29,79,-128],[0,31,79,-128],[0,33,79,-128],[0,36,79,-128],[0,38,79,-128],[0,-79,75,-106],[0,-76,75,-106],[0,-79,75,-109],[0,-70,77,-118],[0,-74,79,-126],[0,-74,80,-128],[0,-70,80,-128],[0,-79,66,-74],[0,-76,67,-77],[0,-76,68,-80],[0,-69,67,-77],[0,-64,67,-77],[0,-78,69,-88],[0,-76,69,-88],[0,-76,70,-90],[0,-76,70,-93],[0,-78,71,-95],[0,-76,71,-95],[0,-68,70,-91],[0,-68,70,-94],[0,-52,66,-74],[0,-50,70,-94],[0,50,75,-117],[0,54,75,-117],[0,57,75,-117],[0,61,75,-117],[0,68,73,-108],[0,72,73,-108],[0,68,76,-123],[0,56,67,-74],[0,50,68,-76],[0,50,68,-79],[0,53,68,-79],[0,56,68,-79],[0,61,70,-94],[0,64,70,-94],[0,72,68,-80],[0,72,68,-83],[0,74,68,-83],[0,77,68,-83],[0,79,68,-83],[0,76,70,-94],[0,79,70,-94],[1,29,76,-117],[1,29,77,-119],[1,38,77,-121],[1,27,78,-124],[1,40,78,-126],[1,40,79,-128],[1,-70,75,-106],[1,-70,75,-109],[1,-73,77,-118],[1,-79,68,-80],[1,-64,70,-91],[1,-64,70,-94],[1,-50,66,-74],[1,-56,70,-94],[1,-54,70,-94],[1,61,70,-91],[1,64,70,-91],[1,73,70,-94],[3,36,78,-123],[3,33,78,-126],[3,-79,67,-77],[3,50,67,-74],[3,79,68,-80],[2,38,78,-123],[2,38,78,-126],[2,53,67,-74],[1,-12,176,-60],[1,-10,176,-60],[1,11,167,-65],[1,13,167,-65],[0,4,166,-65],[0,11,165,-66],[0,13,165,-66],[0,12,173,-61],[1,-92,73,43],[1,-90,72,14],[1,-76,41,54],[1,-76,44,60],[1,-76,44,57],[1,-81,78,-89],[1,-80,81,-102],[1,95,75,39],[0,-89,71,43],[0,-92,73,40],[0,-89,71,40],[0,-96,77,29],[0,-90,72,17],[0,-76,35,51],[0,-76,35,39],[0,-76,35,36],[0,-76,38,57],[0,-76,38,54],[0,-76,38,42],[0,-76,38,39],[0,-76,38,36],[0,-76,41,60],[0,-76,44,54],[0,-76,44,48],[0,-76,44,42],[0,-76,44,36],[0,-76,50,60],[0,-76,50,57],[0,-76,50,42],[0,-76,50,39],[0,-77,19,28],[0,-77,18,25],[0,-77,18,22],[0,-77,19,18],[0,-77,19,15],[0,-76,11,-26],[0,-76,11,-32],[0,-76,13,-29],[0,-76,16,-21],[0,-76,16,-26],[0,-76,16,-32],[0,-76,18,-21],[0,-76,18,-24],[0,-76,18,-29],[0,-76,18,-32],[0,-76,21,-21],[0,-76,21,-24],[0,-76,21,-26],[0,-76,21,-29],[0,-76,21,-32],[0,-83,75,-69],[0,-82,78,-72],[0,-83,78,-81],[0,-81,78,-92],[0,-81,81,-89],[0,-81,81,-92],[0,-79,75,-105],[0,-80,78,-99],[0,-80,78,-102],[0,-79,78,-105],[0,-80,81,-99],[0,95,75,42],[0,97,76,42],[0,97,76,39],[0,90,71,27],[0,95,76,28],[0,97,77,25],[0,80,75,-102],[0,80,75,-96],[0,80,78,-99],[0,79,81,-105],[0,80,81,-99],[0,80,81,-96],[0,83,78,-69],[3,-96,77,24],[3,-97,77,14],[3,-76,35,60],[3,-76,35,45],[3,-76,13,-21],[2,-76,38,48],[2,-76,41,48],[2,-76,41,39],[2,-76,47,39],[2,-76,47,36],[2,-76,50,48],[2,-76,10,-21],[2,-76,13,-26],[2,-76,16,-29],[2,-79,81,-105],[2,95,76,30]];
+// @readouts-end
 const AMB = 'rgb(255,150,30)', AMB_DIM = 'rgba(255,150,30,.22)';
 const SEG = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc',
   8: 'abcdefg', 9: 'abcdfg', '-': 'g', ' ': '', A: 'abcefg', b: 'fgcde', C: 'adef', d: 'bcdeg',
@@ -184,12 +278,181 @@ const panel = {
   },
 };
 
+// ---- the consoles' amber readouts and small LEDs (the `readouts` view) ----
+// Every readout of the model and every LED of 2 cm or less maps its own cell of this
+// 640 x 540 picture (cockpit-3d/tools/live_readouts.py): a readout a 128 x 64 cell, five a
+// row, from the top; an LED a 4 x 4 cell, 160 a row, from y 452. Each readout keeps the
+// look its old picture had (KINDS) and what it shows comes from its old cell's number, so
+// readouts of a look differ. Note counts drive much of it: a dot matrix's rows step on
+// every 3rd, 5th, 7th or 11th note, and an LED toggles every Nth note of a track, N prime,
+// so the patterns drift against each other and never quite repeat.
+const KINDS = ['digits', 'bars', 'text', 'strips', 'wave', 'dots'];
+const RO_W = 128, RO_H = 64, LED_TOP = 452, LED = 4;
+const RO_AMBERS = ['rgb(255,150,30)', 'rgb(255,120,10)', 'rgb(255,180,70)', 'rgb(230,90,10)'];
+const LED_LIT = [[255, 150, 30], [255, 40, 25], [60, 255, 110], [60, 150, 255]];
+const PRIMES = [2, 3, 5, 7, 11, 13];
+function mix(n) { n = (n ^ 61) ^ (n >>> 16); n = Math.imul(n, 9); n ^= n >>> 4; n = Math.imul(n, 0x27d4eb2d); return (n ^ (n >>> 15)) >>> 0; }
+function level(ti) { const m = ((D.meters && D.meters.tracks) || [])[ti]; return m ? Math.max(m[0] || 0, m[1] || 0) : 0; }
+function held(ti) { return (((D.notes && D.notes.tracks) || [])[ti] || []); }
+function params() { return ((D.device && D.device.params) || []).filter(p => p && p.exists !== false).slice(0, 8); }
+function noteName(p) { return NAMES[p % 12].toUpperCase() + (Math.floor(p / 12) - 2); }
+// The tracks with notes, so a readout or LED that follows "a track" follows one that plays.
+function playedTracks() { const t = []; counts.forEach((n, i) => { if (n) t.push(i); }); return t.length ? t : [0, 1, 2, 3, 4, 5]; }
+function pick(list, n) { return list[n % list.length]; }
+// A note started on track ti: the counters, the chroma, the dot matrices' registers.
+function onNote(ti, p, v) {
+  counts[ti] = (counts[ti] || 0) + 1; total++;
+  started.unshift([p, v, ti]); if (started.length > 8) started.pop();
+  chroma[p % 12] = Math.max(chroma[p % 12], 0.4 + 0.6 * v / 127);
+  READOUTS.forEach(([cell, kind], i) => {
+    if (KINDS[kind] !== 'dots') return;
+    const src = cell % 3 === 0 ? -1 : pick(playedTracks(), cell);
+    if (src >= 0 && src !== ti) return;
+    const n = src < 0 ? total : counts[ti], r = regs[i] = regs[i] || [1, 2, 4, 8].map(b => (mix(cell + b) & 1023) || b);
+    for (let row = 0; row < 4; row++) {
+      if (n % PRIMES[1 + (row + cell) % 5]) continue;
+      const g = r[row]; // a 10-bit Galois LFSR: a row of dots that walks, never quite repeating
+      r[row] = ((g >> 1) ^ (g & 1 ? 0x240 : 0)) & 1023;
+    }
+  });
+}
+const ro = {
+  // Five seven-segment digits: the notes played (all, or a track's), the bar and beat,
+  // the tempo, or a device parameter, by the readout's number.
+  digits(w, h, n, col) {
+    const c = clock(), ps = params(), t = pick(playedTracks(), n >> 2);
+    const v = [total % 100000, counts[t] % 100000, (c.bar || 0) % 1000 * 10 + (c.beat || 0),
+      Math.round((c.tempo || 0) * 100) % 100000, ps.length ? Math.round(pick(ps, n).value * 1000) : 0][mix(n) % 5];
+    const cw = (w - 12) / 5;
+    for (let i = 0; i < 5; i++) {
+      const ch = String(v).padStart(5)[i];
+      seg(8, 6 + i * cw + 2, 10, cw - 7, h - 20, 'rgba(255,150,30,.16)');
+      seg(ch, 6 + i * cw + 2, 10, cw - 7, h - 20, col);
+    }
+  },
+  // A bar graph: the device's eight parameters (dim at the value, bright at the modulated
+  // value), the tracks' levels, or the twelve pitch classes the notes light, fading.
+  bars(w, h, n, col) {
+    const ps = params(), mode = mix(n) % 3;
+    let vals;
+    if (mode === 0 && ps.length) vals = ps.map(p => [p.value, p.modulated]);
+    else if (mode === 1) vals = [...Array(8).keys()].map(i => [level(i), level(i)]);
+    else vals = chroma.map(v => [v, v]);
+    const bw = (w - 12) / vals.length;
+    vals.forEach(([a, b], i) => {
+      const px = 6 + i * bw, top = 6, hh = h - 12;
+      x.fillStyle = 'rgba(255,150,30,.14)'; x.fillRect(px, top, bw - 2, hh);
+      x.fillStyle = 'rgba(255,150,30,.45)'; x.fillRect(px, top + hh * (1 - Math.min(1, a)), bw - 2, hh * Math.min(1, a));
+      x.fillStyle = col; x.fillRect(px, top + hh * (1 - Math.min(1, b)), bw - 2, Math.max(2, hh * Math.min(1, b) * (mode === 0 ? .25 : 1)));
+    });
+  },
+  // Five lines: the device's parameters and their values, the last notes started, or
+  // counters (each track's notes modulo a prime, the bar, the section).
+  text(w, h, n, col) {
+    const ps = params(), c = clock(), mode = mix(n) % 3, tr = tracks(), lines = [];
+    if (mode === 0 && ps.length) {
+      const first = Math.floor((c.beats || 0) / 4) % ps.length;
+      for (let i = 0; i < 5; i++) { const p = ps[(first + i) % ps.length]; lines.push(`${p.name.slice(0, 9).padEnd(9)} ${String(p.text || '').slice(0, 11)}`); }
+    } else if (mode === 1) {
+      started.slice(0, 5).forEach(([p, v, ti]) => lines.push(`${noteName(p).padEnd(4)} V${String(v).padStart(3)} ${((tr[ti] || {}).name || 'T' + ti).slice(0, 8)}`));
+    } else {
+      // A few of these, a different few for each readout.
+      const s = section(), pool = [`BAR ${String(c.bar || 0).padStart(4, '0')}.${c.beat || 0}`,
+        `SEC ${((s.cur && s.cur.name) || '-').slice(0, 14)}`, `NXT ${((s.next && s.next.name) || '-').slice(0, 14)}`,
+        `BPM ${(c.tempo || 0).toFixed(2)} ${c.playing ? 'RUN' : 'HOLD'}`, `NOTES ${String(total).padStart(6, '0')}`,
+        `DEV ${((D.device && D.device.name) || '-').slice(0, 14)}`];
+      playedTracks().forEach((t, i) => { const p = PRIMES[2 + (n + i) % 4]; pool.push(`T${t} N${String(counts[t] % 10000).padStart(4, '0')} %${p}=${counts[t] % p}`); });
+      for (let i = 0; i < 5; i++) lines.push(pool[(mix(n) + i) % pool.length]);
+    }
+    lines.forEach((l, i) => txt(l.toUpperCase().slice(0, 21), 5, 13 + i * 11.5, 9.5, i % 2 ? 'rgba(255,150,30,.55)' : col, 'left', 600));
+  },
+  // Three segmented strips: three device parameters, three tracks' levels, or three note
+  // counters, each counting up to a prime and starting again.
+  strips(w, h, n, col) {
+    const ps = params(), mode = mix(n) % 3, tr = playedTracks();
+    for (let r = 0; r < 3; r++) {
+      let lit, of = 16;
+      if (mode === 0 && ps.length) lit = Math.round(pick(ps, (n >> 2) + r).modulated * 16);
+      else if (mode === 1) lit = Math.round(level(pick(tr, (n >> 2) + r)) * 16);
+      else { of = PRIMES[2 + (n + r) % 4]; lit = counts[pick(tr, (n >> 2) + r)] % of + 1; }
+      const sw = (w - 12) / of;
+      for (let i = 0; i < of; i++) { x.fillStyle = i < lit ? col : 'rgba(255,150,30,.16)'; x.fillRect(6 + i * sw, 7 + r * 18, sw - 2, 13); }
+    }
+  },
+  // An oscilloscope on a track: the notes it holds as waves (a semitone up is 1/12 of an
+  // octave faster), as loud as the track; between notes its last note rings on at its
+  // level, and a track that hasn't played draws a faintly noisy line.
+  wave(w, h, n, col) {
+    const ti = pick(playedTracks(), n >> 1), lv = Math.min(1, level(ti) * 1.4), b = clock().beats || 0;
+    let notes = held(ti);
+    if (!notes.length) { const l = started.find(s => s[2] === ti) || last[ti]; if (l) notes = [[l[0], l[1]]]; }
+    x.fillStyle = 'rgba(255,150,30,.18)'; x.fillRect(4, h / 2, w - 8, 1);
+    x.strokeStyle = col; x.lineWidth = 2; x.beginPath();
+    for (let i = 0; i <= w - 8; i += 2) {
+      const t = i / (w - 8);
+      let v = 0;
+      notes.forEach(([p]) => { const f = 2 * Math.pow(2, ((p % 24) - 12) / 12); v += Math.sin((t * f + b) * 6.283); });
+      v = notes.length ? v / Math.sqrt(notes.length) * (0.25 + 0.75 * lv) : ((mix(i * 31 + Math.floor(b * 8) * 7 + n) % 100) / 100 - .5) * .12 * (0.3 + lv);
+      const py = h / 2 - Math.max(-1, Math.min(1, v * .8)) * (h / 2 - 6);
+      i ? x.lineTo(4 + i, py) : x.moveTo(4 + i, py);
+    }
+    x.stroke();
+  },
+  // A 4 x 10 dot matrix: each row a register that steps on every 3rd, 5th, 7th, 11th or
+  // 13th note (of all tracks, or one), so the rows walk at their own rates.
+  dots(w, h, n, col, i) {
+    const r = regs[i] || [1, 2, 4, 8].map(b => (mix(n + b) & 1023) || b);
+    for (let row = 0; row < 4; row++) for (let k = 0; k < 10; k++) {
+      x.fillStyle = (r[row] >> k) & 1 ? col : 'rgba(255,150,30,.16)';
+      x.beginPath(); x.arc(9 + k * 12, 9 + row * 15, 4.5, 0, 7); x.fill();
+    }
+  },
+};
+// What lights an LED, from its number: a toggle every Nth note of a track (N prime), a
+// flash on every Nth note, a track's level over a threshold, a chase that sweeps across the
+// consoles on the beat, or a steady status light. Red, green and blue LEDs follow the
+// drums, the bass and the keys; amber ones any track that plays.
+function ledOn(j, [colour, lx, ly, lz]) {
+  const h = mix(j * 7 + 3), tr = playedTracks(), c = clock(), b = c.beats || 0;
+  const ti = colour === 1 ? 0 : colour === 2 ? 2 : colour === 3 ? 3 : pick(tr, h >> 8);
+  const N = PRIMES[(h >> 4) % PRIMES.length], kind = h % 20;
+  if (kind < 9) return Math.floor(counts[ti] / N) % 2 === ((h >> 12) & 1);
+  if (kind < 12) return counts[ti] % N === 0 && held(ti).length > 0;
+  if (kind < 16) return level(ti) > 0.25 + ((h >> 10) % 50) / 100;
+  if (kind < 18) return c.playing && Math.floor(b * 2 - lx / 12) % 4 === 0;
+  return true;
+}
+function drawReadouts() {
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  READOUTS.forEach(([cell, kind, covered], i) => {
+    if (covered) return;  // a live panel sits over it
+    const px = (i % 5) * RO_W, py = Math.floor(i / 5) * RO_H;
+    x.save(); x.translate(px, py);
+    x.fillStyle = 'rgb(10,6,3)'; x.fillRect(2, 2, RO_W - 4, RO_H - 4);
+    x.beginPath(); x.rect(2, 2, RO_W - 4, RO_H - 4); x.clip();
+    ro[KINDS[kind]](RO_W, RO_H, cell, RO_AMBERS[mix(cell) % 4], i);
+    x.restore();
+  });
+  LEDS.forEach((l, j) => {
+    const [r, g, b] = LED_LIT[l[0]], k = ledOn(j, l) ? 1 : 0.1;
+    x.fillStyle = `rgb(${r * k | 0},${g * k | 0},${b * k | 0})`;
+    x.fillRect((j % 160) * LED, LED_TOP + Math.floor(j / 160) * LED, LED, LED);
+  });
+}
+
 const views = {
   transport() {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
-    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
-    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
+    // Bar, beat and sixteenth: the ticks are dropped whichever separator the host writes
+    // (Bitwig's own text uses ':', the simulator '.').
+    const sep = /:/.test(t.positionText || '') ? ':' : '.';
+    const pos = t.positionText ? t.positionText.split(sep).slice(0, 3).join(sep) : `${c.bar}.${c.beat}.1`;
+    // The position at 92 px, smaller when it would run into the play lamp (a long song's
+    // bar count, or Bitwig's four-part position at high counts).
+    x.font = `700 92px ${MONO}`;
+    const fit = Math.min(92, Math.floor(92 * 510 / Math.max(1, x.measureText(pos).width)));
+    txt(pos, 30, 140 - (92 - fit) / 3, fit, `rgba(${CYAN},.95)`, 'left', 700);
     // play / stop
     x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
     x.beginPath();
@@ -278,7 +541,14 @@ const views = {
     const c = clock(), b = c.beats || 0, tr = tracks();
     frame('NOTES', '');
     const span = 16, L = 16, R = W - 16, X = v => R - (b - v) / span * (R - L);
-    const top = 44, low = 38, high = 82, ph = 236, Y = p => top + ph - (p - low) / (high - low) * ph;
+    // A note above or below the roll's range folds onto it by whole octaves, so it loops
+    // round rather than leaving the roll.
+    const top = 44, low = 38, high = 82, ph = 236;
+    const Y = p => {
+      if (!Number.isFinite(p)) p = low;
+      while (p > high) p -= 12; while (p < low) p += 12;
+      return top + ph - (p - low) / (high - low) * ph;
+    };
     for (let k = Math.ceil(b - span); k <= b; k++) {
       x.fillStyle = k % 4 === 0 ? `rgba(${AMBER},.22)` : 'rgba(255,255,255,.05)'; x.fillRect(X(k), top, 1, H - top - 10);
     }
@@ -335,7 +605,10 @@ const views = {
   // player (the foot of the picture). The selected track's playing notes light every pad
   // of their pitch in its colour, brighter with velocity (0 to 127); each C glows faintly. The grid
   // starts on the C at or below the lowest note the track has played, and a note out of its
-  // range folds onto it by octaves.
+  // range folds onto it by octaves. Only the lit pads are drawn, on a clear page: the unlit
+  // pads are `isopads`, a picture of their own under this one, so the scene can dim them
+  // with its lights and leave the lit ones glowing. A pad lights at once and dims over
+  // FADE_MS when its note ends.
   iso() {
     const g = D.grid || {}, sel = g.selectedTrack >= 0 ? g.selectedTrack : 0;
     const t = D['track/' + sel] || {}, playing = ((D.notes && D.notes.tracks) || [])[sel] || [];
@@ -349,16 +622,50 @@ const views = {
       while (q < base) q += 12;
       vel.set(q, Math.max(vel.get(q) || 0, v));
     }
-    x.fillStyle = '#05080c'; x.fillRect(0, 0, W, H);
-    const cols = 8, rows = 8, gap = 6, cw = (W - gap * (cols + 1)) / cols, ch = (H - gap * (rows + 1)) / rows;
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const pitch = base + c + 5 * r, px = gap + c * (cw + gap), py = H - (r + 1) * (ch + gap);
-      const on = vel.has(pitch), root = pitch % 12 === 0;
-      x.fillStyle = on ? rgba(t.color, 0.55 + 0.45 * Math.min(1, (vel.get(pitch) || 127) / 127))
-        : root ? rgba(t.color, 0.3) : '#1a2028';
-      x.beginPath(); x.roundRect(px, py, cw, ch, 5); x.fill();
-      if (root) txt('C' + (pitch / 12 - 2), px + 6, py + ch - 7, 11, on ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.35)', 'left', 700);
-    }
+    const want = new Map(), roots = new Map();
+    isoPads((px, py, cw, ch, r, c) => {
+      const pitch = base + c + 5 * r, key = r * 8 + c;
+      if (vel.has(pitch)) want.set(key, [0.55 + 0.45 * Math.min(1, (vel.get(pitch) || 127) / 127), t.color]);
+      else if (pitch % 12 === 0) want.set(key, [ROOT_GLOW, t.color]);
+      if (pitch % 12 === 0) roots.set(key, 'C' + (pitch / 12 - 2));
+    });
+    fading = fadeTo(want, deskDt());
+    x.clearRect(0, 0, W, H);
+    isoPads((px, py, cw, ch, r, c) => {
+      const key = r * 8 + c, gl = glow[key];
+      if (gl) litPad(px, py, cw, ch, 6, gl[1], gl[0]);
+      const name = roots.get(key);
+      if (name && gl) {
+        x.globalAlpha = Math.min(1, gl[0] / ROOT_GLOW);
+        txt(name, px + 7, py + ch - 8, 11, gl[0] > ROOT_GLOW + 0.05 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.4)', 'left', 700);
+        x.globalAlpha = 1;
+      }
+    });
+  },
+  // The desk's unlit pads, under `iso`: the same 8 x 8 pads, every one unlit, on the
+  // desk's dark. It needs no data and never changes.
+  isopads() {
+    x.fillStyle = DESK_DARK; x.fillRect(0, 0, W, H);
+    isoPads((px, py, cw, ch) => siliconePad(px, py, cw, ch, 6));
+  },
+  // The desk's meter bridge, beside the pads: the six tracks (left and right each) and the
+  // master, in 18 segments, lit from the foot by `meters`, green to red (the master cyan
+  // to amber). Each segment is a small lit pad that dims over FADE_MS as the level falls.
+  // Only the lit segments are drawn, on a clear page, over `bridgepads`.
+  bridge() {
+    const m = D.meters || {}, tr = m.tracks || [], ms = m.master || [], want = new Map();
+    bridgeSegs((key, px, py, w, h, col, s, n, at) => {
+      const v = col.master ? ms[col.i] : (tr[col.i] || [])[col.sub];
+      if (+v >= (s + 1) / n - 0.5 / n) want.set(key, [1, mixHex(col.low, col.high, at)]);
+    });
+    fading = fadeTo(want, deskDt());
+    x.clearRect(0, 0, W, H);
+    bridgeSegs((key, px, py, w, h) => { const gl = glow[key]; if (gl) litPad(px, py, w, h, 2, gl[1], gl[0], 0.5); });
+  },
+  // The meter bridge's unlit segments, under `bridge`.
+  bridgepads() {
+    x.fillStyle = DESK_DARK; x.fillRect(0, 0, W, H);
+    bridgeSegs((key, px, py, w, h) => siliconePad(px, py, w, h, 2, 0.5));
   },
   // The console's small displays, live: one 320 x 360 picture holding every panel, each in
   // the cell the model's live-panel quads map (cockpit-3d/tools/live_panels.py, PANELS).
@@ -371,6 +678,8 @@ const views = {
       panel[name](w, h); x.restore();
     }
   },
+  // The consoles' amber readouts and small LEDs, live (see drawReadouts).
+  readouts() { drawReadouts(); },
   scenes() {
     const sc = (D.scenes && D.scenes.items) || [], g = D.grid || {}, tr = tracks();
     frame('SCENES', `${g.trackCount || 0} TRACKS`);
@@ -394,7 +703,14 @@ const views = {
 function take() {
   D = jstream.data();
   const c = clock(), b = c.beats || 0;
-  if (b < lastBeats - 1) { history.length = 0; for (const k in onsets) delete onsets[k]; }
+  if (b < lastBeats - 1) {  // the clock went back: start the counts and patterns again
+    history.length = 0; for (const k in onsets) delete onsets[k];
+    counts.fill(0); counts.length = 8; total = 0; started.length = 0; chroma.fill(0);
+    for (const k in regs) delete regs[k];
+  }
+  // the pitch classes' glow fades over about a beat
+  const fade = Math.pow(0.25, Math.max(0, Math.min(1, b - Math.max(0, lastBeats))));
+  for (let i = 0; i < 12; i++) chroma[i] *= fade;
   lastBeats = b;
   // keep a short history of the notes for the piano roll and the clip's steps
   const ns = (D.notes && D.notes.tracks) || [];
@@ -407,6 +723,7 @@ function take() {
     seen.add(k);
     if (!open.has(k)) {
       last[ti] = [p, v];
+      onNote(ti, p, v);
       (onsets[ti] = onsets[ti] || []).push(b);
       history.push([b, null, pitch, ti]);
       const cl = D.clip || {}, t = D['track/' + ti];
@@ -424,7 +741,8 @@ function take() {
   dirty = true;
 }
 function draw() {
-  if (window.jstream && jstream.data) { if (dirty) { views[VIEW](); if (VIEW !== 'iso' && VIEW !== 'panels') scan(); dirty = false; } }
+  if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (dirty || fading) { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }

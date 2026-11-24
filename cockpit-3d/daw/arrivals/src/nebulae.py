@@ -226,7 +226,7 @@ def ring_nebula(w, h, seed=24):
     knots = ridged(n, np.cos(ang) * 6 + r * 30, np.sin(ang) * 6, r * 12, 5)
     oiii = smooth(R * 0.95, R * 0.3, r) * (0.25 + 1.1 * fbm(n, u * 6, v * 6, 2.2, 7) ** 2) * (0.3 + 0.9 * smooth(0, R * 0.85, r))
     red = shell * (0.15 + 1.6 * knots ** 3) * smooth(R * 0.7, R * 0.92, r) * (0.6 + 0.6 * fil)
-    halo = smooth(R * 1.9, R * 1.0, r) * smooth(R * 0.8, R * 1.05, r) * (0.3 + 0.7 * fil) * 0.22
+    halo = smooth(R * 2.3, R * 1.0, r) * smooth(R * 0.8, R * 1.05, r) * (0.3 + 0.7 * fil) * 0.4
     light = (oiii[..., None] * np.array([0.25, 0.85, 0.85]) * 0.9
              + (shell * 0.35)[..., None] * np.array([0.9, 0.9, 0.6]) * smooth(R * 0.9, R * 0.5, r)[..., None]
              + red[..., None] * np.array([1.0, 0.25, 0.2]) * 1.8
@@ -235,6 +235,9 @@ def ring_nebula(w, h, seed=24):
     glob = smooth(0.72, 0.85, ridged(n, u * 26, v * 26, 4.4, 3)) * smooth(R * 0.6, R * 0.8, r) * smooth(R * 0.95, R * 0.8, r)
     dust = np.clip(glob * 0.7, 0, 0.8)
     light = light * (1 - dust[..., None])
+    # Hazy rather than crisp: the shell's light spread wide, so its rim melts into the
+    # halo and the sky instead of drawing a hard line.
+    light = light * 0.5 + blur(light, w / 70) * 0.75
     light = light + _one_star(w, h, w / 2, h / 2, 1.2, (0.85, 0.9, 1.0))
     light = light + _stars(w, h, seed + 1, 40, bright=0.5, spikes=1)
     return _finish(light, dust * 0.5, w, exposure=1.5, sat=1.1, edge=_edge(x, y, 0.98, 0.98, 0.3))
