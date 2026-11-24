@@ -1,0 +1,99 @@
+# Feature tour
+
+A JStream project that tours what JStream does, run by a show, for showing people what's
+unique about it.
+
+![What you make: a live broadcast scene of built-in sources](media/preview/what-you-make.jpg)
+
+It is run by a show ([JStream ADR-0210](https://github.com/jeffmhopkins/JStream/pull/1716),
+the show format). Real screenshots of the app sit in scenes as image sources, and the show loads keyframes that move the scene
+camera onto one part of a screenshot at a time, with a spotlight and a short callout. Three
+chapters are the feature itself rather than pictures of it: What you make is a live broadcast
+scene, the Keyframes chapter moves that scene's feeds between three keyframes, and the Motion
+chapter runs five motion modifiers.
+The project doubles as a fixture for the show timeline: it uses every part of a show at
+least once.
+
+It needs no camera and no network. The only device it touches is desktop audio, which the
+show's audio track brings up in three chapters. The 3D chapter shows stills that JStream
+rendered of [cockpit-3d](../cockpit-3d/), and that project's DAW screens drawing a simulated Bitwig session; it doesn't load the
+cockpit itself.
+
+## Open it
+
+**File › Open project…** and pick `feature-tour.json`. Keep the `media/` and `fonts/`
+folders beside it. Opening a project replaces the one that is open, and JStream saves into
+this file from then on, so copy the folder somewhere first if you want to keep this one
+clean.
+
+## Run it
+
+It needs a build with the show runner and the Show panel, which arrive in the next
+pre-release. Open the Show panel, pick **Feature tour** and press Play, or press
+`Ctrl+Alt+P`. Every bookmark's note is a short script for whoever presents it.
+
+| Key | MIDI note | Does |
+|---|---|---|
+| `Ctrl+Alt+Space` | 36 | Continue |
+| `Ctrl+Alt+[` / `Ctrl+Alt+]` | 37 / 38 | Back / Skip |
+| `Ctrl+Alt+1` … `Ctrl+Alt+8` | | Go to bookmark 1 to 8 |
+| `Ctrl+Alt+0` | | Go to the Thanks bookmark |
+| `Ctrl+Alt+.` | | Stop the show |
+| `Ctrl+Alt+L` / `Ctrl+Alt+B` | 39 (lower third) | Toggle the title lower third / the status tag, with or without a show |
+| `Ctrl+Alt+K` | | Fire the impulse in the Motion chapter |
+
+## The Feature tour show
+
+| Time | Chapter | What it exercises |
+|---|---|---|
+| 0:00 | Pre-show | a loop that Continue leaves at once; a non-pausing bookmark inside it |
+| 0:20 | Welcome | a slow fade on the clip; a sequence cue plays the title build; a camera keyframe on a slow drift; an audio clip |
+| 0:32 | The studio | four camera keyframes over a screenshot, each with a spotlight and a callout |
+| 1:01 | What you make | a live broadcast scene of built-in sources, with a nested scene as its lower third; a bookmark that plays through |
+| 1:13 | Keyframes | one flat scene and its three layout keyframes, loaded with a Move; one item has its own delay, and one is another scene (the feed's lower third), cropped |
+| 1:38 | Motion | event cues fire an impulse modifier; an audio clip feeds the audio modifier |
+| 1:54 | Sequences & channels | camera keyframes over the Sequence panel |
+| 2:18 | Shows | a stinger on the clip and on the bookmark |
+| 2:58 | 3D cockpit | camera keyframes over two cockpit renders and the cockpit's DAW screens |
+| 3:27 | DAW & web pages | a sequence cue plays a card build |
+| 3:43 | Keys & MIDI | a bookmark that continues by itself after 12 s |
+| 4:01 | Effects | a bookmark that plays through |
+| 4:19 | Plugins, cameras and going live | camera keyframes over screenshots and panels |
+| 5:00 | Under the hood | a sequence cue plays a card build |
+| 5:14 | Thanks | a loop that finishes its pass on Continue; a lane drives the Glow channel; the end goes to Pre-show |
+
+Overlay tracks put a lower third over the opening of most chapters, one over the title,
+and a "Rendered in JStream" status tag over the whole tour, with fades. A second show,
+**Lightning tour**, plays the title, Keyframes, the 3D cockpit and Thanks straight through and
+loops, with the Next monitor live: one project, several shows, shared scenes.
+
+## Look
+
+The tour uses the app's own palette and type: the colours of JStream's `crates/jstream-ui/style.css`
+and IBM Plex Sans and Mono, which are in `fonts/` under the SIL Open Font License
+(`fonts/OFL.txt`), as the app bundles them
+([JStream ADR-0077](https://github.com/jeffmhopkins/JStream/blob/main/docs/adr/0077-bundle-ibm-plex-fonts.md)).
+
+## Credits
+
+The three film stills in `media/tos-*.jpg` are from *Tears of Steel*, (CC) Blender
+Foundation, [mango.blender.org](https://mango.blender.org), licensed under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). They are cut to 16:9 in the
+scenes with item crops, and otherwise unchanged. The What you make and Keyframes
+chapters show them, and the bookmark notes name the film.
+
+## Changing it
+
+The project is generated. `tools/make_tour.py` writes it, and reads `media/` and `fonts/`
+beside the file it writes:
+
+    python3 tools/make_tour.py feature-tour.json
+
+The committed file is in the canonical form JStream saves, so open and save it once in
+JStream after regenerating to keep diffs small. JStream loads either form.
+
+- `tools/preview.py feature-tour.json OUT_DIR` draws rough stills of every chapter and
+  keyframe with a pinhole camera (layout only: no effects, lights or blending).
+- `tools/make_storyboard.py feature-tour.json storyboard.md` rewrites
+  [storyboard.md](storyboard.md), the chapter-by-chapter run order with every bookmark's
+  script.
