@@ -246,11 +246,19 @@ for item, view, x, y, w, h in PAGES_AT:
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
 # The desk: the pads (the selected track's notes, or the clip launcher), the tracks' meters
-# and the master's.
+# and the master's. The note grid and the meters draw only their lit pads and segments, on
+# a clear picture, over a picture of their unlit ones (`DESK_UNLIT`): the unlit pads show
+# by the cabin's and the desk's light, so they dim with those switches, and go fully dark
+# with both off, while the lit ones stay lit.
+DESK_UNLIT = []  # (item, source, x, y, w, h): under the desk's lit pads, dimmed by the lights
+CLEAR = "#00000000"
 if DESK_GRID == "notes":
     ed += [src("launcher", "Note grid", "browser", {
         **page("iso", 600), "width": 600, "height": 360, "fps": 30,
-        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT})]
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+        src("launcher_unlit", "Note grid, unlit pads", "browser", {
+            **page("isopads", 600), "width": 600, "height": 360, "fps": 1})]
+    DESK_UNLIT.append(("a_launcher_unlit", "launcher_unlit", 0, 720, 600, 360))
 else:
     ed += [src("launcher", "Clip launcher", "grid", {
         "input": INPUT, "mode": "cells", "width": 600, "height": 360, "columns": 8, "rows": 8,
@@ -265,15 +273,25 @@ ed += [src("panels", "Console panels", "browser", {
         **page("panels", PW), "width": PW, "height": PH, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
+METER_PAD = "#11161dff"
+METERS = {"input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",
+          "field": "tracks", "segments": 18, "gap": 8, "radius": 2}
+MASTER = {"input": INPUT, "mode": "bars", "width": 56, "height": 360, "columns": 2, "key": "meters",
+          "field": "master", "segments": 18, "gap": 6, "radius": 2}
+# A meter's unlit segments: the same bars, every segment the pad's colour.
+UNLIT = {"pad": METER_PAD, "color_low": METER_PAD, "color_high": METER_PAD, "background": "#05080cff"}
 ed += [
     src("meters", "Track meters", "grid", {
-        "input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",
-        "field": "tracks", "segments": 18, "gap": 8, "radius": 2, "pad": "#11161dff",
-        "color_low": "#2fe08aff", "color_high": "#ff4a3aff", "background": "#05080cff"}),
+        **METERS, "pad": CLEAR, "color_low": "#2fe08aff", "color_high": "#ff4a3aff", "background": CLEAR}),
     src("master", "Master meter", "grid", {
-        "input": INPUT, "mode": "bars", "width": 56, "height": 360, "columns": 2, "key": "meters",
-        "field": "master", "segments": 18, "gap": 6, "radius": 2, "pad": "#11161dff",
-        "color_low": "#6ee0ffff", "color_high": "#ffb040ff", "background": "#05080cff"}),
+        **MASTER, "pad": CLEAR, "color_low": "#6ee0ffff", "color_high": "#ffb040ff", "background": CLEAR}),
+    src("meters_unlit", "Track meters, unlit", "grid", {**METERS, **UNLIT}),
+    src("master_unlit", "Master meter, unlit", "grid", {**MASTER, **UNLIT}),
+]
+DESK_UNLIT += [("a_meters_unlit", "meters_unlit", 612, 720, 290, 360),
+               ("a_master_unlit", "master_unlit", 904, 720, 56, 360)]
+ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
+ed += [
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
     add("atlas", "a_meters", "meters", geo(612 + 145, 900, 290, 360)),
     add("atlas", "a_master", "master", geo(904 + 28, 900, 56, 360)),
@@ -308,6 +326,12 @@ elif SWITCHES:
     must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_off",
              "motion": gates("screens", off=1.0)}),
          "screens switch")
+# The desk's unlit pads dim by half with the cabin's switch and by half with the desk's, so
+# they are dark with both off (and with the master off); the lit pads above them stay lit.
+if SWITCHES or CHANNELS:
+    unlit = [gate("cabin", off=-0.5), gate("desk", off=-0.5), gate("master")]
+    must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": item, "motion": unlit}
+                for item, *_ in DESK_UNLIT], "unlit pads"), "unlit pads")
 
 # ---- the cockpit ----
 cam = SHOTS["cockpit"]

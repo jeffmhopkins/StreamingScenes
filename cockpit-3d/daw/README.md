@@ -29,13 +29,13 @@ scene follows a real Bitwig with the JTunnel plugin.
 
 | In the cockpit | Driven by | How |
 |---|---|---|
-| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played, and a note above or below its range folds onto it by whole octaves, so any range shows | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
+| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played, and a note above or below its range folds onto it by whole octaves, so any range shows. The unlit pads are a picture of their own under the lit ones (`isopads`), which the cabin and desk switches dim, so with the lights off only the lit pads show | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
 | …or, with `DESK_GRID=clips`, the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The button panel right of the centre console's readouts: a mini clip launcher, 8 tracks × 8 scenes, a playing clip full in its track's colour, a queued one blinking on the beat, the selected track marked under its column | `track/N` `slots[]`, `color`; `grid.selectedTrack`; `clock.beats` | the `panels` page (its `launcher` cell) on the model's `live_panels` |
 | The centre console's left readout: the selected track's last note (name and octave, C3 = 60) and its velocity, as a number and a bar | `notes.tracks[N]`, `grid.selectedTrack` | `panels` (`note`) |
 | The centre console's right readout: how busy the selected track is, RATE (the notes it started over the last bar, as segments and a number) and POLY (the notes it holds now, up to 8) | `notes.tracks[N]`, `clock.beats`, `grid.selectedTrack` | `panels` (`density`) |
 | The other small readouts: the section, next section, tempo, selected track and device as text (left wing); bar and beat (left wing, aft); the beat in the bar as four dots (right wing, aft); a dot per track while it plays a note (centre); every track's level and the master's as bars (overhead); the master's and the selected track's recent level as scrolling traces (right wing; overhead); the master's and the selected track's level as segment strips (centre, far left) | `markers`, `clock`, `device`, `meters`, `notes`, `grid.selectedTrack` | `panels` (`status`, `position`, `beats`, `activity`, `levels`, `masterWave`, `trackWave`, `strips`); `tools/live_panels.py` names which readout shows which |
-| The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode |
+| The desk's meter bridge, tracks and master | `meters` `tracks`, `master` | two `grid` sources, bars mode, drawing only their lit segments over two more that draw every segment unlit, dimmed by the cabin and desk switches as the note grid's unlit pads are |
 | The seven screens | every key | browser sources with `page_api_data` |
 | The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
 | A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit |
@@ -54,8 +54,8 @@ up:
 
 | CC | Group | What it switches |
 |---|---|---|
-| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight |
-| 41 | Desk | the six pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow) |
+| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; half the desk's unlit pads |
+| 41 | Desk | the six pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the other half of the desk's unlit pads |
 | 42 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
 | 43 | Glow | the model's own LEDs and light strips: every material's glow strength |
 | 44 | Master | all four, so only the sky lights the cabin and reflects off it |
@@ -69,7 +69,8 @@ part way. `SWITCHES=0` builds without the CCs (with channels, the switch channel
 
 Each switch is a `midi` motion modifier on every light of its group, beside the data
 modifiers already there: it adds -1 to a light's opacity (a light's strength is its
-intensity times its opacity), +1 to the black cover's, and -3 to the model's glow
+intensity times its opacity), +1 to the black cover's, -0.5 to the desk's unlit pads'
+(the Cabin and Desk switches each; -1 for the Master), and -3 to the model's glow
 strength, which is a multiplier of 1 at rest that the LEDs' data drives raise by up to
 1.6. A model takes at most 8 motion modifiers, and the cockpit already has 6 data ones,
 so the Glow switches drive every material's glow at once (`emissive_strength` with no
