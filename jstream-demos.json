@@ -1,6 +1,6 @@
 {
   "schema_version": 23,
-  "rev": 585,
+  "rev": 577,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -21903,100 +21903,10 @@
     {
       "id": "sound_journal",
       "name": "Sound Journal",
-      "timelines": [
-        {
-          "timeline_id": "title_in",
-          "name": "Sound Journal title in",
-          "duration_ms": 1200,
-          "loop": "once",
-          "cues": [
-            {
-              "at_ms": 0,
-              "action": {
-                "preset_id": "cut",
-                "scene_id": "sound_journal",
-                "type": "scene.switch"
-              }
-            }
-          ],
-          "lanes": [
-            {
-              "target": {
-                "channel": "title_fade"
-              },
-              "points": [
-                {
-                  "at_ms": 1200,
-                  "value": 1.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ],
-          "starts": [
-            {
-              "type": "channel",
-              "channel_id": "title",
-              "edge": "rises"
-            }
-          ],
-          "stops": [
-            {
-              "type": "channel",
-              "channel_id": "title",
-              "edge": "falls"
-            }
-          ]
-        },
-        {
-          "timeline_id": "title_out",
-          "name": "Sound Journal title out",
-          "duration_ms": 900,
-          "loop": "once",
-          "cues": [
-            {
-              "at_ms": 900,
-              "action": {
-                "preset_id": "cut",
-                "scene_id": "cockpit",
-                "type": "scene.switch"
-              }
-            }
-          ],
-          "lanes": [
-            {
-              "target": {
-                "channel": "title_fade"
-              },
-              "points": [
-                {
-                  "at_ms": 900,
-                  "value": 0.0,
-                  "curve": "ease_in_out"
-                }
-              ]
-            }
-          ],
-          "starts": [
-            {
-              "type": "channel",
-              "channel_id": "title",
-              "edge": "falls"
-            }
-          ],
-          "stops": [
-            {
-              "type": "channel",
-              "channel_id": "title",
-              "edge": "rises"
-            }
-          ]
-        }
-      ],
       "items": [
         {
-          "id": "sj_view",
-          "source_id": "sj_cockpit",
+          "id": "sj_dim",
+          "source_id": "sj_black",
           "geometry": {
             "center": {
               "x": 960.0,
@@ -22019,67 +21929,7 @@
             "bottom": 0
           },
           "visible": true,
-          "effects": [
-            {
-              "id": "sj_blur",
-              "kind": "blur",
-              "kind_version": 1,
-              "settings": {
-                "area": "whole",
-                "area_height": 0.5,
-                "area_width": 0.5,
-                "area_x": 0.25,
-                "area_y": 0.25,
-                "radius": 0.0
-              }
-            },
-            {
-              "id": "sj_dim",
-              "kind": "color_correction",
-              "kind_version": 1,
-              "settings": {
-                "brightness": 0.0,
-                "contrast": 0.0,
-                "gamma": 0.0,
-                "hue_shift": 0.0,
-                "multiply": "#ffffff",
-                "opacity": 100.0,
-                "saturation": 0.0
-              }
-            }
-          ],
-          "motion": [
-            {
-              "modifier_id": "blur",
-              "property": "effect",
-              "effect": {
-                "filter_id": "sj_blur",
-                "param": "radius"
-              },
-              "kind": "channel",
-              "channel_id": "title_fade",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": 0.0,
-              "to": 6.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "dim",
-              "property": "effect",
-              "effect": {
-                "filter_id": "sj_dim",
-                "param": "multiply"
-              },
-              "kind": "channel",
-              "channel_id": "title_fade",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": 0.0,
-              "to": -0.62,
-              "clock": "engine"
-            }
-          ]
+          "opacity": 0.62
         },
         {
           "id": "sj_title",
@@ -22105,20 +21955,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "fade",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "title_fade",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         }
       ]
     },
@@ -31142,6 +30979,20 @@
       }
     },
     {
+      "id": "sj_black",
+      "name": "Sound Journal dim",
+      "kind": {
+        "type": "builtin",
+        "kind": "color"
+      },
+      "kind_version": 1,
+      "settings": {
+        "color": "#000000ff",
+        "height": 1080,
+        "width": 1920
+      }
+    },
+    {
       "id": "sj_card",
       "name": "Sound Journal title",
       "kind": {
@@ -31155,14 +31006,6 @@
           "root": "collection",
           "type": "asset"
         }
-      }
-    },
-    {
-      "id": "sj_cockpit",
-      "name": "Cockpit (nested)",
-      "kind": {
-        "type": "scene",
-        "scene_id": "cockpit"
       }
     },
     {
@@ -31783,9 +31626,8 @@
     {
       "chord": "Ctrl+Alt+KeyJ",
       "action": {
-        "type": "channel.set_value",
-        "channel_id": "title",
-        "value": 1.0
+        "type": "overlay.show",
+        "scene_id": "sound_journal"
       }
     },
     {
@@ -31958,9 +31800,8 @@
     {
       "chord": "Ctrl+Alt+Shift+KeyJ",
       "action": {
-        "type": "channel.set_value",
-        "channel_id": "title",
-        "value": 0.0
+        "type": "overlay.hide",
+        "scene_id": "sound_journal"
       }
     },
     {
@@ -32700,9 +32541,8 @@
         "channel": 16
       },
       "action": {
-        "type": "channel.set_value",
-        "channel_id": "title",
-        "value": 1.0
+        "type": "overlay.show",
+        "scene_id": "sound_journal"
       }
     },
     {
@@ -32712,9 +32552,8 @@
         "channel": 16
       },
       "action": {
-        "type": "channel.set_value",
-        "channel_id": "title",
-        "value": 0.0
+        "type": "overlay.hide",
+        "scene_id": "sound_journal"
       }
     }
   ],
@@ -33639,53 +33478,6 @@
     {
       "channel_id": "src_right_transport",
       "name": "Right monitor: Transport",
-      "default": 0.0,
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "title",
-      "name": "Sound Journal title",
-      "default": 0.0,
-      "inputs": [
-        {
-          "kind": "midi",
-          "control": "cc",
-          "controller": 45,
-          "channel": 16,
-          "smoothing_ms": 50,
-          "curve": "linear",
-          "from": 0.0,
-          "to": 1.0
-        },
-        {
-          "kind": "data",
-          "key": "params",
-          "field": "values.19",
-          "range": [
-            0.0,
-            1.0
-          ],
-          "smoothing_ms": 30,
-          "curve": "linear",
-          "from": 0.0,
-          "to": 1.0
-        }
-      ],
-      "combine": "latest",
-      "average_ms": 0,
-      "rise_ms": 0,
-      "fall_ms": 0,
-      "curve": "linear",
-      "off_value": 0.0
-    },
-    {
-      "channel_id": "title_fade",
-      "name": "Sound Journal title fade",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,

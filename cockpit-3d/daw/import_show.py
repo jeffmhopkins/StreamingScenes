@@ -9,7 +9,7 @@
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows it, Ctrl+Alt+Shift+H hides it (before sequences, Ctrl+Alt+H shows or hides it), and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
-- the Sound Journal title (title.py): the cockpit darkened and slightly blurred under the
+- the Sound Journal title (title.py): whatever is on program darkened under the
   JMH shield and "Sound Journal", faded in by Ctrl+Alt+J and out by Ctrl+Alt+Shift+J;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
@@ -247,15 +247,14 @@ if SHIP:
             for _, key, action in ship_sequences.CONTROLS if key]
     must(batch(seq, "ship sequences"), "ship sequences")
 
-# ---- the Sound Journal title (title.py): the cockpit darkened and blurred under the JMH
+# ---- the Sound Journal title (title.py): an overlay darkening program under the JMH
 # shield and "Sound Journal", faded in on Ctrl+Alt+J and out on Ctrl+Alt+Shift+J ----
 import title  # noqa: E402
 
 TITLE = False
 if SHIP:
     try:
-        title.add("cockpit", [BUILT["cc_input"](title.TITLE_CC, 0.0, 1.0, 50)]
-                  + BUILT["mod_inputs"]("title"))
+        title.add()
         TITLE = True
     except SystemExit as e:
         print(f"no Sound Journal title ({e}); importing the rest", file=sys.stderr)

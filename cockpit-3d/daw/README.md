@@ -120,11 +120,10 @@ sequences keep working beside it.
 | 9 | `ship_pitch` | pitch at rest | a whole turn nose up |
 | 10 | `ship_roll` | roll at rest | a whole turn right wing down |
 | 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
-| 20 | `title` | Sound Journal title out (crossing one half plays the fade out) | in (crossing one half plays the fade in) |
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
 CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
-Mod. Mods 21 to 32 stay free.
+Mod. Mods 20 to 32 stay free.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin, the warp's glow and the five pad lights.
@@ -165,14 +164,14 @@ What it makes:
 
 | | |
 |---|---|
-| Scenes | `DAW cockpit` (3D, with a keyframe a view, in its `Views` folder), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport), `Sound Journal` (the cockpit under the Sound Journal title, which its switch puts on program) |
+| Scenes | `DAW cockpit` (3D, with a keyframe a view, in its `Views` folder), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport), `Sound Journal` (the Sound Journal title, which its switch puts over program as an overlay) |
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides to its keyframe in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows a subscene, `src_holo`, which starts on the `holo_feed` source; see [The hologram](#the-hologram) and [Switching what the screens show](#switching-what-the-screens-show). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp, Ctrl+Alt+D drift, Ctrl+Alt+Shift+D hold steady; see [Cockpit sequences](#cockpit-sequences). What each main monitor and the hologram show: Ctrl+Alt+Shift with 1 to 5 (left monitor), 6 to 0 (centre), Y to P (right), Z to B (hologram) and N or K (desk); see [Switching what the screens show](#switching-what-the-screens-show) |
-| Sound Journal title | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out; CC 45 and notes 84 and 85 on channel 16, and Mod 20, too; see [The Sound Journal title](#the-sound-journal-title) |
+| Sound Journal title | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out; notes 84 and 85 on channel 16, too; see [The Sound Journal title](#the-sound-journal-title) |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, then from 58 (A#2) up the screens' sources, five each for the left, centre and right monitors and the hologram (58 to 77) and the desk's two (78, 79), and 84 (C6) and 85 turn the Sound Journal title on and off, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from any input fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from any input (`CC_INPUT` names one) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
@@ -373,33 +372,27 @@ dust and stars. It writes them at 1024 pixels (rendered at 2048) and writes
 
 ## The Sound Journal title
 
-The title card from Jeff's streams, over the live cockpit: the picture darkens and blurs
-slightly, and the JMH shield and "Sound Journal" fade in, centred. `title.py` builds it and
+The title card from Jeff's streams, over the live cockpit: the picture darkens, and the JMH shield and "Sound Journal" fade in, centred. `title.py` builds it and
 `import_show.py` calls it.
 
 ![The cockpit under the Sound Journal title](title/title-on.jpg)
 
 | | |
 |---|---|
-| In, out | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out. CC `TITLE_CC` (45) on channel 16 from any input does too (up is in), as do Mod 20 and, with `NOTES=1`, notes `TITLE_NOTE` (84, C6) and 85 on channel 16. An agent sends `channel.set_value` on `title` (1 in, 0 out), as `python3 title.py on` and `off` do |
-| How long | in over `TITLE_IN_MS` (1200), out over `TITLE_OUT_MS` (900), eased at both ends |
-| How it looks | the blur's radius goes to `TITLE_BLUR_PX` (6 px), and the picture to `1 - TITLE_DIM` (0.38) of its brightness, as the card comes up to opaque |
+| In, out | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out, as do, with `NOTES=1`, notes `TITLE_NOTE` (84, C6) and 85 on channel 16. An agent sends `overlay.show` or `overlay.hide` on `sound_journal`, as `python3 title.py on` and `off` do |
+| How long | the overlay's own fade, in and out |
+| How it looks | the picture goes to `1 - TITLE_DIM` (0.38) of its brightness, as the card comes up to opaque |
 | The card | `title/title.png`, drawn by `title/make_title.py`: the monogram over the words in Ubuntu Light (`title/Ubuntu-Light.ttf`, under the Ubuntu Font Licence in `title/UFL.txt`). The monogram is the font `Crepitus-monogram.ttf`'s ligature for `1jMh`; with that font in `title/`, the script draws it from the font, and without it, from a traced outline that stands in for it. `WORDS` changes the words |
 
-JStream draws a 3D scene through its camera, so a fixed overlay can't sit in the cockpit
-itself: a 2D scene, `sound_journal`, nests the cockpit over the whole canvas and puts the
-card above it (JStream ADR-0094 decision 5). The cockpit item carries a `blur` and a
-`color_correction` whose radius and multiply colour follow the channel `title_fade`, as
-the card's opacity does.
-
-The switch is the channel `title` (0 out, starting out), and its CC and Mod are inputs of
-it. Rising past one half plays the sequence `title_in`: it cuts to `sound_journal`, which
-looks exactly like the cockpit while `title_fade` is 0, and fades `title_fade` up.
-Falling plays `title_out`, which fades it down and cuts back to `DAW cockpit` at the end.
-Each stops the other, so flipping the switch mid-fade turns round from where it is. The
-views, the lights, the warp and the hologram keep working underneath, since they move
-the cockpit's channels and camera, not the program. Turning the title off always returns
-to the cockpit, even if the switch was turned on from another scene.
+The title is an overlay (JStream ADR-0210 decision 11): a 2D scene, `sound_journal`, put
+over program, with a black card at `TITLE_DIM` (0.62) opacity over the whole canvas and the
+title card above it. Program is never switched, so the view on screen, whichever of the
+cockpit's keyframes it is, stays where it is under the title, and a view switched while
+the title is up glides under it. The views, the lights, the warp and the hologram keep
+working underneath, and the title works over any other scene too. An overlay can't blur
+what is under it, so the picture only darkens. A sequence's cue can't put an overlay up
+(JStream lets a cue run only switches, item, value, sequence and channel actions), so the
+title has no channel: CC 45 and Mod 20 no longer drive it, only its keys and notes.
 
 ## The hologram
 
