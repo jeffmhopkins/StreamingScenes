@@ -17283,7 +17283,7 @@
               "channel_id": "holo_beam",
               "smoothing_ms": 0,
               "curve": "linear",
-              "from": -0.5,
+              "from": -1.0,
               "to": 0.0,
               "clock": "engine"
             },

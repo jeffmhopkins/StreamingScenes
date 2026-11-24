@@ -121,8 +121,9 @@ inputs) to play it from Bitwig.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the six pad lights. The hologram's
-light counts only while the hologram is shown, and it is first in the stack, so then the
-last pad light gives up its slot. `GLOW=0` builds
+light counts only while the hologram is shown, and it is first in stacking order, so then
+the last pad light gives up its slot (JStream logs once that the scene has more lights than
+a model is lit by; that is expected). `GLOW=0` builds
 the earlier set: no cards, a light per track around the cabin, the desk's and the
 screens' glow. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
 `BLOOM` and `LEVEL_MS` tune it. The bloom's radius is 16 px. `render_daw.py` waits
@@ -302,7 +303,7 @@ console. Its bottom stays clear of the monitor case from the pilot's seat.
 | What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
 | Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
 | Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card`, `holo_haze` and `holo_light`; the art is in `hologram/` (`make_art.py` draws it) |
-| Its light | `holo_light`, a point light in the hologram's colour in front of the beam, shown and hidden with the cards. With sequences it is at half with the beam and full with the panel (its opacity follows `holo_beam` and `holo_panel`). `HOLO_LIGHT` sets its strength (1.6); 0 leaves it out. It takes one of the model's 8 lights only while shown (see [Light switches](#light-switches)) |
+| Its light | `holo_light`, a point light in the hologram's colour in front of the beam, shown and hidden with the cards. With sequences it is at 0 before the beam, half with the beam and full with the panel (two opacity modifiers, which multiply: `holo_beam` scales it from 0, `holo_panel` from a half). `HOLO_LIGHT` sets its strength (1.6); 0 leaves it out. It takes one of the model's 8 lights only while shown (see [Light switches](#light-switches)) |
 
 The cards sit behind the cabin model's centre, so JStream would sort them under the
 model and show them only through the windows. `hologram.py` turns off `depth_sort` on the

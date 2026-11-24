@@ -37,9 +37,10 @@ the console, and the panel sits a little lower and nearer than it first did, at 
 same size on screen.
 
 The light takes one of the 8 lights a model is lit by only while the hologram is shown (a
-hidden light lights nothing and takes no slot). `add` puts it at the bottom of the
-scene's stack, so it is always among the 8: while it is on, the last light in stacking
-order, a pad light of the desk's, gives up its slot.
+hidden light lights nothing and takes no slot). `add` puts it first in stacking
+order, so it is always among the 8: while it is on, the last light in stacking
+order, a pad light of the desk's, gives up its slot, and JStream logs once that the scene
+has more lights than a model is lit by.
 
 The panel shows `holo_feed`, an image source holding the 2D cockpit's caller still, until
 `source <id>` (an `item.set_source` on `holo_card`) puts any other source there: a webcam
@@ -187,10 +188,11 @@ def _sequences(scene, holo_inputs=()):
         {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _reveal("holo_panel")]},
         {"type": "item.set_motion", "item_id": HAZE, "motion": [_reveal("holo_panel")]},
     ] + ([
-        # The light comes up with the beam and goes on with the panel: its opacity follows
-        # each channel for half, so it is full with both and half with the beam alone.
+        # The light comes up with the beam and goes on with the panel. Opacity modifiers
+        # multiply, so the beam's scales it from 0 and the panel's from a half: 0 with
+        # neither, half with the beam alone, full with both.
         {"type": "item.set_motion", "item_id": LIGHT, "motion": [
-            _dim("beam", "holo_beam"), _dim("panel", "holo_panel")]},
+            _dim("beam", "holo_beam", -1.0), _dim("panel", "holo_panel", -0.5)]},
     ] if LIGHT_INTENSITY > 0 else []) + [
         {"type": "timeline.set", "scene_id": scene, "timeline": show},
         {"type": "timeline.set", "scene_id": scene, "timeline": hide},
@@ -207,11 +209,12 @@ def _lit(at, how):
     return [(at, f"item.{how}", LIGHT)] if LIGHT_INTENSITY > 0 else []
 
 
-def _dim(mid, channel):
-    """A modifier that takes half the light's opacity away while `channel` reads 0."""
+def _dim(mid, channel, at0):
+    """A modifier that scales the light's opacity by 1 + `at0` while `channel` reads 0, and
+    leaves it while it reads 1."""
     return {"modifier_id": mid, "property": "opacity", "enabled": True, "clock": "engine",
             "kind": "channel", "channel_id": channel, "smoothing_ms": 0, "curve": "linear",
-            "from": -0.5, "to": 0.0}
+            "from": at0, "to": 0.0}
 
 
 def _bob():
@@ -272,7 +275,7 @@ def edits(scene="cockpit", channels=False, holo_inputs=()):
             {"type": "item.add", "scene_id": scene, "item_id": LIGHT, "source_id": LIGHT,
              "geometry": {"center": {"x": q["x"], "y": q["y"]}, "size": {"width": 40, "height": 40},
                           "depth_px": q["z"]}},
-            # First in the stack, so it is among the 8 lights a model is lit by.
+            # First in stacking order, so it is among the 8 lights a model is lit by.
             {"type": "item.reorder", "item_id": LIGHT, "index": 0},
             {"type": "item.set_transition", "item_id": LIGHT, "transition": {
                 "delay_ms": 0, "easing": "inherit", "glide": "auto",
