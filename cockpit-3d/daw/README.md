@@ -38,7 +38,8 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The desk's meter bridge: each track's left and right and the master's, 18 silicone segments each, green to red (the master cyan to amber), each segment dimming over `FADE_MS` as the level falls | `meters` `tracks`, `master` | the page's `bridge` view, over its unlit segments (`bridgepads`), dimmed by the cabin and desk switches as the note grid's unlit pads are |
 | The seven screens | every key | browser sources with `page_api_data` |
 | The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
-| A light over each launcher column, in its track's colour, lighting the desk and the cabin | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit |
+| A light over each launcher column, in its track's colour, lighting the desk and the cabin (the lead and its echo share one over their two columns) | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit; the shared light has one for each track, each half as deep |
+| The warp's glow: a blue-white light pouring in through the windshield as the warp builds, so a jump to warp lights the cabin even with every switch off | the `warp` channel (CC 30, Mod 6, the warp sequences) | a `channel` modifier on a directional light's opacity, dark at rest and full (`WARP_LIGHT`, 3.0) at full warp; no switch dims it. `WARP_LIGHT=0` leaves it out |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The ship's warp drive and orientation: the sky streams past as the warp comes up, and the sky and the starlight turn around the cabin as the ship yaws, pitches and rolls | MIDI CCs from Bitwig on channel `SHIP_CC_CHANNEL` (16) from the sender `SHIP_CC_INPUT` (`Bitwig`): `SHIP_CC_WARP` (30) takes the warp from rest to full, and `SHIP_CC_YAW` (31), `SHIP_CC_PITCH` (32) and `SHIP_CC_ROLL` (33) each turn the ship a whole turn over the CC's travel (right, nose up, right wing down), all smoothed over `SHIP_CC_SMOOTHING_MS` (250). `WARP`, `SHIP_YAW`, `SHIP_PITCH` and `SHIP_ROLL` set where they rest. With a JStream that has ADR-0187, each jump to warp travels where the ship points: straight ahead from wherever the heading, pitch and roll have turned the sky, which swings at most `WARP_LOOK_DEG` (10) at warp; out of warp the sky stays where the jump left it and the controls turn it from there (`WARP_AIM=sky` keeps the older behaviour). On an older one, turning moves where the warp streams from, so hold the heading while at warp. The sky follows pitch and roll with a JStream that has ADR-0182; an older one turns it on the heading only | a `channel` modifier on the environment light's `warp` following the channel `warp`, which CC 30, [Mod](#jtunnel-mods) 6 and the [warp sequences](#cockpit-sequences) drive (a `midi` modifier on a JStream without channels), and `channel` modifiers on the `turn`, `tilt` and `rotation` of three nested 3D groups (the ship's rig, ADR-0164) that hold the sky and the starlight, following `ship_yaw`, `ship_pitch` and `ship_roll`, which CCs 31 to 33 and [Mods](#jtunnel-mods) 8 to 10 drive (`midi` modifiers without channels) |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
@@ -55,7 +56,7 @@ up:
 | CC | Group | What it switches |
 |---|---|---|
 | 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; half the desk's unlit pads |
-| 41 | Desk | the six pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the other half of the desk's unlit pads |
+| 41 | Desk | the five pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the other half of the desk's unlit pads |
 | 42 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
 | 43 | Glow | the model's own LEDs and light strips: every material's glow strength |
 | 44 | Master | all four, so only the sky lights the cabin and reflects off it |
@@ -121,9 +122,9 @@ so Mods 20 to 32 stay free: assign one to a camera channel in JStream (the chann
 inputs) to play it from Bitwig.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
-glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
-the earlier set: no cards, a light per track around the cabin, the desk's and the
-screens' glow. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
+glow (the default) those are the sun, the cabin, the warp's glow and the five pad lights.
+`GLOW=0` builds the earlier set: no cards, a light per track around the cabin, the desk's
+and the screens' glow, of which the first 8 light the model. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
 `BLOOM` and `LEVEL_MS` tune it. The bloom's radius is 16 px. `render_daw.py` waits
 `WARM_S` seconds (3) at the first frame for the pages, the data and the probe. Its frames smooth the band's lights only on a JStream with ADR-0173 (#1620): an engine without it draws each snapshot with no output running at the meters' raw levels, so the lights strobe on every hit whatever `LEVEL_MS` says.
 
@@ -253,6 +254,17 @@ the twelve pictures in [`arrivals/`](arrivals), picked at random as the warp end
 pinned in the sky a little off straight ahead, so it is in view when you arrive. It lights
 the cabin faintly in its own colour (`ARRIVAL_LIGHT`, 0.6). `sky_arrivals.py` puts them in
 a group scene, `arrivals`, and sets the sky's `sky_pictures` to it.
+
+The picture fades out as the warp builds and back in as it drops. The warp here follows
+the `warp` channel, so it never sits above its own setting, and before JStream's ADR-0224
+([#1789](https://github.com/jeffmhopkins/JStream/pull/1789)) that left the next picture
+unpicked until the warp reached rest, where it popped in, and a warp aimed ahead dropped
+the last one within half a second of starting. With ADR-0224 both fade with the deep sky.
+
+The big hazy ones (the emission and reflection nebulae and the spiral galaxy), which
+melt into the sky, come up twice as often as the rest (`WEIGHT` in `sky_arrivals.py`,
+an item each time), so now and then one follows itself. The ring nebula is rendered
+hazy too: its shell's light is spread wide, so its rim melts into a broad halo.
 
 Each is sized for what it is (`SIZE` in `sky_arrivals.py`, its width across the sky):
 
