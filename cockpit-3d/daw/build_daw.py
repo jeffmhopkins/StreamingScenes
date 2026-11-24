@@ -37,7 +37,7 @@ from live_panels import PANELS_AT  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
-INPUT = os.environ.get("DAW_INPUT", "JTunnel")
+INPUT = os.environ.get("DAW_INPUT", "")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
@@ -51,7 +51,7 @@ SHIP_PITCH = float(os.environ.get("SHIP_PITCH", "0"))
 SHIP_ROLL = float(os.environ.get("SHIP_ROLL", "0"))
 WARP = float(os.environ.get("WARP", "0"))
 SHIP_CC_CHANNEL = int(os.environ.get("SHIP_CC_CHANNEL", "16"))
-SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "JTunnel")
+SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "")
 SHIP_CC_WARP = int(os.environ.get("SHIP_CC_WARP", "30"))
 SHIP_CC_YAW = int(os.environ.get("SHIP_CC_YAW", "31"))
 SHIP_CC_PITCH = int(os.environ.get("SHIP_CC_PITCH", "32"))
@@ -99,7 +99,7 @@ SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
 SWITCH_FADE_MS = int(os.environ.get("SWITCH_FADE_MS", "2000"))
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
-CC_INPUT = os.environ.get("CC_INPUT", "JTunnel")
+CC_INPUT = os.environ.get("CC_INPUT", "")
 # The groups, in CC order, then the master.
 GROUPS = ["cabin", "desk", "screens", "glow"]
 SWITCH_CC = {g: SWITCH_FIRST + i for i, g in enumerate(GROUPS + ["master"])}
@@ -134,10 +134,16 @@ def must(result, what):
     return text
 
 
+def _input(name):
+    """The `input` field naming the sender `name`, or none at all, which reads any sender
+    (or, in the desktop app, the live one)."""
+    return {"input": name} if name else {}
+
+
 def data(mid, prop, key, field, frm, to, smoothing=60, states=None, rng=(0.0, 1.0), curve="linear", **kw):
     """A `data` motion modifier (ADR-0171 decision 3) on `prop`."""
     m = {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "data",
-         "input": INPUT, "key": key, "field": field, "range": list(rng), "smoothing_ms": smoothing,
+         **_input(INPUT), "key": key, "field": field, "range": list(rng), "smoothing_ms": smoothing,
          "curve": curve, "from": frm, "to": to}
     if states:
         m["states"] = states
@@ -157,14 +163,14 @@ def follow(mid, prop, channel, at0, at1, smoothing=30, **kw):
 def cc_input(controller, at0, at1, smoothing, channel=CC_CHANNEL, sender=CC_INPUT):
     """A channel's input reading a MIDI CC: `at0` at 0 and `at1` at 127, as channel values."""
     return {"kind": "midi", "control": "cc", "controller": controller, "channel": channel,
-            "input": sender, "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
+            **_input(sender), "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
 
 
 def mod_inputs(channel, smoothing=30):
     """`channel`'s JTunnel Mod as a list of one input, 0 to 1 onto 0 to 1: [] without one."""
     if not MODS or channel not in MOD:
         return []
-    return [{"kind": "data", "input": MOD_INPUT or INPUT, "key": "params",
+    return [{"kind": "data", **_input(MOD_INPUT or INPUT), "key": "params",
              "field": f"values.{MOD[channel] - 1}", "range": [0.0, 1.0], "smoothing_ms": smoothing,
              "curve": "linear", "from": 0.0, "to": 1.0}]
 
@@ -177,7 +183,7 @@ def gate(group, prop="opacity", off=-1.0, **kw):
     frm, to = (0.0, off) if SWITCH_UP == "off" else (off, 0.0)
     m = {"modifier_id": f"switch_{group}", "property": prop, "enabled": True, "clock": "engine",
          "kind": "midi", "control": "cc", "controller": SWITCH_CC[group], "channel": CC_CHANNEL,
-         "input": CC_INPUT, "smoothing_ms": SWITCH_FADE_MS, "curve": "linear", "from": frm, "to": to}
+         **_input(CC_INPUT), "smoothing_ms": SWITCH_FADE_MS, "curve": "linear", "from": frm, "to": to}
     m.update(kw)
     return m
 
@@ -509,7 +515,7 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
 # rests until its CC first moves (a CC reads 0 until then).
 def cc(mid, prop, controller, frm, to, **kw):
     return {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "midi",
-            "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, "input": SHIP_CC_INPUT,
+            "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, **_input(SHIP_CC_INPUT),
             "from": frm, "to": to, "smoothing_ms": SHIP_CC_SMOOTHING_MS, **kw}
 
 

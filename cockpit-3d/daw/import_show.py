@@ -31,8 +31,9 @@ variables tune the cockpit.
 
 Bitwig's state reaches the scene once the app receives from its JTunnel sender (the app's
 own setting, "Receive from JTunnel senders", which only a person changes). The cockpit
-reads that sender as the input `JTunnel`, whatever its name (JStream #1784). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
-views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
+names no input, so it reads whichever sender sends (in the desktop app, the live one),
+whatever its name. With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI
+switches the views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
 plugin's sender too: an accepted sender's MIDI reaches the bindings.
 """
 import os
@@ -53,7 +54,7 @@ WARM = int(os.environ.get("WARM", "3"))
 CC = os.environ.get("CC", "0") == "1"
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
 CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
-CC_INPUT = os.environ.get("CC_INPUT", "JTunnel")
+CC_INPUT = os.environ.get("CC_INPUT", "")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
 # How the camera follows its view channels: a little smoothing hides the values thread's
 # ticks, which aren't in step with the frames.
@@ -270,7 +271,7 @@ if CC:
     # alike and carries through a glide between them. With sequences the views' own
     # channels come first in the same list, and the CCs add to wherever they put it.
     motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
-               "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
+               "controller": CC_FIRST + i, "channel": CC_CHANNEL, **({"input": CC_INPUT} if CC_INPUT else {}),
                "from": 0, "to": to,
                "smoothing_ms": 0 if prop == "autofocus" else CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
