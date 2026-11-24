@@ -29442,7 +29442,7 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 56,
+        "note": 84,
         "channel": 16
       },
       "action": {
@@ -29454,7 +29454,7 @@
     {
       "trigger": {
         "kind": "midi_note",
-        "note": 57,
+        "note": 85,
         "channel": 16
       },
       "action": {

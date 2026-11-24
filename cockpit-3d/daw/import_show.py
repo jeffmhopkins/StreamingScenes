@@ -278,12 +278,12 @@ if NOTES:
                    "action": action}
                   for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
                   if HOLOGRAM or action.get("channel_id") != "holo"]
-        # Then the title's on and off.
-        first += len(ship_sequences.CONTROLS)
-        notes += [{"type": "binding.set",
-                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
-                   "action": action}
-                  for i, (_, _, action) in enumerate(title.CONTROLS if TITLE else [])]
+    # The title's on and off, on notes of their own (TITLE_NOTE, 84 and 85: C6 and C#6),
+    # clear of the views' and the sequences' notes however many of those there are.
+    notes += [{"type": "binding.set",
+               "trigger": {"kind": "midi_note", "note": title.TITLE_NOTE + i, "channel": NOTE_CHANNEL},
+               "action": action}
+              for i, (_, _, action) in enumerate(title.CONTROLS if TITLE else [])]
     must(batch(notes, "notes"), "notes")
 
 if CC:

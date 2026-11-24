@@ -13,7 +13,7 @@ nests the 3D one (JStream ADR-0094 decision 5). This adds that scene, `sound_jou
 Two channels (JStream ADR-0183) drive it:
 - `title`, the switch (1 on, 0 off, starting off). Ctrl+Alt+J sets it to 1 and
   Ctrl+Alt+Shift+J to 0; CC `TITLE_CC` (45) on channel 16 from `Bitwig` and the JTunnel
-  Mod `TITLE_MOD` (20) are inputs of it, and import_show.py puts it on two MIDI notes.
+  Mod `TITLE_MOD` (20) are inputs of it, and import_show.py puts it on notes `TITLE_NOTE` (84, C6) and 85.
 - `title_fade`, how far in it is (0 to 1): the blur's radius (0 to `TITLE_BLUR_PX`), how
   far the picture darkens (to `1 - TITLE_DIM` of its brightness) and the card's opacity
   all follow it.
@@ -37,6 +37,7 @@ SCENE = "sound_journal"
 CARD = os.path.join(HERE, "title", "title.png")
 TITLE_CC = int(os.environ.get("TITLE_CC", "45"))
 TITLE_MOD = int(os.environ.get("TITLE_MOD", "20"))
+TITLE_NOTE = int(os.environ.get("TITLE_NOTE", "84"))   # on; off is the next note up
 TITLE_IN_MS = int(os.environ.get("TITLE_IN_MS", "1200"))
 TITLE_OUT_MS = int(os.environ.get("TITLE_OUT_MS", "900"))
 TITLE_BLUR_PX = float(os.environ.get("TITLE_BLUR_PX", "6"))
