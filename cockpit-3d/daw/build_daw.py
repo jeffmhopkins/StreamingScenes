@@ -34,6 +34,8 @@ from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
+from live_readouts import READOUTS_AT, SIDE_AT  # noqa: E402
+from ship_sequences import DRIFT_DEG  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -92,7 +94,7 @@ MOD = {  # channel: its Mod number. 1 on and 0 off for the switches, 1 full for 
     "warp": 6, "holo": 7, "ship_yaw": 8, "ship_pitch": 9, "ship_roll": 10,
     "screen_center": 11, "screen_left": 12, "screen_right": 13, "screen_ovl": 14,
     "screen_ovr": 15, "screen_side_l": 16, "screen_side_r": 17, "screen_desk": 18,
-    "screen_panels": 19,
+    "screen_panels": 19, "title": 20,
 }
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
@@ -182,6 +184,16 @@ def gate(group, prop="opacity", off=-1.0, **kw):
     return m
 
 
+def uncover(group):
+    """The motion modifier with which `group`'s switch clears a black cover: the cover's
+    opacity times 0 while the switch is on, as placed while it is off, over SWITCH_FADE_MS."""
+    if CHANNELS:
+        return follow(f"switch_{group}", "opacity", "power_" + group, 0.0, -1.0)
+    m = gate(group, "opacity", -1.0)
+    m["from"], m["to"] = m["to"], m["from"]
+    return m
+
+
 def gates(group, prop="opacity", off=-1.0, **kw):
     """`group`'s switch and the master's, for one setting: [] without SWITCHES or channels."""
     if not SWITCHES and not CHANNELS:
@@ -223,20 +235,22 @@ PAGES_AT = [  # (item, view, x, y, w, h): the model's atlas cells (its README)
     ("a_right", "device", 1280, 0, 640, 360),
     ("a_ovl", "mixer", 0, 360, 640, 360),
     ("a_ovr", "scenes", 640, 360, 640, 360),
-    ("a_side_l", "clip", 1280, 360, 640, 360),
-    ("a_side_r", "notes", 1280, 720, 640, 360),
+    # The side monitors are small, so the model gives them a quarter cell each
+    # (tools/live_readouts.py); their pages still draw at 640 x 360.
+    ("a_side_l", "clip", *SIDE_AT["screen_side_left"]),
+    ("a_side_r", "notes", *SIDE_AT["screen_side_right"]),
 ]
 ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
       src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
       add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080))]
 
 
-def page(view, width=640):
-    """Where a screen's page comes from: inline, with its view and width set ahead of the
+def page(view, width=640, height=360):
+    """Where a screen's page comes from: inline, with its view and size set ahead of the
     page's script, or from PAGES."""
     if PAGES:
-        return {"url": f"{PAGES}/daw.html?view={view}&w={width}"}
-    head = f'<head><script>window.DAW_VIEW="{view}";window.DAW_W={width}</script>'
+        return {"url": f"{PAGES}/daw.html?view={view}&w={width}&h={height}"}
+    head = f'<head><script>window.DAW_VIEW="{view}";window.DAW_W={width};window.DAW_H={height}</script>'
     return {"html": DAW_HTML.replace("<head>", head, 1)}
 
 
@@ -245,12 +259,21 @@ for item, view, x, y, w, h in PAGES_AT:
         **page(view), "width": 640, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
-# The desk: the pads (the selected track's notes, or the clip launcher), the tracks' meters
-# and the master's.
+# The desk: the pads (the selected track's notes, or the clip launcher), and the meter
+# bridge, the tracks' meters and the master's, raised silicone pads lit from under (the
+# page's `iso` and `bridge`). The note grid and the bridge draw only their lit pads, on a
+# clear page, over a page of their unlit ones (`DESK_UNLIT`): the unlit pads show by the
+# cabin's and the desk's light, so they dim with those switches and go fully dark with
+# both off, while the lit ones stay lit.
+DESK_UNLIT = []  # (item, source, x, y, w, h): under the desk's lit pads, dimmed by the lights
+CLEAR = "#00000000"
 if DESK_GRID == "notes":
     ed += [src("launcher", "Note grid", "browser", {
         **page("iso", 600), "width": 600, "height": 360, "fps": 30,
-        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT})]
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+        src("launcher_unlit", "Note grid, unlit pads", "browser", {
+            **page("isopads", 600), "width": 600, "height": 360, "fps": 1})]
+    DESK_UNLIT.append(("a_launcher_unlit", "launcher_unlit", 0, 720, 600, 360))
 else:
     ed += [src("launcher", "Clip launcher", "grid", {
         "input": INPUT, "mode": "cells", "width": 600, "height": 360, "columns": 8, "rows": 8,
@@ -265,35 +288,56 @@ ed += [src("panels", "Console panels", "browser", {
         **page("panels", PW), "width": PW, "height": PH, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
+# The meter bridge: the tracks' meters and the master's, as one page of lit segments.
+ed += [src("bridge", "Meter bridge", "browser", {
+        **page("bridge", 348), "width": 348, "height": 360, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       src("bridge_unlit", "Meter bridge, unlit", "browser", {
+        **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
+DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
+ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
+# The consoles' amber readouts and small LEDs: one page, `readouts`, in the space the side
+# monitors gave up; each readout and LED of the model maps its own cell of it
+# (tools/live_readouts.py).
+RX, RY, RW, RH = READOUTS_AT
+ed += [src("readouts", "Console readouts and LEDs", "browser", {
+        **page("readouts", RW, RH), "width": RW, "height": RH, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       add("atlas", "a_readouts", "readouts", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 ed += [
-    src("meters", "Track meters", "grid", {
-        "input": INPUT, "mode": "bars", "width": 290, "height": 360, "columns": 6, "key": "meters",
-        "field": "tracks", "segments": 18, "gap": 8, "radius": 2, "pad": "#11161dff",
-        "color_low": "#2fe08aff", "color_high": "#ff4a3aff", "background": "#05080cff"}),
-    src("master", "Master meter", "grid", {
-        "input": INPUT, "mode": "bars", "width": 56, "height": 360, "columns": 2, "key": "meters",
-        "field": "master", "segments": 18, "gap": 6, "radius": 2, "pad": "#11161dff",
-        "color_low": "#6ee0ffff", "color_high": "#ffb040ff", "background": "#05080cff"}),
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
-    add("atlas", "a_meters", "meters", geo(612 + 145, 900, 290, 360)),
-    add("atlas", "a_master", "master", geo(904 + 28, 900, 56, 360)),
+    add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
     {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
      "kind": {"type": "scene", "scene_id": "atlas"}},
 ]
-# With channels, each monitor has a black cover of its own, clear while its `screen_<cell>`
-# channel is on; the channel follows `power_screens`, so the screens' CC still switches
-# them all, and a sequence can switch them one by one. Without, one cover over the atlas.
+# The black covers that switch the screens off. A motion modifier on opacity multiplies it
+# (by 1 plus what it adds), so a cover is opaque as placed and its switch clears it: a
+# cover that started clear could never be faded in. With channels, each monitor has a cover
+# of its own, clear while its `screen_<cell>` channel is on; the channel follows
+# `power_screens`, so the screens' CC still switches them all, and a sequence can switch
+# them one by one. Without channels, one cover over the atlas for the screens' switch.
+# Either way the master switch has a cover of its own over the whole atlas, since one
+# cover's modifiers can only multiply, and either switch alone must black the screens.
 SCREEN_CELLS = [(item[2:], x, y, w, h) for item, _, x, y, w, h in PAGES_AT]
 SCREEN_CELLS += [("desk", 0, 720, 960, 360), ("panels", PX, PY, PW, PH)]
-if CHANNELS:
+if CHANNELS or SWITCHES:
     ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 64, "height": 64})]
-    ed += [add("atlas", "off_" + cell, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"),
-               opacity=0.0) for cell, x, y, w, h in SCREEN_CELLS]
-elif SWITCHES:
-    # The screens' switch: a black cover over the whole atlas, clear until it fades in.
-    ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
-           add("atlas", "a_off", "atlas_off", geo(960, 540, 1920, 1080), opacity=0.0)]
+    cover = lambda iid, x, y, w, h: add("atlas", iid, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))
+    if CHANNELS:
+        ed += [cover("off_" + cell, x, y, w, h) for cell, x, y, w, h in SCREEN_CELLS]
+    else:
+        ed += [cover("a_off", 0, 0, 1920, 1080)]
+    ed += [cover("off_master", 0, 0, 1920, 1080)]
+# The readouts and LEDs belong to the Glow switch, as the model's glowing materials do: a
+# black cover over their page, cleared while the glow is on (`off_master` covers them with
+# the rest while the master is off).
+if SWITCHES or CHANNELS:
+    ed += [src("readouts_off", "Readouts off", "color", {"color": "#000000ff", "width": 64, "height": 64}),
+           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 must(batch(ed, "atlas"), "atlas")
+if SWITCHES or CHANNELS:
+    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_readouts",
+             "motion": [uncover("glow")]}), "readouts switch")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
@@ -301,13 +345,26 @@ if CHANNELS:
                     "curve": "linear", "from": 0.0, "to": 1.0}] + mod_inputs("screen_" + cell)}}
         for cell, *_ in SCREEN_CELLS]
     ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_" + cell,
-            "motion": [follow("screen", "opacity", "screen_" + cell, 1.0, 0.0),
-                       gate("master", off=1.0)]} for cell, *_ in SCREEN_CELLS]
+            "motion": [follow("screen", "opacity", "screen_" + cell, 0.0, -1.0)]}
+           for cell, *_ in SCREEN_CELLS]
+    ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_master",
+            "motion": [uncover("master")]}]
     must(batch(ch, "screen channels"), "screen channels")
 elif SWITCHES:
-    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_off",
-             "motion": gates("screens", off=1.0)}),
+    must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": iid, "motion": [uncover(g)]}
+                for iid, g in (("a_off", "screens"), ("off_master", "master"))], "screens switch"),
          "screens switch")
+# The desk's unlit pads dim by half with the cabin's switch and go dark with the desk's or
+# the master's (opacity modifiers multiply); the lit pads above them stay lit.
+if SWITCHES or CHANNELS:
+    unlit = [gate("cabin", off=-0.5), gate("desk"), gate("master")]
+    must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": item, "motion": unlit}
+                for item, *_ in DESK_UNLIT], "unlit pads"), "unlit pads")
+# The desk's atlas items, bottom up, each with its motion (sources.py's desk subscene
+# takes them over).
+DESK_LAYERS = [(item, sid, x, y, w, h, unlit if SWITCHES or CHANNELS else [])
+               for item, sid, x, y, w, h in DESK_UNLIT]
+DESK_LAYERS += [("a_launcher", "launcher", 0, 720, 600, 360, []), ("a_bridge", "bridge", 612, 720, 348, 360, [])]
 
 # ---- the cockpit ----
 cam = SHOTS["cockpit"]
@@ -331,8 +388,7 @@ must(batch([
 if GLOW and GLOW_CARDS:
     from glow import card_at
     ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
-    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("meters", 612, 720, 290, 360, GLOW_DESK),
-                   ("master", 904, 720, 56, 360, GLOW_DESK)]
+    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("bridge", 612, 720, 348, 360, GLOW_DESK)]
     cards = []
     for sid, x, y, w, h, glow in ON_SCREENS:
         g = card_at(x, y, x + w, y + h)
@@ -351,17 +407,6 @@ if GLOW and GLOW_CARDS:
         if gate_list:
             must(op({"type": "item.set_motion", "scene_id": "cockpit", "item_id": "g_" + sid,
                      "motion": gate_list}), "screens switch")
-
-THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
-    from shots import THROTTLE_PIVOT, _bounds
-    lo, hi = _bounds(THROTTLE)
-    mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
-    must(batch([
-        src("throttle_model", "Throttle lever", "model", {"file": asset(THROTTLE), "lighting": "scene"}),
-        add("cockpit", "throttle", "throttle_model",
-            geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
-    ], "throttle"), "throttle")
 
 
 def light(lid, name, settings, at, aim=None, size=60, scene="cockpit"):
@@ -421,10 +466,19 @@ L += light("l_sun", "Starlight", {"type": "directional", "color": "#ffe6c4", "in
            (0.6, 3.2, -4.0), aim={"tilt_deg": -35.0, "turn_deg": 192.0}, scene=SHIP)
 L += light("l_cabin", "Cabin", {"type": "point", "color": "#9fc4ff", "intensity": 1.2, "range_px": 3200},
            (0.0, BOUNDS_MAX[1] - 0.1, -0.2))
+# The warp's glow: a blue-white light from ahead, out of the windshield, that comes up
+# with the warp (it follows the `warp` channel below) and goes nowhere near a switch, so
+# a jump to warp lights a dark cabin. WARP_LIGHT sets its strength at full warp; 0 leaves
+# it out.
+WARP_LIGHT = float(os.environ.get("WARP_LIGHT", "3.0"))
+if WARP_LIGHT > 0:
+    L += light("l_warp", "Warp glow", {"type": "directional", "color": "#a9c8ff", "intensity": WARP_LIGHT},
+               (0.0, 2.0, -4.0), aim={"tilt_deg": -20.0, "turn_deg": 180.0})
 # A model is lit by at most 8 lights (the ambient and the environment aside), the first
-# in stacking order. With GLOW the 8 are the sun, the cabin and the launcher's six pad
-# lights, which light the cabin in the band's colours from the desk; without it, the
-# screens' glow, a light a track around the cabin and the desk's glow.
+# in stacking order. With GLOW the 8 are the sun, the cabin, the warp's glow and the
+# launcher's pad lights (the two lead tracks' columns share one), which light the cabin
+# in the band's colours from the desk; without it, the warp's glow, the screens' glow and
+# the first four of the lights a track around the cabin.
 if not GLOW:
     L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
                (0.0, 1.0, -1.15))
@@ -447,15 +501,17 @@ if not GLOW:
 # The launcher throws its pads' colours on the desk and the screens above it: a small
 # light a track over its column, in the track's colour (the launcher's first 600 px of the
 # desk's 960 px cell, the desk 0.72 m wide, so a column is 75 px, 56 mm).
+# The lead and its echo share one light over their two columns, in between their colours,
+# so the warp's glow has a slot.
 PAD_LIGHTS = []
 if GLOW:
-    for ti, (_, color) in enumerate([("Drums", "#ff7a1a"), ("Hats", "#ffc23d"), ("Bass", "#2fd27a"),
-                                     ("Keys", "#3aa0ff"), ("Lead", "#c45cff"), ("Lead Echo", "#ff4f9a")]):
-        x = -0.36 + (ti + 0.5) * 0.05625
-        lid = f"l_pad{ti}"
-        PAD_LIGHTS.append((lid, ti))
-        L += light(lid, f"Pad light {ti + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
-                                                 "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
+    for n, (tracks, color) in enumerate([((0,), "#ff7a1a"), ((1,), "#ffc23d"), ((2,), "#2fd27a"),
+                                         ((3,), "#3aa0ff"), ((4, 5), "#e05ccd")]):
+        x = -0.36 + (sum(tracks) / len(tracks) + 0.5) * 0.05625
+        lid = f"l_pad{n}"
+        PAD_LIGHTS.append((lid, tracks))
+        L += light(lid, f"Pad light {n + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
+                                                "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
 # The warp goes where the ship points (JStream ADR-0187): each jump travels straight ahead
 # from wherever the heading, pitch and roll have turned the sky, and at warp they swing it
@@ -497,8 +553,10 @@ if ARRIVALS:
 LEVEL_MS = int(os.environ.get("LEVEL_MS", "220"))
 motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.5, 0.0, smoothing=LEVEL_MS)]
           for lid, _, _, _, ti, _, _ in TRACK_LIGHTS}
-for lid, ti in PAD_LIGHTS:
-    motion[lid] = [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.45, 0.0, smoothing=LEVEL_MS)]
+for lid, tracks in PAD_LIGHTS:
+    # A shared light follows each of its tracks for its share, so it keeps one's floor.
+    motion[lid] = [data(f"level{ti}" if len(tracks) > 1 else "level", "opacity", "meters", f"tracks.{ti}.0",
+                        -0.45 / len(tracks), 0.0, smoothing=LEVEL_MS) for ti in tracks]
 if not GLOW:
     motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
     # The screens' glow pulses on every beat: brightest on it, fading through it.
@@ -532,6 +590,9 @@ if CHANNELS:
                             channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]
         + mod_inputs("warp", SHIP_CC_SMOOTHING_MS)}}), "warp channel")
     motion["l_env"].append(follow("warp", "source", "warp", 0.0, 1.0, source={"param": "warp"}))
+    if WARP_LIGHT > 0:
+        # Dark at rest, full at full warp: it swells as the warp builds.
+        motion["l_warp"] = [follow("warp", "opacity", "warp", -1.0, 0.0)]
     # The heading, pitch and roll too: a whole turn over the channel's 0 to 1, from rest.
     ship = [("ship_yaw", "Ship heading", SHIP_CC_YAW, "turn", -360.0),
             ("ship_pitch", "Ship pitch", SHIP_CC_PITCH, "tilt", 360.0),
@@ -543,8 +604,21 @@ if CHANNELS:
         for cid, name, ccn, _, _ in ship], "ship channels"), "ship channels")
     for cid, _, _, prop, turn in ship:
         motion[cid] = [follow(cid[5:], prop, cid, 0.0, turn)]
+    # The drift (ship_sequences.py's `drift`): one more small turn on each of the rig's
+    # groups, added to the heading, pitch and roll, from DRIFT_DEG one way at 0 to the other
+    # at 1, none at the channel's default of a half. So the ship drifts around wherever it
+    # points, and the CCs still turn it while it does.
+    must(batch([{"type": "channel.set", "channel": {
+        "channel_id": f"drift_{a}", "name": f"Drift {a}", "default": 0.5}} for a in DRIFT_DEG],
+        "drift channels"), "drift channels")
+    for cid, _, _, prop, turn in ship:
+        a = cid[5:]
+        motion[cid].append(follow(f"drift_{a}", prop, f"drift_{a}", -DRIFT_DEG[a] * (turn / 360.0),
+                                  DRIFT_DEG[a] * (turn / 360.0), smoothing=200))
 else:
     motion["l_env"].append(cc("warp", "source", SHIP_CC_WARP, 0.0, 1.0, source={"param": "warp"}))
+    if WARP_LIGHT > 0:
+        motion["l_warp"] = [cc("warp", "opacity", SHIP_CC_WARP, -1.0, 0.0)]
 if not CHANNELS:
     motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
     motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
@@ -573,7 +647,7 @@ motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0
 LIGHT_GROUP = {"l_ambient": "cabin", "l_sun": "cabin", "l_cabin": "cabin", "l_glow": "desk",
                "l_desk": "desk"}
 LIGHT_GROUP.update({lid: "desk" for lid, *_ in TRACK_LIGHTS})
-LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})
+LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})  # the warp's glow is none's
 for lid, group in LIGHT_GROUP.items():
     if any(e.get("item_id") == lid for e in L):
         motion.setdefault(lid, []).extend(gates(group))

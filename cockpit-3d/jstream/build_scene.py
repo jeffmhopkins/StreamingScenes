@@ -15,7 +15,9 @@ import os
 import sys
 
 from mcp import init, op, batch, asset
-from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, THROTTLE_PIVOT, _bounds, p
+from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from live_readouts import SIDE_AT  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -83,21 +85,24 @@ must(op({"type": "item.set_motion", "scene_id": "feed", "item_id": "bar", "motio
      "period_ms": int(4000 * F), "phase": 0.0}]}), "feed motion")
 
 # With PAGES_URL, every screen of the model shares one material, `screens`, mapped onto
-# a 1920 x 1080 atlas of 640 x 360 cells (the model's README). The atlas is a 2D scene:
-# the feed on the centre screen, the 2D cockpit's screen pages on the others.
+# a 1920 x 1080 atlas (the model's README). The atlas is a 2D scene: the feed on the
+# centre screen, the 2D cockpit's screen pages on the others, over the model's own
+# placeholder atlas, so the console's live panels, readouts and LEDs show the pictures
+# the model was made with.
 ATLAS = [  # (item, page or None for the feed, x, y, w, h)
     ("a_left", "screen-radar", 0, 0, 640, 360),
     ("a_center", None, 640, 0, 640, 360),
     ("a_right", "screen-spectrum", 1280, 0, 640, 360),
     ("a_ovl", "screen-nav", 0, 360, 640, 360),
     ("a_ovr", "screen-shields", 640, 360, 640, 360),
-    ("a_side_l", "screen-telemetry", 1280, 360, 640, 360),
+    ("a_side_l", "screen-telemetry", *SIDE_AT["screen_side_left"]),
     ("a_desk", "desk", 0, 720, 960, 360),
-    ("a_side_r", "screen-camhud-1", 1280, 720, 640, 360),
+    ("a_side_r", "screen-camhud-1", *SIDE_AT["screen_side_right"]),
 ]
 if PAGES_URL:
     ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
-          src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
+          src("atlas_bg", "Atlas background", "image",
+              {"file": asset(os.path.join(os.path.dirname(MODEL), "textures", "screens.jpg"))}),
           add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080)),
           {"type": "source.create", "source_id": "feed_in_atlas", "name": "Feed",
            "kind": {"type": "scene", "scene_id": "feed"}}]
@@ -173,17 +178,6 @@ must(batch([
         geo(CX, CY, S * (BOUNDS_MAX[0] - BOUNDS_MIN[0]), S * (BOUNDS_MAX[1] - BOUNDS_MIN[1]),
             depth_px=0.0)),
 ], "cockpit items"), "cockpit items")
-
-# The throttle lever, where the model ships one: a second model placed at its hinge.
-THROTTLE = os.path.join(os.path.dirname(MODEL), "throttle.gltf")
-if os.path.exists(THROTTLE):
-    lo, hi = _bounds(THROTTLE)
-    mid = p(*[THROTTLE_PIVOT[i] + (lo[i] + hi[i]) / 2 for i in range(3)])
-    must(batch([
-        src("throttle_model", "Throttle lever", "model", {"file": asset(THROTTLE), "lighting": "scene"}),
-        add("cockpit", "throttle", "throttle_model",
-            geo(mid["x"], mid["y"], S * (hi[0] - lo[0]), S * (hi[1] - lo[1]), depth_px=mid["z"])),
-    ], "throttle"), "throttle")
 
 # ---- lights ----
 def light(lid, name, settings, at, aim=None, size=60):

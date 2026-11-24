@@ -34,14 +34,16 @@ scene's lights, so it will not look exactly like this there.
 | Path | What it is |
 |---|---|
 | [`model/cockpit.gltf`](model/cockpit.gltf) | The model. Point a `model` source's `file` at it. Its `cockpit.bin` and `textures/` must stay beside it. |
-| [`model/throttle.gltf`](model/throttle.gltf) | The throttle lever by itself, so a scene can move it. It uses the same `textures/`. See [The throttle lever](#the-throttle-lever). |
 | [`model/textures/`](model/textures/) | 21 images: six tiling PBR sets (colour, normal, occlusion-roughness-metalness), the decal atlas, the amber readout atlas, and the screens' placeholder atlas. |
 | [`model/CREDITS.md`](model/CREDITS.md) | Where every texture comes from, and its licence (all CC0). |
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
+| [`tools/live_readouts.py`](tools/live_readouts.py) | Runs last: gives the side monitors smaller cells and moves every amber readout and every LED of 2 cm or less onto the `screens` material, each in a cell of its own, so a live source can drive each one. See [Live readouts and LEDs](#live-readouts-and-leds). |
 | [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
+| [`tools/softkeys.py`](tools/softkeys.py), [`tools/add_softkeys.py`](tools/add_softkeys.py) | The soft keys a scene can light: where they are and which atlas pixels light them, and the script that adds their lights and the hologram's keys to an exported `cockpit.gltf`. See [Soft keys](#soft-keys). |
+| [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles none of several thousand sampled views can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
 
 ## Numbers
@@ -51,14 +53,50 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 171,210 | 2,000,000 |
+| Triangles | 147,301 (the optimised 147,201, then the soft keys' 100) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
-| Memory | 437 MiB of textures with mips, about 14 MiB of mesh: about 451 MiB | 512 MiB |
+| Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
 | Compression | none (no Draco, meshopt or KTX2) | none read |
 
-Nothing in the file was reported as ignored. `throttle.gltf` loads the same way: 408
-triangles, and its own copy of the `paint` and `plastic` sets, 128 MiB.
+Nothing in the file was reported as ignored.
+
+## What the model doesn't draw
+
+A renderer's cost here is mostly pixels, not triangles: every surface under a pixel is
+drawn into the depth, shadow and reflection passes whether it ends up seen or not, and
+every model in a scene gets full-screen layers of its own. `build_cockpit.py` makes the
+cabin from hundreds of bevelled blocks pushed into each other, which leaves faces buried
+inside the consoles and flat against the walls. `tools/optimize_gltf.py` runs after it and
+takes out what costs time and shows nothing:
+
+| | Before | After |
+|---|---|---|
+| Models a scene places | 2 (the cockpit and a throttle lever) | 1 |
+| Triangles | 171,210 and the lever's 408 | 147,201 |
+| Surface area | 109.2 m² | 95.9 m² |
+| Surfaces under a pixel, over the DAW show's twelve views | 3.6 to 8.2 | 3.2 to 6.7 |
+| Glass | lit by every light, then shown at 5% | unlit, at the same 5% |
+
+- **Triangles seen in none of about 5,600 views are gone**: 24,009 of them. A triangle
+  stays if it is the nearest surface anywhere in any of them: six directions from each
+  point of a grid through the cabin, from every view of the DAW show, from 30 cm to
+  each side of every view (as far as the show's camera channels push it), and from
+  points along the glide between every two views; and 300 directions from outside, so
+  the hull casts the same shadows. Points inside a solid part are left out. The depth
+  picture of every one of those views is the same before and after, which the tool
+  checks before it writes anything. That check is over the views the choice was made
+  from: a camera somewhere between them could still find a seam a few pixels wide. Run
+  the tool on the model as `finish_gltf.py` left it when the views change, since it
+  can't put a triangle back.
+- **The throttle lever is gone.** It was a second model, `throttle.gltf`, a prop for
+  trying a model a scene could move. A second model costs a renderer full-screen layers
+  of its own, far more than its 408 triangles: 2.5 ms a frame on an integrated GPU with
+  reflections on. Its base and slot stay on the left console.
+- **The glass is `KHR_materials_unlit`**. It was lit like every other surface and then
+  shown at 5% opacity, across every window. Unlit, it dims what is behind it the same;
+  what is lost is a reflection of the sky and the lights at a twentieth of its strength,
+  at most 9 of 255 levels in JStream.
 
 ## Why it stays sharp up close
 
@@ -97,12 +135,12 @@ cabin toward the windshield.
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
 | `dashboard` | the three monitors, upright, the centre one at z ≈ −1.42 and the outer two turned 15° inward, hinged midway in an even 5.5 cm gap, in one slim moulded case (a face with a window per screen, about 4 cm deep, with a deeper chamfered frame standing 3 cm proud round each side screen, and over it all one ledge standing 7 cm out toward the pilot that steps up one ledge-thickness (2.4 cm) into a low trapezoid crown over the centre monitor, an amber light bar along its whole front edge) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
 | `live_panels` | eleven quads on the `screens` material over the centre console's, the wings' and the overhead switch panel's readouts and the button panel right of the centre console's readouts (see [Screens](#screens)) |
-| `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (the lever is `throttle.gltf`), side stick on the right; a ledge under each side window |
+| `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (with no lever), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
 | `cabin` | the walls and roof behind the side windows, light strips, floor, pipes |
 
-All glass is the one `glass` material (alpha-blended, nearly clear): whatever is behind the
+All glass is the one `glass` material (alpha-blended, nearly clear, unlit): whatever is behind the
 model in the scene shows through every window. There is no seat and no centre
 console; the floor from the tray back (x ±0.75, z −0.6 to 1.1) is clear for the camera.
 
@@ -123,8 +161,8 @@ atlas holds a test card per screen.
 | `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.315, 1.118, −1.407) | (0.817, 1.118, −1.273) | (0.315, 0.826, −1.407) | (0.817, 0.826, −1.273) | (−0.26, 0.00, 0.97) |
 | `screen_overhead_left` | 0, 360 to 640, 720 | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_overhead_right` | 640, 360 to 1280, 720 | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
-| `screen_side_left` | 1280, 360 to 1920, 720 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
-| `screen_side_right` | 1280, 720 to 1920, 1080 | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
+| `screen_side_left` | 1280, 360 to 1600, 540 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
+| `screen_side_right` | 1600, 360 to 1920, 540 | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
 | `screen_desk` | 0, 720 to 960, 1080 | 0.720 × 0.270 (8:3) | (−0.360, 0.718, −1.052) | (0.360, 0.718, −1.052) | (−0.360, 0.662, −0.788) | (0.360, 0.662, −0.788) | (0, 0.98, 0.21) |
 
 `screen_desk` is the playing surface of the instrument on the tray. It is the one screen
@@ -143,33 +181,58 @@ placeholder atlas holds each readout's old picture there, so the model looks as 
 until a live source fills the strip; the DAW scene draws them from its `panels` page
 ([daw/README.md](daw/README.md)).
 
+The side monitors are a third as wide as the big ones, so their cells are a quarter as big
+(320 × 180, still more pixels a millimetre than the big monitors get). The 640 × 540 they
+leave, 1280, 540 to 1920, 1080, feeds the readouts and the LEDs, below.
+
+### Live readouts and LEDs
+
+Every amber readout (35, ten of them under live panels) and every LED of 2 cm or less (366:
+the buttons', the toggles', the knobs' and the indicator slits') is on the `screens`
+material with a cell of its own in that 640 × 540 space, which `tools/live_readouts.py`
+lays out:
+
+| Part | Cell | Where (from 1280, 540) |
+|---|---|---|
+| Readout *i* | 128 × 64, the readout's picture the same way up | five a row from the top: x = 128 × (*i* mod 5), y = 64 × ⌊*i* / 5⌋ |
+| LED *j* | 4 × 4, every corner of the LED at its centre, so it shows one colour | 160 a row from y 452: x = 4 × (*j* mod 160), y = 452 + 4 × ⌊*j* / 160⌋ |
+
+The tool writes the order (each readout's old readout-atlas cell and so its look, and each
+LED's colour and place) into the DAW page (`daw/pages/daw.html`), which draws them, and the
+placeholder atlas holds each readout's old picture and each LED lit, so the model looks as
+it did until a live source fills them. The larger glowing parts (the monitor light bar, the
+pillar markers, the ledge and desk lights, the overhead lamp and the stick's trigger) stay on
+their glowing materials.
+
+### Soft keys
+
+Each main monitor has five soft keys under it, and the blank panel on the dash just in
+front of and right of where the DAW scene's hologram projects from (centred on x 0.05,
+z −1.171) has five more, `holo_keys`. A scene lights any of them: one node, `softkey_lights`, lays a
+quad on the `screens` material over each key's face, every corner of it mapping the same
+point of the atlas, so the face is the colour of that one atlas pixel. The pixels are in
+the **key strip**, the bottom 16 px of the readouts' space (1280, 1064 to 1920, 1080),
+under the LEDs' rows, which the readouts page leaves empty (`add_softkeys.py` still stops
+`screen_side_right`'s texture coordinates above it, which its own cell, above, never
+reaches).
+Key *n* is the 32 × 16 px block *n* of the strip from its left, in this order: the left
+monitor's keys left to right, the centre's, the right's, then the hologram's
+([`tools/softkeys.py`](tools/softkeys.py) `keys()`). Draw a block bright to light its key,
+dark to leave it off; the placeholder atlas leaves them dark. `tools/add_softkeys.py` adds
+all of it to an exported model, without Blender (it does nothing if it is there).
+
 To put live pictures on the screens, lay them out in one 1920 × 1080 scene in those cells
 and give the model source `texture` = that scene and `texture_material` = `screens`
 (ADR-0107 decision 5).
 
-### The throttle lever
-
-JStream can't move one node inside a model, so the lever (shaft and grip) is not in
-`cockpit.gltf`. It is `throttle.gltf`, a second model to place in the scene, with its
-origin at the hinge inside the base. It is modelled upright, at the middle of its travel.
-
-| | |
-|---|---|
-| Hinge (pivot), in the cockpit's coordinates | (−0.930, 0.737, −0.150) |
-| Hinge axis | the cockpit's x axis: the grip swings toward −z (forward) or +z (back) |
-| Travel | −25° to +25° from upright; the slot in the base is 24 cm long |
-| Size | 0.120 × 0.220 × 0.080 m (x, y, z) |
-| Bounds centre, from the pivot | (0, 0.110, 0): the lever stands on its pivot |
-
-To animate it, put the lever in a group whose centre is the pivot, offset the lever by
-its bounds centre, and tilt the group.
-
 ### All materials
 
 `panel`, `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
-`glass` (blended), `decals` (alpha-masked labels and stripes), `readout` (the amber
-displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and `screens` above.
+`glass` (blended and unlit), `decals` (alpha-masked labels and stripes), `readout` (the amber
+displays, emissive from the readout atlas: no part uses it once `live_readouts.py` has run),
+`light_strip` and `led_amber`, `led_red`, `led_green`, `led_blue` (emissive: the larger
+LEDs; the small ones are on `screens`), `glow_amber` (the dim orange accent strips), and
+`screens` above.
 
 ## In JStream
 
@@ -204,7 +267,6 @@ What it shows:
   and depth bloom.
 - **A plate far outside.** `starship-cockpit/pages/planet.jpg` as a card 40 m past the
   windshield, seen through the glass.
-- **A second model.** The throttle lever, `model/throttle.gltf`, placed at its hinge.
 - **A deep-space sky and the jump to warp.** The environment light is also the backdrop
   (JStream ADR-0167): stars, nebulae and a galaxy band, infinitely far behind the
   cabin, seen through every window and lighting the model. The `warp` shot dims the
@@ -216,7 +278,7 @@ What it shows:
 | File | What it does |
 |---|---|
 | [`jstream/build_scene.py`](jstream/build_scene.py) | Builds the `feed` and `cockpit` scenes, the lights, filters, the shot variants and the glide presets. |
-| [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point and throttle hinge from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
+| [`jstream/shots.py`](jstream/shots.py) | Where the model sits in the scene, and the four shots' cameras, in model metres. It reads the model's bounds and `screen_center` from the glTF, and the eye point from this README, so the shots follow the model when it changes. `COCKPIT_MODEL` points it at another copy. |
 | [`jstream/drive.py`](jstream/drive.py) | Plays the tour live on program and records it (`record` output, H.264), with the jump to warp and back. |
 | [`jstream/render_frames.py`](jstream/render_frames.py) | Renders the tour frame by frame through `video.snapshot`, for a machine too slow to composite it live. |
 | [`jstream/snap_shot.py`](jstream/snap_shot.py) | Puts one shot on program and saves a snapshot. |
@@ -277,6 +339,9 @@ python tools/make_textures.py dl model/textures
 python tools/make_textures.py --grunge model/textures   # panel: grungy metal, no rivets
 python tools/build_cockpit.py model/textures model/cockpit.gltf --blend cockpit.blend
 python tools/finish_gltf.py model/cockpit.gltf
+python tools/add_softkeys.py model/cockpit.gltf
+python tools/optimize_gltf.py model/cockpit.gltf   # needs numpy and cc; about 9 minutes on four cores
+python tools/live_readouts.py model/cockpit.gltf   # the readouts and small LEDs onto `screens`
 python tools/render_previews.py cockpit.blend media 48 1280
 ```
 
