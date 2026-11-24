@@ -188,12 +188,8 @@ const views = {
   transport() {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
-    // Bar, beat and sixteenth: Bitwig's text without its ticks, whichever of '.' and ':' it
-    // separates with, shrunk to fit left of the play lamp however many bars it counts.
-    const sep = t.positionText && t.positionText.includes(':') ? ':' : '.';
-    const pos = t.positionText ? t.positionText.split(sep).slice(0, 3).join(sep) : `${c.bar}.${c.beat}.1`;
-    x.font = `700 92px ${MONO}`;
-    txt(pos, 30, 140, Math.min(92, Math.floor(92 * 510 / Math.max(1, x.measureText(pos).width))), `rgba(${CYAN},.95)`, 'left', 700);
+    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
+    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
     // play / stop
     x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
     x.beginPath();
