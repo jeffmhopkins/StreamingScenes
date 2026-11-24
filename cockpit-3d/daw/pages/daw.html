@@ -188,8 +188,14 @@ const views = {
   transport() {
     const c = clock(), t = D.transport || {};
     frame('TRANSPORT', 'BITWIG · JTUNNEL');
-    const pos = t.positionText ? t.positionText.split('.').slice(0, 3).join('.') : `${c.bar}.${c.beat}.1`;
-    txt(pos, 30, 140, 92, `rgba(${CYAN},.95)`, 'left', 700);
+    // Bar, beat and sixteenth: the ticks are dropped whichever separator the host writes
+    // (Bitwig's own text uses ':', the simulator '.'). The size shrinks so a long count
+    // (bar 1000 and up) stays clear of the play lamp, and the line keeps its middle.
+    const sep = /:/.test(t.positionText || '') ? ':' : '.';
+    const pos = t.positionText ? t.positionText.split(sep).slice(0, 3).join(sep) : `${c.bar}.${c.beat}.1`;
+    x.font = `700 92px ${MONO}`;
+    const room = 500, fit = Math.min(92, Math.floor(92 * room / x.measureText(pos).width));
+    txt(pos, 30, 140 - (92 - fit) * .36, fit, `rgba(${CYAN},.95)`, 'left', 700);
     // play / stop
     x.fillStyle = c.playing ? `rgba(${GREEN},.95)` : `rgba(${AMBER},.5)`;
     x.beginPath();
