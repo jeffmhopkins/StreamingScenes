@@ -184,6 +184,16 @@ def gate(group, prop="opacity", off=-1.0, **kw):
     return m
 
 
+def uncover(group):
+    """The motion modifier with which `group`'s switch clears a black cover: the cover's
+    opacity times 0 while the switch is on, as placed while it is off, over SWITCH_FADE_MS."""
+    if CHANNELS:
+        return follow(f"switch_{group}", "opacity", "power_" + group, 0.0, -1.0)
+    m = gate(group, "opacity", -1.0)
+    m["from"], m["to"] = m["to"], m["from"]
+    return m
+
+
 def gates(group, prop="opacity", off=-1.0, **kw):
     """`group`'s switch and the master's, for one setting: [] without SWITCHES or channels."""
     if not SWITCHES and not CHANNELS:
@@ -300,29 +310,34 @@ ed += [
     {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
      "kind": {"type": "scene", "scene_id": "atlas"}},
 ]
-# With channels, each monitor has a black cover of its own, clear while its `screen_<cell>`
-# channel is on; the channel follows `power_screens`, so the screens' CC still switches
-# them all, and a sequence can switch them one by one. Without, one cover over the atlas.
+# The black covers that switch the screens off. A motion modifier on opacity multiplies it
+# (by 1 plus what it adds), so a cover is opaque as placed and its switch clears it: a
+# cover that started clear could never be faded in. With channels, each monitor has a cover
+# of its own, clear while its `screen_<cell>` channel is on; the channel follows
+# `power_screens`, so the screens' CC still switches them all, and a sequence can switch
+# them one by one. Without channels, one cover over the atlas for the screens' switch.
+# Either way the master switch has a cover of its own over the whole atlas, since one
+# cover's modifiers can only multiply, and either switch alone must black the screens.
 SCREEN_CELLS = [(item[2:], x, y, w, h) for item, _, x, y, w, h in PAGES_AT]
 SCREEN_CELLS += [("desk", 0, 720, 960, 360), ("panels", PX, PY, PW, PH)]
-if CHANNELS:
+if CHANNELS or SWITCHES:
     ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 64, "height": 64})]
-    ed += [add("atlas", "off_" + cell, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"),
-               opacity=0.0) for cell, x, y, w, h in SCREEN_CELLS]
-elif SWITCHES:
-    # The screens' switch: a black cover over the whole atlas, clear until it fades in.
-    ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
-           add("atlas", "a_off", "atlas_off", geo(960, 540, 1920, 1080), opacity=0.0)]
+    cover = lambda iid, x, y, w, h: add("atlas", iid, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))
+    if CHANNELS:
+        ed += [cover("off_" + cell, x, y, w, h) for cell, x, y, w, h in SCREEN_CELLS]
+    else:
+        ed += [cover("a_off", 0, 0, 1920, 1080)]
+    ed += [cover("off_master", 0, 0, 1920, 1080)]
 # The readouts and LEDs belong to the Glow switch, as the model's glowing materials do: a
-# black cover over their page, clear while the glow and the master are on.
+# black cover over their page, cleared while the glow is on (`off_master` covers them with
+# the rest while the master is off).
 if SWITCHES or CHANNELS:
     ed += [src("readouts_off", "Readouts off", "color", {"color": "#000000ff", "width": 64, "height": 64}),
-           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"),
-               opacity=0.0)]
+           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 must(batch(ed, "atlas"), "atlas")
 if SWITCHES or CHANNELS:
     must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_readouts",
-             "motion": gates("glow", off=1.0)}), "readouts switch")
+             "motion": [uncover("glow")]}), "readouts switch")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
@@ -330,17 +345,19 @@ if CHANNELS:
                     "curve": "linear", "from": 0.0, "to": 1.0}] + mod_inputs("screen_" + cell)}}
         for cell, *_ in SCREEN_CELLS]
     ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_" + cell,
-            "motion": [follow("screen", "opacity", "screen_" + cell, 1.0, 0.0),
-                       gate("master", off=1.0)]} for cell, *_ in SCREEN_CELLS]
+            "motion": [follow("screen", "opacity", "screen_" + cell, 0.0, -1.0)]}
+           for cell, *_ in SCREEN_CELLS]
+    ch += [{"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_master",
+            "motion": [uncover("master")]}]
     must(batch(ch, "screen channels"), "screen channels")
 elif SWITCHES:
-    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_off",
-             "motion": gates("screens", off=1.0)}),
+    must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": iid, "motion": [uncover(g)]}
+                for iid, g in (("a_off", "screens"), ("off_master", "master"))], "screens switch"),
          "screens switch")
-# The desk's unlit pads dim by half with the cabin's switch and by half with the desk's, so
-# they are dark with both off (and with the master off); the lit pads above them stay lit.
+# The desk's unlit pads dim by half with the cabin's switch and go dark with the desk's or
+# the master's (opacity modifiers multiply); the lit pads above them stay lit.
 if SWITCHES or CHANNELS:
-    unlit = [gate("cabin", off=-0.5), gate("desk", off=-0.5), gate("master")]
+    unlit = [gate("cabin", off=-0.5), gate("desk"), gate("master")]
     must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": item, "motion": unlit}
                 for item, *_ in DESK_UNLIT], "unlit pads"), "unlit pads")
 

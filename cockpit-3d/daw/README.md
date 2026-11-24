@@ -30,7 +30,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 
 | In the cockpit | Driven by | How |
 |---|---|---|
-| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played, and a note above or below its range folds onto it by whole octaves, so any range shows. The pads are raised silicone caps, matte when unlit and lit from under when playing, with the light brightest in the middle and spilling onto the desk; a pad lights at once and dims over 350 ms when its note ends (the page's `FADE_MS`, timed by the data's clock while the transport plays, so held-clock renders repeat). The unlit pads are a page of their own under the lit ones (`isopads`), which the cabin and desk switches dim, so with the lights off only the lit pads show | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
+| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played, and a note above or below its range folds onto it by whole octaves, so any range shows. The pads are raised silicone caps, matte when unlit and lit from under when playing, with the light brightest in the middle and spilling onto the desk; a pad lights at once and dims over 350 ms when its note ends (the page's `FADE_MS`, timed by the data's clock while the transport plays, so held-clock renders repeat). The unlit pads are a page of their own under the lit ones (`isopads`), which the cabin switch dims by half and the desk switch turns off, so with the lights off only the lit pads show | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
 | …or, with `DESK_GRID=clips`, the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The button panel right of the centre console's readouts: a mini clip launcher, 8 tracks × 8 scenes, a playing clip full in its track's colour, a queued one blinking on the beat, the selected track marked under its column | `track/N` `slots[]`, `color`; `grid.selectedTrack`; `clock.beats` | the `panels` page (its `launcher` cell) on the model's `live_panels` |
 | The centre console's left readout: the selected track's last note (name and octave, C3 = 60) and its velocity, as a number and a bar | `notes.tracks[N]`, `grid.selectedTrack` | `panels` (`note`) |
@@ -58,8 +58,8 @@ up:
 
 | CC | Group | What it switches |
 |---|---|---|
-| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; half the desk's unlit pads |
-| 41 | Desk | the five pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the other half of the desk's unlit pads |
+| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; the desk's unlit pads, to half |
+| 41 | Desk | the five pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the desk's unlit pads |
 | 42 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
 | 43 | Glow | the model's own LEDs and light strips (every material's glow strength), and the live readouts and small LEDs (a black cover over their page) |
 | 44 | Master | all four, so only the sky lights the cabin and reflects off it |
@@ -73,8 +73,10 @@ part way. `SWITCHES=0` builds without the CCs (with channels, the switch channel
 
 Each switch is a `midi` motion modifier on every light of its group, beside the data
 modifiers already there: it adds -1 to a light's opacity (a light's strength is its
-intensity times its opacity), +1 to the black cover's, -0.5 to the desk's unlit pads'
-(the Cabin and Desk switches each; -1 for the Master), and -3 to the model's glow
+intensity times its opacity, and a modifier on opacity multiplies it by 1 plus what it
+adds), -1 to the black cover's while the switch is on (so the cover, opaque as placed,
+clears, and comes back as the switch turns off), -0.5 to the desk's unlit pads' for the
+Cabin switch and -1 for the Desk and Master switches, and -3 to the model's glow
 strength, which is a multiplier of 1 at rest that the LEDs' data drives raise by up to
 1.6. A model takes at most 8 motion modifiers, and the cockpit already has 6 data ones,
 so the Glow switches drive every material's glow at once (`emissive_strength` with no
@@ -86,7 +88,9 @@ In a JStream with channels (ADR-0183, protocol 0.169) each switch is a channel,
 `power_cabin`, `power_desk`, `power_screens`, `power_glow` and `power_master` (1 on, 0
 off, starting on), and its CC is one input of it; the modifiers follow the channel. So
 the [cockpit's sequences](#cockpit-sequences) switch the same lights, and whichever of
-the CC and a sequence moved last wins. With channels the screens have a cover each
+the CC and a sequence moved last wins. The Master switch has a black cover of its own
+over the whole atlas, since either it or the screens' switch alone must black the screens
+and one cover's modifiers only multiply. With channels the screens have a cover each
 instead of one over the atlas, each following its own channel, `screen_center`,
 `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`,
 `screen_side_r`, `screen_desk` and `screen_panels`, which follows `power_screens`: CC 42
