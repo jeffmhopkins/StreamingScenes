@@ -22106,118 +22106,6 @@
   ],
   "shows": [
     {
-      "show_id": "lightning",
-      "name": "Lightning tour (no pauses)",
-      "program": [
-        {
-          "clip_id": "l1",
-          "scene_id": "s_title",
-          "length_ms": 10000
-        },
-        {
-          "clip_id": "l2",
-          "scene_id": "s_kf",
-          "length_ms": 25500,
-          "preset_id": "fade"
-        },
-        {
-          "clip_id": "l3",
-          "scene_id": "s_3d",
-          "length_ms": 29000,
-          "preset_id": "slow_fade"
-        },
-        {
-          "clip_id": "l4",
-          "scene_id": "s_thanks",
-          "length_ms": 10000,
-          "preset_id": "sting"
-        }
-      ],
-      "keyframes": [
-        {
-          "marker_id": "lk0",
-          "at_ms": 14000,
-          "keyframe_id": "s_kf_k0",
-          "preset_id": "layout"
-        },
-        {
-          "marker_id": "lk1",
-          "at_ms": 19500,
-          "keyframe_id": "s_kf_k1",
-          "preset_id": "layout"
-        },
-        {
-          "marker_id": "lk2",
-          "at_ms": 25000,
-          "keyframe_id": "s_kf_k2",
-          "preset_id": "layout"
-        },
-        {
-          "marker_id": "lk_home",
-          "at_ms": 30500,
-          "preset_id": "layout"
-        },
-        {
-          "marker_id": "lc0",
-          "at_ms": 39500,
-          "keyframe_id": "s_3d_k0",
-          "preset_id": "glide"
-        },
-        {
-          "marker_id": "lc1",
-          "at_ms": 45000,
-          "keyframe_id": "s_3d_k1",
-          "preset_id": "glide"
-        },
-        {
-          "marker_id": "lc2",
-          "at_ms": 50500,
-          "keyframe_id": "s_3d_k2",
-          "preset_id": "glide"
-        },
-        {
-          "marker_id": "lc3",
-          "at_ms": 56000,
-          "keyframe_id": "s_3d_k3",
-          "preset_id": "glide"
-        },
-        {
-          "marker_id": "lc_home",
-          "at_ms": 61500,
-          "preset_id": "glide"
-        }
-      ],
-      "sequences": [
-        {
-          "track_id": "ls",
-          "name": "Builds",
-          "cues": [
-            {
-              "cue_id": "lq1",
-              "at_ms": 0,
-              "action": {
-                "timeline_id": "title_build",
-                "type": "timeline.play"
-              }
-            }
-          ]
-        }
-      ],
-      "bookmarks": [
-        {
-          "bookmark_id": "l_top",
-          "name": "Top",
-          "at_ms": 0,
-          "pausing": false,
-          "note": "No pauses: this show plays straight through and loops. Keyframes, then the 3D cockpit."
-        }
-      ],
-      "end": {
-        "type": "loop"
-      },
-      "next_monitor": "live"
-    },
-    {
       "show_id": "tour",
       "name": "Feature tour",
       "program": [
@@ -22899,6 +22787,139 @@
       "preset_id": "fade",
       "next_monitor": "still",
       "planned_ms": 1200000
+    },
+    {
+      "show_id": "tour_lightning",
+      "name": "Lightning tour (no pauses)",
+      "program": [
+        {
+          "clip_id": "l1",
+          "scene_id": "s_title",
+          "length_ms": 10000
+        },
+        {
+          "clip_id": "l2",
+          "scene_id": "s_kf",
+          "length_ms": 25500,
+          "preset_id": "fade"
+        },
+        {
+          "clip_id": "l3",
+          "scene_id": "s_3d",
+          "length_ms": 29000,
+          "preset_id": "slow_fade"
+        },
+        {
+          "clip_id": "l4",
+          "scene_id": "s_thanks",
+          "length_ms": 10000,
+          "preset_id": "sting"
+        }
+      ],
+      "keyframes": [
+        {
+          "marker_id": "lk0",
+          "at_ms": 14000,
+          "keyframe_id": "s_kf_k0",
+          "preset_id": "layout"
+        },
+        {
+          "marker_id": "lk1",
+          "at_ms": 19500,
+          "keyframe_id": "s_kf_k1",
+          "preset_id": "layout"
+        },
+        {
+          "marker_id": "lk2",
+          "at_ms": 25000,
+          "keyframe_id": "s_kf_k2",
+          "preset_id": "layout"
+        },
+        {
+          "marker_id": "lk_home",
+          "at_ms": 30500,
+          "preset_id": "layout"
+        },
+        {
+          "marker_id": "lc0",
+          "at_ms": 39500,
+          "keyframe_id": "s_3d_k0",
+          "preset_id": "glide"
+        },
+        {
+          "marker_id": "lc1",
+          "at_ms": 45000,
+          "keyframe_id": "s_3d_k1",
+          "preset_id": "glide"
+        },
+        {
+          "marker_id": "lc2",
+          "at_ms": 50500,
+          "keyframe_id": "s_3d_k2",
+          "preset_id": "glide"
+        },
+        {
+          "marker_id": "lc3",
+          "at_ms": 56000,
+          "keyframe_id": "s_3d_k3",
+          "preset_id": "glide"
+        },
+        {
+          "marker_id": "lc_home",
+          "at_ms": 61500,
+          "preset_id": "glide"
+        }
+      ],
+      "sequences": [
+        {
+          "track_id": "ls",
+          "name": "Builds",
+          "cues": [
+            {
+              "cue_id": "lq1",
+              "at_ms": 0,
+              "action": {
+                "timeline_id": "title_build",
+                "type": "timeline.play"
+              }
+            }
+          ]
+        }
+      ],
+      "bookmarks": [
+        {
+          "bookmark_id": "l_top",
+          "name": "Welcome",
+          "at_ms": 0,
+          "pausing": false,
+          "note": "No pauses: this show plays straight through and loops, with the Next monitor live. It shares its scenes with the Feature tour: one project, several shows."
+        },
+        {
+          "bookmark_id": "l_kf",
+          "name": "Keyframes",
+          "at_ms": 10000,
+          "pausing": false,
+          "note": "One scene, three keyframes. The show loads each one with a Move."
+        },
+        {
+          "bookmark_id": "l_3d",
+          "name": "3D cockpit",
+          "at_ms": 35500,
+          "pausing": false,
+          "note": "The glTF cockpit, rendered in JStream, with its DAW screens."
+        },
+        {
+          "bookmark_id": "l_end",
+          "name": "Thanks",
+          "at_ms": 64500,
+          "pausing": false,
+          "note": "Then it loops back to the top."
+        }
+      ],
+      "end": {
+        "type": "loop"
+      },
+      "next_monitor": "live"
     }
   ],
   "transitions": {

@@ -1072,7 +1072,7 @@ show = {
 L_KF = shot_len(K_KF) + 2 * S
 l_t = [0, 10 * S, 10 * S + L_KF, 10 * S + L_KF + shot_len(K_3D)]
 show_short = {
-    "show_id": "lightning", "name": "Lightning tour (no pauses)",
+    "show_id": "tour_lightning", "name": "Lightning tour (no pauses)",
     "program": [
         {"clip_id": "l1", "scene_id": "s_title", "length_ms": 10 * S},
         {"clip_id": "l2", "scene_id": "s_kf", "length_ms": L_KF, "preset_id": "fade"},
@@ -1087,9 +1087,17 @@ show_short = {
                  [{"marker_id": "lc_home", "at_ms": l_t[2] + 4 * S + len(K_3D) * FOCUS_MS, "preset_id": "glide"}],
     "sequences": [{"track_id": "ls", "name": "Builds", "cues": [
         {"cue_id": "lq1", "at_ms": 0, "action": act("timeline.play", timeline_id="title_build")}]}],
-    "bookmarks": [{"bookmark_id": "l_top", "name": "Top", "at_ms": 0, "pausing": False,
-                   "note": "No pauses: this show plays straight through and loops. "
-                           "Keyframes, then the 3D cockpit."}],
+    "bookmarks": [
+        {"bookmark_id": "l_top", "name": "Welcome", "at_ms": l_t[0], "pausing": False,
+         "note": "No pauses: this show plays straight through and loops, with the Next monitor live. "
+                 "It shares its scenes with the Feature tour: one project, several shows."},
+        {"bookmark_id": "l_kf", "name": "Keyframes", "at_ms": l_t[1], "pausing": False,
+         "note": "One scene, three keyframes. The show loads each one with a Move."},
+        {"bookmark_id": "l_3d", "name": "3D cockpit", "at_ms": l_t[2], "pausing": False,
+         "note": "The glTF cockpit, rendered in JStream, with its DAW screens."},
+        {"bookmark_id": "l_end", "name": "Thanks", "at_ms": l_t[3], "pausing": False,
+         "note": "Then it loops back to the top."},
+    ],
     "end": {"type": "loop"}, "next_monitor": "live",
 }
 
@@ -1189,7 +1197,7 @@ doc = {
     "folders": [{"id": "f_tour", "name": "Feature tour"}, {"id": "f_overlays", "name": "Tour overlays"}],
     "labels": [{"id": "tour", "name": "Feature tour", "color": "#4c8dff"}],
     "hotkeys": sorted(hotkeys, key=lambda h: h["chord"]), "bindings": bindings, "channels": chan,
-    "shows": [show_short, show], "transitions": transitions,
+    "shows": [show, show_short], "transitions": transitions,
 }
 
 

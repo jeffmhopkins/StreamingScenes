@@ -108,7 +108,7 @@ for clip in tour["program"]:
     t = end
 end = tour["end"]
 out.append(f"## End\n\nThe show ends by going to the bookmark `{end.get('bookmark_id')}`, so it is ready to run again.\n")
-light = next(s for s in d["shows"] if s["show_id"] == "lightning")
+light = next(s for s in d["shows"] if s["show_id"] == "tour_lightning")
 out.append(f"## The second show: {light['name']}\n")
 out.append(", then ".join(f"`{c['scene_id']}` ({c['length_ms'] / 1000:g} s)" for c in light["program"])
            + f". It loops, with the Next monitor live: one project, several shows, shared scenes.\n")
