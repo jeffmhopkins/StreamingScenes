@@ -69,7 +69,9 @@ part way. `SWITCHES=0` builds without the CCs (with channels, the switch channel
 
 Each switch is a `midi` motion modifier on every light of its group, beside the data
 modifiers already there: it adds -1 to a light's opacity (a light's strength is its
-intensity times its opacity), +1 to the black cover's, and -3 to the model's glow
+intensity times its opacity, and a modifier on opacity multiplies it by 1 plus what it
+adds), -1 to the black cover's while the switch is on (so the cover, opaque as placed,
+clears, and comes back as the switch turns off), and -3 to the model's glow
 strength, which is a multiplier of 1 at rest that the LEDs' data drives raise by up to
 1.6. A model takes at most 8 motion modifiers, and the cockpit already has 6 data ones,
 so the Glow switches drive every material's glow at once (`emissive_strength` with no
@@ -81,7 +83,9 @@ In a JStream with channels (ADR-0183, protocol 0.169) each switch is a channel,
 `power_cabin`, `power_desk`, `power_screens`, `power_glow` and `power_master` (1 on, 0
 off, starting on), and its CC is one input of it; the modifiers follow the channel. So
 the [cockpit's sequences](#cockpit-sequences) switch the same lights, and whichever of
-the CC and a sequence moved last wins. With channels the screens have a cover each
+the CC and a sequence moved last wins. The Master switch has a black cover of its own
+over the whole atlas, since either it or the screens' switch alone must black the screens
+and one cover's modifiers only multiply. With channels the screens have a cover each
 instead of one over the atlas, each following its own channel, `screen_center`,
 `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`,
 `screen_side_r`, `screen_desk` and `screen_panels`, which follows `power_screens`: CC 42
