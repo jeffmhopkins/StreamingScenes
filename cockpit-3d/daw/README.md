@@ -16,6 +16,8 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
 | `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`) the desk's note grid (`?view=iso&w=600`) and the console's small displays (`?view=panels&w=320`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as sequences with a hotkey each, the cockpit's sequences (lights, monitors, hologram, warp), two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
+| `show_tour.py` | The Cockpit tour, a show (JStream ADR-0210) that runs through the cockpit for an audience: power up, the seat, the desk, the monitors, the consoles, warp, the hologram, the 2D desk and power down, with a script in every bookmark's note. See [The cockpit tour](#the-cockpit-tour). |
+| `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, and the jump to warp and back, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
@@ -130,6 +132,10 @@ close to the desk, a screen or a side console (`CLOSE` in `render_daw.py`).
 
 ## Importing the show
 
+The cockpit is also baked into [`jstream-demos.json`](../../jstream-demos.json) at the repo's
+root, beside the feature tour, with its views on Ctrl+Shift+1 to 0, - and = there; open that
+to skip the import. To build it into a project of its own:
+
 `import_show.py` puts everything into a running JStream over MCP, with no other step: no
 page server, and no files copied, since the screens' pages go into the project inline and
 the models are read from this checkout.
@@ -151,6 +157,7 @@ What it makes:
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
 | Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
+| Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp; see [Cockpit sequences](#cockpit-sequences) |
 | MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp and drop out of warp, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
@@ -161,6 +168,31 @@ The app hears the hotkeys while another application, such as Bitwig, has the foc
 agent switches the views with `timeline.play` on a `view_…` sequence (`view_cockpit` is
 the wide view). Without reflection probes in the JStream it runs on, the cockpit builds
 without reflections and says so.
+
+### The cockpit tour
+
+A show, "Cockpit tour", that walks an audience through the cockpit in about three minutes.
+Open the Show panel, pick it and press Play. Each bookmark pauses, and its note is a script
+for whoever presents; Continue goes on.
+
+| Bookmark | On program | What the show does |
+|---|---|---|
+| Pre-show | Be right back | loops until Continue |
+| Power up | the cockpit, wide | plays `lights_on`, then `monitors_on` |
+| The pilot's seat | the cockpit | behind the seat, then the seat |
+| The desk | the cockpit | the desk, then the desk low |
+| The monitors | the cockpit | the centre, left and right monitors |
+| Overhead and the consoles | the cockpit | overhead, then the left and right consoles |
+| Warp | the cockpit | out the windshield; `warp_in`, then `warp_out` 12 s later |
+| Hologram | the cockpit | the seat; `holo_show`, then `holo_hide` |
+| The same data in 2D | DAW desk 2D | a fade to the flat desk |
+| Power down | the cockpit, wide | `monitors_off`, then `lights_off`; the end goes back to Pre-show |
+
+A small tag scene, `tour_tag` ("DAW COCKPIT · BITWIG OVER JTUNNEL"), sits over the cockpit
+on an overlay track. The views, lights, monitors, warp and hologram are cues on a sequence
+track that play the sequences above, so the show moves nothing a hotkey doesn't. On a
+JStream without the hologram's filter its two cues do nothing. A project imported before
+the show existed gets it with `python3 add_show.py`; save the project afterwards.
 
 ### Camera views
 

@@ -16,6 +16,9 @@
   cockpit's camera in every view (CAMERA_CCS below; needs a JStream whose cameras take
   MIDI, JStream #1631), and, where JStream has them (protocol 0.167), CC 28 for roll and
   CC 29 to switch autofocus off; CC=1 turns on the views' depth of field, and autofocus;
+- the Cockpit tour, a show that runs through the views, the lights, the monitors, the
+  warp, the hologram and the 2D desk, with a script in each bookmark (show_tour.py; needs
+  a JStream with shows, protocol 0.177);
 - and the studio keeps the scenes warm, so switching between 2D and 3D starts nothing.
 
     python3 import_show.py [project file]
@@ -300,6 +303,15 @@ must(batch([{"type": "scene.set_role", "scene_id": "atlas", "role": "group"},
             {"type": "scene.reorder", "scene_id": "atlas",
              "index": (1 if SEQ else len(VIEWS)) + 2}], "atlas"), "atlas")
 
+# ---- the cockpit tour, a show (show_tour.py) that runs through all of it; a JStream
+# without shows (before protocol 0.177) imports the rest ----
+import show_tour  # noqa: E402
+
+text, ok = batch(show_tour.edits(), "cockpit tour") if SEQ and SHIP else ("needs sequences", False)
+TOUR = ok
+if not ok:
+    print(f"no cockpit tour show ({text[:200]}); importing the rest", file=sys.stderr)
+
 # ---- keep the scenes warm, and start on the wide view ----
 text, ok = op({"type": "studio.set_warm", "scenes": WARM})
 if not ok:
@@ -309,5 +321,6 @@ print("imported: views Ctrl+Alt+1..0, -, =" + (" (sequences)" if SEQ else " (key
       + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W" if SHIP else "")
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ
-          else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram"))
+          else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram")
+      + ("; show: Cockpit tour" if TOUR else ""))
 print("saved to", PROJECT)
