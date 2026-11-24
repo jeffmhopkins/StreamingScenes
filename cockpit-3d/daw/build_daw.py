@@ -34,6 +34,7 @@ from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
+from live_readouts import READOUTS_AT, SIDE_AT  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -223,20 +224,22 @@ PAGES_AT = [  # (item, view, x, y, w, h): the model's atlas cells (its README)
     ("a_right", "device", 1280, 0, 640, 360),
     ("a_ovl", "mixer", 0, 360, 640, 360),
     ("a_ovr", "scenes", 640, 360, 640, 360),
-    ("a_side_l", "clip", 1280, 360, 640, 360),
-    ("a_side_r", "notes", 1280, 720, 640, 360),
+    # The side monitors are small, so the model gives them a quarter cell each
+    # (tools/live_readouts.py); their pages still draw at 640 x 360.
+    ("a_side_l", "clip", *SIDE_AT["screen_side_left"]),
+    ("a_side_r", "notes", *SIDE_AT["screen_side_right"]),
 ]
 ed = [{"type": "scene.create", "scene_id": "atlas", "name": "Screens atlas"},
       src("atlas_bg", "Atlas background", "color", {"color": "#05080cff", "width": 1920, "height": 1080}),
       add("atlas", "a_bg", "atlas_bg", geo(960, 540, 1920, 1080))]
 
 
-def page(view, width=640):
-    """Where a screen's page comes from: inline, with its view and width set ahead of the
+def page(view, width=640, height=360):
+    """Where a screen's page comes from: inline, with its view and size set ahead of the
     page's script, or from PAGES."""
     if PAGES:
-        return {"url": f"{PAGES}/daw.html?view={view}&w={width}"}
-    head = f'<head><script>window.DAW_VIEW="{view}";window.DAW_W={width}</script>'
+        return {"url": f"{PAGES}/daw.html?view={view}&w={width}&h={height}"}
+    head = f'<head><script>window.DAW_VIEW="{view}";window.DAW_W={width};window.DAW_H={height}</script>'
     return {"html": DAW_HTML.replace("<head>", head, 1)}
 
 
@@ -282,6 +285,14 @@ ed += [src("bridge", "Meter bridge", "browser", {
         **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
 DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
 ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
+# The consoles' amber readouts and small LEDs: one page, `readouts`, in the space the side
+# monitors gave up; each readout and LED of the model maps its own cell of it
+# (tools/live_readouts.py).
+RX, RY, RW, RH = READOUTS_AT
+ed += [src("readouts", "Console readouts and LEDs", "browser", {
+        **page("readouts", RW, RH), "width": RW, "height": RH, "fps": 30,
+        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
+       add("atlas", "a_readouts", "readouts", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 ed += [
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
     add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
@@ -301,7 +312,16 @@ elif SWITCHES:
     # The screens' switch: a black cover over the whole atlas, clear until it fades in.
     ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 1920, "height": 1080}),
            add("atlas", "a_off", "atlas_off", geo(960, 540, 1920, 1080), opacity=0.0)]
+# The readouts and LEDs belong to the Glow switch, as the model's glowing materials do: a
+# black cover over their page, clear while the glow and the master are on.
+if SWITCHES or CHANNELS:
+    ed += [src("readouts_off", "Readouts off", "color", {"color": "#000000ff", "width": 64, "height": 64}),
+           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"),
+               opacity=0.0)]
 must(batch(ed, "atlas"), "atlas")
+if SWITCHES or CHANNELS:
+    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_readouts",
+             "motion": gates("glow", off=1.0)}), "readouts switch")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
