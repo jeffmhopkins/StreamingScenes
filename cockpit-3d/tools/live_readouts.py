@@ -254,7 +254,8 @@ def main(path):
         mesh["primitives"] = [p for p in mesh["primitives"] if not p.get("drop")] + new
     if len(readouts) > READOUT_COLS * (LED_TOP // READOUT_H):
         sys.exit(f"{len(readouts)} readouts don't fit")
-    if LED_TOP + (len(leds) + LED_COLS - 1) // LED_COLS * LED_CELL > READOUTS_AT[3]:
+    # The bottom 16 px are the soft keys' strip (softkeys.py KEY_STRIP).
+    if LED_TOP + (len(leds) + LED_COLS - 1) // LED_COLS * LED_CELL > READOUTS_AT[3] - 16:
         sys.exit(f"{len(leds)} LEDs don't fit")
     m.save()
     write_table(readouts, leds)

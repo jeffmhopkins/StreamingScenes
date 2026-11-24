@@ -44,7 +44,9 @@ has more lights than a model is lit by.
 
 The panel shows `holo_feed`, an image source holding the 2D cockpit's caller still, until
 `source <id>` (an `item.set_source` on `holo_card`) puts any other source there: a webcam
-or a screen capture made in the Sources panel. Every ID starts with `holo_`.
+or a screen capture made in the Sources panel. Every ID starts with `holo_`. In the DAW
+show, sources.py points the card at a subscene, `src_holo`, that switches between the DAW
+pages and that feed; `source <id>` then points the subscene's feed slot and selects it.
 
 The cards are drawn in stacking order, after the model (`add` turns off the scene
 cameras' `depth_sort`, keyframes' included): by box-centre depth they would sort behind
@@ -348,10 +350,15 @@ if __name__ == "__main__":
                     "value": 1.0 if cmd == "show" else 0.0})
         if not ok:
             _must(op(show_action() if cmd == "show" else hide_action()), cmd)
-    elif cmd == "source" and len(sys.argv) > 2:
-        _must(op({"type": "item.set_source", "item_id": CARD, "source_id": sys.argv[2]}),
-              "item.set_source")
-    elif cmd == "standin":
-        _must(op({"type": "item.set_source", "item_id": CARD, "source_id": FEED}), "standin")
+    elif cmd in ("source", "standin") and (cmd == "standin" or len(sys.argv) > 2):
+        # With switchable sources (sources.py), the panel shows the subscene `src_holo`:
+        # point its feed slot at the source and select that slot (key 5). Without, point
+        # the card itself.
+        sid = FEED if cmd == "standin" else sys.argv[2]
+        _, ok = op({"type": "item.set_source", "item_id": "src_holo_feed", "source_id": sid})
+        if ok:
+            _must(op({"type": "timeline.play", "timeline_id": "holo_feed"}), "holo_feed")
+        else:
+            _must(op({"type": "item.set_source", "item_id": CARD, "source_id": sid}), "item.set_source")
     else:
         sys.exit(__doc__)

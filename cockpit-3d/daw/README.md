@@ -20,6 +20,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
+| `sources.py` | What the three main monitors and the hologram show: a subscene each, with five sources to switch between and the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
 | `serve_pages.py` | Serves `pages/` with threads and a deep accept queue, for `PAGES=…` while editing a page: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
@@ -163,11 +164,11 @@ What it makes:
 | Scenes | `DAW cockpit` (3D, with a sequence a view), `DAW desk 2D` (the launcher, the meters, the transport, the mixer and the arrangement, flat), `Be right back` (a title over the transport) |
 | Views | Ctrl+Alt+1 wide, 2 behind the seat, 3 the pilot's seat, 4 the desk, 5 the centre monitor, 6 the left, 7 the right, 8 overhead, 9 out the windshield, 0 the desk low, - the left console, = the right console. Each glides there in `GLIDE_MS` (1800) from wherever the camera is; see [Camera views](#camera-views) |
 | Scenes' hotkeys | Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back, each a fade of `FADE_MS` (600) |
-| Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows the `holo_feed` source; see [The hologram](#the-hologram). A JStream without the `hologram` filter imports the rest of the show and says so |
+| Hologram | Ctrl+Alt+H shows the hologram over the dash, Ctrl+Alt+Shift+H hides it (without sequences, Ctrl+Alt+H shows or hides it). It shows a subscene, `src_holo`, which starts on the `holo_feed` source; see [The hologram](#the-hologram) and [Switching what the screens show](#switching-what-the-screens-show). A JStream without the `hologram` filter imports the rest of the show and says so |
 | Show | the Cockpit tour (`show_tour.py`), on a JStream with shows (protocol 0.177); see [The cockpit tour](#the-cockpit-tour) |
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
-| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp, Ctrl+Alt+D drift, Ctrl+Alt+Shift+D hold steady; see [Cockpit sequences](#cockpit-sequences) |
-| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp, Ctrl+Alt+D drift, Ctrl+Alt+Shift+D hold steady; see [Cockpit sequences](#cockpit-sequences). What each main monitor and the hologram show: Ctrl+Alt+Shift with 1 to 5 (left monitor), 6 to 0 (centre), Y to P (right) and Z to B (hologram); see [Switching what the screens show](#switching-what-the-screens-show) |
+| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, then from 58 (A#2) up the screens' sources, five each for the left, centre and right monitors and the hologram (58 to 77), from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
@@ -269,10 +270,54 @@ Each angle is a sum of four slow waves, a whole number of them a loop, with rand
 from a fixed seed (`DRIFT_WAVES`, `DRIFT_SEED` in `ship_sequences.py`), so the three angles
 never line up and the drift has no visible pattern. The lane holds the waves' turning
 points, eased in and out between them, so the ship slows to a stop each time it turns on
-one axis while the others keep moving, every 5 to 30 s; the loop starts and ends on the
+one axis while the others keep moving, every 4.8 to 29 s; the loop starts and ends on the
 same turning point, so it has no seam. The first pass glides in from wherever the ship is.
 `drift_settle` (Hold steady) stops `drift` as it starts (a `stops` trigger) and eases the
 three back to the middle over 6 s.
+
+### Switching what the screens show
+
+The three main monitors and the hologram each show a subscene (a group scene placed as a
+source), `src_left`, `src_center`, `src_right` and `src_holo`, which holds one item per
+source it can show. `sources.py` builds them. Each has five, one per soft key under its
+screen, left to right:
+
+| Key | Item | Shows |
+|---|---|---|
+| 1 | `src_<screen>_transport` | the transport page |
+| 2 | `src_<screen>_arrange` | the arrangement |
+| 3 | `src_<screen>_device` | the device |
+| 4 | `src_<screen>_mixer` | the mixer |
+| 5 | `src_<screen>_feed` | a camera feed: the source `feed` (`holo_feed` on the hologram), a stand-in still until you point it elsewhere |
+
+The left monitor starts on the transport, the centre on the arrangement, the right on the
+device and the hologram on its feed. To put a webcam, a capture or anything else on a
+screen, open its subscene in the app and point one of its items at that source (or send
+`item.set_source`); the key then picks it.
+
+Each item is a channel, `src_<screen>_<slot>` (1 shown, 0 not), and a sequence a key,
+`<screen>_<slot>` ("Centre monitor: Mixer"), takes its screen's five channels to that
+key's in `SOURCE_FADE_MS` (150 ms), from wherever they are, so the pictures cross-fade.
+Play one from the app's sequences, a cue, an agent's `timeline.play`, or these (the notes follow the
+views' and the cockpit sequences' notes, so they move up if those gain any):
+
+| Screen | Keys (after Ctrl+Alt+Shift) | MIDI notes (with `NOTES=1`) |
+|---|---|---|
+| Left monitor | 1 to 5 | 58 to 62 |
+| Centre monitor | 6 to 0 | 63 to 67 |
+| Right monitor | Y, U, I, O, P | 68 to 72 |
+| Hologram | Z, X, C, V, B | 73 to 77 |
+
+The selected source's key lights amber under its screen: the five soft keys under each
+monitor, and a row of five on the dash just in front of and right of the hologram's
+lens. Each key's face is a quad on the model's `screens` material that maps one block of
+the atlas's key strip (the bottom 16 px of the readouts' space, under the LEDs; see the
+model's README), and the atlas has a lit block a key
+there, following its channel. The keys are LEDs: the Glow and Master switches darken them
+with the others. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
+show each monitor's starting page, whatever its key picks, since a card glows only with a
+source's own frame, not a scene's. It needs channels and
+sequences (protocol 0.170); without them the screens show what they did before.
 
 ### Where a warp arrives
 
@@ -337,7 +382,7 @@ console. Its bottom stays clear of the monitor case from the pilot's seat.
 | | |
 |---|---|
 | Show, hide | With sequences: Ctrl+Alt+H sets the channel `holo` to 1 and Ctrl+Alt+Shift+H to 0, as Mod 7 does; its rising past one half starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.set_value` on `holo`, as `python3 hologram.py show` and `hide` do. Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
-| What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
+| What it shows | its subscene `src_holo`, which starts on the image source `holo_feed` (the 2D cockpit's caller still) and switches to the DAW pages on its keys ([Switching what the screens show](#switching-what-the-screens-show)). `python3 hologram.py source <source id>` points the feed slot at another source, such as a webcam or a screen capture made in the Sources panel, and selects it |
 | Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
 | Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card`, `holo_haze` and `holo_light`; the art is in `hologram/` (`make_art.py` draws it) |
 | Its light | `holo_light`, a point light in the hologram's colour in front of the beam, shown and hidden with the cards. With sequences it is at 0 before the beam, half with the beam and full with the panel (two opacity modifiers, which multiply: `holo_beam` scales it from 0, `holo_panel` from a half). `HOLO_LIGHT` sets its strength (1.6); 0 leaves it out. It takes one of the model's 8 lights only while shown (see [Light switches](#light-switches)) |
