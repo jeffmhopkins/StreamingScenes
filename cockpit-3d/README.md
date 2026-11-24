@@ -40,7 +40,9 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
 | [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
+| [`tools/live_readouts.py`](tools/live_readouts.py) | Runs last: gives the side monitors smaller cells and moves every amber readout and every LED of 2 cm or less onto the `screens` material, each in a cell of its own, so a live source can drive each one. See [Live readouts and LEDs](#live-readouts-and-leds). |
 | [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
+| [`tools/softkeys.py`](tools/softkeys.py), [`tools/add_softkeys.py`](tools/add_softkeys.py) | The soft keys a scene can light: where they are and which atlas pixels light them, and the script that adds their lights and the hologram's keys to an exported `cockpit.gltf`. See [Soft keys](#soft-keys). |
 | [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles none of several thousand sampled views can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
 
@@ -51,7 +53,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 147,201 | 2,000,000 |
+| Triangles | 147,301 (the optimised 147,201, then the soft keys' 100) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -65,7 +67,7 @@ A renderer's cost here is mostly pixels, not triangles: every surface under a pi
 drawn into the depth, shadow and reflection passes whether it ends up seen or not, and
 every model in a scene gets full-screen layers of its own. `build_cockpit.py` makes the
 cabin from hundreds of bevelled blocks pushed into each other, which leaves faces buried
-inside the consoles and flat against the walls. `tools/optimize_gltf.py` runs last and
+inside the consoles and flat against the walls. `tools/optimize_gltf.py` runs after it and
 takes out what costs time and shows nothing:
 
 | | Before | After |
@@ -159,8 +161,8 @@ atlas holds a test card per screen.
 | `screen_right` | 1280, 0 to 1920, 360 | 0.520 × 0.292 | (0.315, 1.118, −1.407) | (0.817, 1.118, −1.273) | (0.315, 0.826, −1.407) | (0.817, 0.826, −1.273) | (−0.26, 0.00, 0.97) |
 | `screen_overhead_left` | 0, 360 to 640, 720 | 0.300 × 0.169 | (−0.530, 1.772, −0.577) | (−0.230, 1.772, −0.577) | (−0.530, 1.628, −0.663) | (−0.230, 1.628, −0.663) | (0, −0.51, 0.86) |
 | `screen_overhead_right` | 640, 360 to 1280, 720 | 0.300 × 0.169 | (0.230, 1.772, −0.577) | (0.530, 1.772, −0.577) | (0.230, 1.628, −0.663) | (0.530, 1.628, −0.663) | (0, −0.51, 0.86) |
-| `screen_side_left` | 1280, 360 to 1920, 720 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
-| `screen_side_right` | 1280, 720 to 1920, 1080 | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
+| `screen_side_left` | 1280, 360 to 1600, 540 | 0.220 × 0.124 | (−1.024, 0.900, −0.406) | (−0.967, 0.900, −0.619) | (−0.933, 0.820, −0.381) | (−0.876, 0.820, −0.594) | (0.62, 0.77, 0.17) |
+| `screen_side_right` | 1600, 360 to 1920, 540 | 0.220 × 0.124 | (0.967, 0.900, −0.619) | (1.024, 0.900, −0.406) | (0.876, 0.820, −0.594) | (0.933, 0.820, −0.381) | (−0.62, 0.77, 0.17) |
 | `screen_desk` | 0, 720 to 960, 1080 | 0.720 × 0.270 (8:3) | (−0.360, 0.718, −1.052) | (0.360, 0.718, −1.052) | (−0.360, 0.662, −0.788) | (0.360, 0.662, −0.788) | (0, 0.98, 0.21) |
 
 `screen_desk` is the playing surface of the instrument on the tray. It is the one screen
@@ -179,6 +181,46 @@ placeholder atlas holds each readout's old picture there, so the model looks as 
 until a live source fills the strip; the DAW scene draws them from its `panels` page
 ([daw/README.md](daw/README.md)).
 
+The side monitors are a third as wide as the big ones, so their cells are a quarter as big
+(320 × 180, still more pixels a millimetre than the big monitors get). The 640 × 540 they
+leave, 1280, 540 to 1920, 1080, feeds the readouts and the LEDs, below.
+
+### Live readouts and LEDs
+
+Every amber readout (35, ten of them under live panels) and every LED of 2 cm or less (366:
+the buttons', the toggles', the knobs' and the indicator slits') is on the `screens`
+material with a cell of its own in that 640 × 540 space, which `tools/live_readouts.py`
+lays out:
+
+| Part | Cell | Where (from 1280, 540) |
+|---|---|---|
+| Readout *i* | 128 × 64, the readout's picture the same way up | five a row from the top: x = 128 × (*i* mod 5), y = 64 × ⌊*i* / 5⌋ |
+| LED *j* | 4 × 4, every corner of the LED at its centre, so it shows one colour | 160 a row from y 452: x = 4 × (*j* mod 160), y = 452 + 4 × ⌊*j* / 160⌋ |
+
+The tool writes the order (each readout's old readout-atlas cell and so its look, and each
+LED's colour and place) into the DAW page (`daw/pages/daw.html`), which draws them, and the
+placeholder atlas holds each readout's old picture and each LED lit, so the model looks as
+it did until a live source fills them. The larger glowing parts (the monitor light bar, the
+pillar markers, the ledge and desk lights, the overhead lamp and the stick's trigger) stay on
+their glowing materials.
+
+### Soft keys
+
+Each main monitor has five soft keys under it, and the blank panel on the dash just in
+front of and right of where the DAW scene's hologram projects from (centred on x 0.05,
+z −1.171) has five more, `holo_keys`. A scene lights any of them: one node, `softkey_lights`, lays a
+quad on the `screens` material over each key's face, every corner of it mapping the same
+point of the atlas, so the face is the colour of that one atlas pixel. The pixels are in
+the **key strip**, the bottom 16 px of the readouts' space (1280, 1064 to 1920, 1080),
+under the LEDs' rows, which the readouts page leaves empty (`add_softkeys.py` still stops
+`screen_side_right`'s texture coordinates above it, which its own cell, above, never
+reaches).
+Key *n* is the 32 × 16 px block *n* of the strip from its left, in this order: the left
+monitor's keys left to right, the centre's, the right's, then the hologram's
+([`tools/softkeys.py`](tools/softkeys.py) `keys()`). Draw a block bright to light its key,
+dark to leave it off; the placeholder atlas leaves them dark. `tools/add_softkeys.py` adds
+all of it to an exported model, without Blender (it does nothing if it is there).
+
 To put live pictures on the screens, lay them out in one 1920 × 1080 scene in those cells
 and give the model source `texture` = that scene and `texture_material` = `screens`
 (ADR-0107 decision 5).
@@ -187,8 +229,10 @@ and give the model source `texture` = that scene and `texture_material` = `scree
 
 `panel`, `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended and unlit), `decals` (alpha-masked labels and stripes), `readout` (the amber
-displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and `screens` above.
+displays, emissive from the readout atlas: no part uses it once `live_readouts.py` has run),
+`light_strip` and `led_amber`, `led_red`, `led_green`, `led_blue` (emissive: the larger
+LEDs; the small ones are on `screens`), `glow_amber` (the dim orange accent strips), and
+`screens` above.
 
 ## In JStream
 
@@ -295,7 +339,9 @@ python tools/make_textures.py dl model/textures
 python tools/make_textures.py --grunge model/textures   # panel: grungy metal, no rivets
 python tools/build_cockpit.py model/textures model/cockpit.gltf --blend cockpit.blend
 python tools/finish_gltf.py model/cockpit.gltf
+python tools/add_softkeys.py model/cockpit.gltf
 python tools/optimize_gltf.py model/cockpit.gltf   # needs numpy and cc; about 9 minutes on four cores
+python tools/live_readouts.py model/cockpit.gltf   # the readouts and small LEDs onto `screens`
 python tools/render_previews.py cockpit.blend media 48 1280
 ```
 

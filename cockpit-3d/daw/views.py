@@ -20,7 +20,9 @@ SIDE_L, SIDE_R = (-0.95, 0.86, -0.50), (0.95, 0.86, -0.50)
 SHOTS = dict(_SHOTS)
 SHOTS["desk"] = camera((0.0, 1.16, -0.52), DESK, 54, focus=DESK, blur=10)
 SHOTS["desk_low"] = camera((0.32, 0.98, -0.55), (-0.05, 0.69, -0.95), 50, focus=DESK, blur=12)
-SHOTS["overhead"] = camera((0.0, 1.40, -0.14), OVER, 52, focus=OVER, blur=8)
+# Back and wide enough that both overhead screens are whole in the frame, with their
+# bezels.
+SHOTS["overhead"] = camera((0.0, 1.38, -0.08), OVER, 60, focus=OVER, blur=8)
 SHOTS["side_l"] = camera((-0.74, 1.12, -0.44), SIDE_L, 42, focus=SIDE_L, blur=10)
 SHOTS["side_r"] = camera((0.74, 1.12, -0.44), SIDE_R, 42, focus=SIDE_R, blur=10)
 # Out through the windshield at the sky, the canopy only a little soft.

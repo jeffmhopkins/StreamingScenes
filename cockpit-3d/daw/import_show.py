@@ -9,6 +9,8 @@
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows it, Ctrl+Alt+Shift+H hides it (before sequences, Ctrl+Alt+H shows or hides it), and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
+- the Sound Journal title (title.py): the cockpit darkened and slightly blurred under the
+  JMH shield and "Sound Journal", faded in by Ctrl+Alt+J and out by Ctrl+Alt+Shift+J;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
 - with NOTES=1, Bitwig MIDI notes on channel 16 that switch the views too (below);
@@ -29,10 +31,11 @@ no page server and no copies, since the screens' pages go in inline and the mode
 read from this checkout. JS_TOKEN and JS_MCP are as for ../jstream/mcp.py; build_daw.py's
 variables tune the cockpit.
 
-Bitwig's state reaches the scene once the app receives from the JTunnel sender named
-`Bitwig` (the app's own setting, "Receive from JTunnel senders", which only a person
-changes). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
-views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
+Bitwig's state reaches the scene once the app receives from its JTunnel sender (the app's
+own setting, "Receive from JTunnel senders", which only a person changes). The cockpit
+names no input, so it reads whichever sender sends (in the desktop app, the live one),
+whatever its name. With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI
+switches the views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
 plugin's sender too: an accepted sender's MIDI reaches the bindings.
 """
 import os
@@ -53,7 +56,7 @@ WARM = int(os.environ.get("WARM", "3"))
 CC = os.environ.get("CC", "0") == "1"
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
 CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
-CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_INPUT = os.environ.get("CC_INPUT", "")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
 
 # The camera's CCs, from CC_FIRST up, in this order: the property and how far the CC's
@@ -165,6 +168,21 @@ except SystemExit as e:
     HOLOGRAM = False
 
 
+# ---- what the monitors and the hologram show (sources.py): each shows a subscene that
+# holds a source a soft key, switched by a sequence a key, its key lit ----
+import sources  # noqa: E402
+
+SOURCES = SEQ and CHANNELS
+if SOURCES:
+    gate = BUILT["gate"]
+    must(batch(sources.edits(HOLOGRAM, [gate("glow"), gate("master")],
+                             [gate("cabin", off=-0.5), gate("desk"), gate("master")]),
+               "screen sources"), "screen sources")
+    # The desk too: its pads and meter bridge (with their unlit pages, which keep the
+    # lights' switches) or a camera.
+    must(batch(sources.desk_edits(BUILT["DESK_LAYERS"]), "desk source"), "desk source")
+
+
 # ---- two 2D scenes from the same live data ----
 def src(sid, name, kind, settings):
     return {"type": "source.create", "source_id": sid, "name": name,
@@ -190,9 +208,12 @@ must(batch([
     add("desk_2d", "bg", "bg_2d", 960, 540, 1920, 1080),
     add("desk_2d", "title", "title_2d", 960, 70, 1200, 80, fit_mode="fit"),
     # The launcher and the meters as the desk shows them, big, with the pages around.
+    # The note grid and the bridge draw only their lit pads, over their unlit ones.
+    *([add("desk_2d", "launcher_unlit", "launcher_unlit", 520, 560, 800, 480)]
+      if os.environ.get("DESK_GRID", "notes") == "notes" else []),
     add("desk_2d", "launcher", "launcher", 520, 560, 800, 480),
-    add("desk_2d", "meters", "meters", 1080, 560, 290, 480, fit_mode="stretch"),
-    add("desk_2d", "master", "master", 1270, 560, 56, 480, fit_mode="stretch"),
+    add("desk_2d", "bridge_unlit", "bridge_unlit", 1120, 560, 464, 480, fit_mode="stretch"),
+    add("desk_2d", "bridge", "bridge", 1120, 560, 464, 480, fit_mode="stretch"),
     add("desk_2d", "transport", "p_transport", 1620, 330, 480, 270, fit_mode="stretch"),
     add("desk_2d", "mixer", "p_mixer", 1620, 640, 480, 270, fit_mode="stretch"),
     add("desk_2d", "arrange", "p_arrange", 960, 960, 1760, 180, fit_mode="fill"),
@@ -222,6 +243,19 @@ if SHIP:
             for _, key, action in ship_sequences.CONTROLS if key]
     must(batch(seq, "ship sequences"), "ship sequences")
 
+# ---- the Sound Journal title (title.py): the cockpit darkened and blurred under the JMH
+# shield and "Sound Journal", faded in on Ctrl+Alt+J and out on Ctrl+Alt+Shift+J ----
+import title  # noqa: E402
+
+TITLE = False
+if SHIP:
+    try:
+        title.add("cockpit", [BUILT["cc_input"](title.TITLE_CC, 0.0, 1.0, 50)]
+                  + BUILT["mod_inputs"]("title"))
+        TITLE = True
+    except SystemExit as e:
+        print(f"no Sound Journal title ({e}); importing the rest", file=sys.stderr)
+
 if NOTES:
     notes = [{"type": "binding.set",
               "trigger": {"kind": "midi_note", "note": 36 + i, "channel": NOTE_CHANNEL},
@@ -235,13 +269,32 @@ if NOTES:
                    "action": action}
                   for i, (_, _, action) in enumerate(ship_sequences.CONTROLS)
                   if HOLOGRAM or action.get("channel_id") != "holo"]
+    if SOURCES:
+        # The screens' sources after those, from 58 (A#2): each screen's five keys in turn.
+        first = 36 + len(VIEWS) + len(ship_sequences.CONTROLS)
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(sources.controls(HOLOGRAM))]
+        # The desk's two after the hologram's five, whether or not it has them.
+        first += len(sources.controls(True))
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(sources.desk_controls())]
+    # The title's on and off, on notes of their own (TITLE_NOTE, 84 and 85: C6 and C#6),
+    # clear of the views' and the sequences' notes however many of those there are.
+    notes += [{"type": "binding.set",
+               "trigger": {"kind": "midi_note", "note": title.TITLE_NOTE + i, "channel": NOTE_CHANNEL},
+               "action": action}
+              for i, (_, _, action) in enumerate(title.CONTROLS if TITLE else [])]
     must(batch(notes, "notes"), "notes")
 
 if CC:
     # Camera motion belongs to the scene's family, so the cockpit's offsets every view
     # alike and carries through a glide between them.
     motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
-               "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
+               "controller": CC_FIRST + i, "channel": CC_CHANNEL, **({"input": CC_INPUT} if CC_INPUT else {}),
                "from": 0, "to": to,
                "smoothing_ms": 0 if prop == "autofocus" else CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
@@ -271,7 +324,7 @@ if CC:
 # the scene list, and last, since opening the project puts its first scene on program ----
 must(batch([{"type": "scene.set_role", "scene_id": "atlas", "role": "group"},
             {"type": "scene.reorder", "scene_id": "atlas",
-             "index": 1 + len(VIEWS) + 2}], "atlas"), "atlas")
+             "index": 1 + len(VIEWS) + 2 + TITLE}], "atlas"), "atlas")
 
 # ---- the cockpit tour, a show (show_tour.py) that runs through all of it; a JStream
 # without shows (before protocol 0.177) imports the rest ----
@@ -288,9 +341,10 @@ if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
 print("imported: views Ctrl+Alt+1..0, -, = (keyframes)"
-      + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W" if SHIP else "")
+      + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W; drift D, Shift+D" if SHIP else "")
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ
           else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram")
+      + ("; Sound Journal title Ctrl+Alt+J on, Ctrl+Alt+Shift+J off" if TITLE else "")
       + ("; show: Cockpit tour" if TOUR else ""))
 print("saved to", PROJECT)
