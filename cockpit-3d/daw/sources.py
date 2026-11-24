@@ -99,10 +99,11 @@ def _follow(ch):
             "from": -1.0, "to": 0.0}
 
 
-def edits(hologram=True, gates=()):
+def edits(hologram=True, gates=(), unlit_gates=()):
     """The subscenes, their channels and sequences, the hotkeys, the key lights in the
     `atlas` scene, and the screens pointed at the subscenes. `gates` are more motion
-    modifiers for every lit key (build_daw.py's glow and master switches)."""
+    modifiers for every lit key (build_daw.py's glow and master switches), `unlit_gates` for
+    the strip of unlit keys (the switches that dim the desk's unlit pads)."""
     e = [{"type": "source.create", "source_id": "feed",
           "name": "Monitor camera feed (swap for a camera or capture)",
           "kind": {"type": "builtin", "kind": "image"},
@@ -149,6 +150,9 @@ def edits(hologram=True, gates=()):
           {"type": "item.add", "scene_id": "atlas", "item_id": "keys_unlit", "source_id": "key_unlit",
            "geometry": {"center": {"x": x + w / 2, "y": y + h / 2}, "size": {"width": w, "height": h},
                         "fit_mode": "stretch"}}]
+    if unlit_gates:
+        e.append({"type": "item.set_motion", "scene_id": "atlas", "item_id": "keys_unlit",
+                  "motion": list(unlit_gates)})
     for n, (screen_name, i, *_) in enumerate(softkeys.keys()):
         screen = screen_name.replace("screen_", "").replace("hologram", "holo")
         if screen == "holo" and not hologram:

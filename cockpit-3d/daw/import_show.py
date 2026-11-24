@@ -201,7 +201,9 @@ import sources  # noqa: E402
 
 SOURCES = SEQ and CHANNELS
 if SOURCES:
-    must(batch(sources.edits(HOLOGRAM, [BUILT["gate"]("glow"), BUILT["gate"]("master")]),
+    gate = BUILT["gate"]
+    must(batch(sources.edits(HOLOGRAM, [gate("glow"), gate("master")],
+                             [gate("cabin", off=-0.5), gate("desk"), gate("master")]),
                "screen sources"), "screen sources")
 
 

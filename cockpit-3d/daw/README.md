@@ -321,7 +321,7 @@ lens. Each key's face is a quad on the model's `screens` material that maps one 
 the atlas's key strip (the bottom 16 px of the readouts' space, under the LEDs; see the
 model's README), and the atlas has a lit block a key
 there, following its channel. The keys are LEDs: the Glow and Master switches darken them
-with the others. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
+with the others, and the unlit keys go dark with the lights as the desk's unlit pads do. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
 show each monitor's starting page, whatever its key picks, since a card glows only with a
 source's own frame, not a scene's. It needs channels and
 sequences (protocol 0.170); without them the screens show what they did before.

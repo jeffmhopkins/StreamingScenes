@@ -137,7 +137,7 @@ def _image(sid, name, path):
 def _timeline(tid, name, cues):
     return {"timeline_id": tid, "name": name, "duration_ms": max(c[0] for c in cues) + 100,
             "cues": [{"at_ms": at, "action": {"type": action, "item_id": item}}
-                     for at, action, item in cues]}
+                     for at, action, item in sorted(cues, key=lambda c: c[0])]}  # in time order
 
 
 def _reveal(channel):
