@@ -21,7 +21,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into sequences, and the channels and lanes those sequences move (`sequences()`). |
 | `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
-| `sources.py` | What the three main monitors and the hologram show: a subscene each, with five sources to switch between and the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
+| `sources.py` | What the three main monitors, the hologram and the desk show: a subscene each, with sources to switch between and, on the monitors and the hologram, the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
 | `serve_pages.py` | Serves `pages/` with threads and a deep accept queue, for `PAGES=…` while editing a page: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
@@ -175,7 +175,7 @@ What it makes:
 | Warm | the studio keeps `WARM` (3) scenes warm, so the cockpit's sources keep running while a 2D scene is on |
 | Sequences | Ctrl+Alt+L lights on, Ctrl+Alt+Shift+L lights off, Ctrl+Alt+M monitors on, Ctrl+Alt+Shift+M monitors off, Ctrl+Alt+W go to warp, Ctrl+Alt+Shift+W drop out of warp, Ctrl+Alt+D drift, Ctrl+Alt+Shift+D hold steady; see [Cockpit sequences](#cockpit-sequences). What each main monitor and the hologram show: Ctrl+Alt+Shift with 1 to 5 (left monitor), 6 to 0 (centre), Y to P (right) and Z to B (hologram); see [Switching what the screens show](#switching-what-the-screens-show) |
 | Sound Journal title | Ctrl+Alt+J fades it in, Ctrl+Alt+Shift+J out; CC 45 and notes 84 and 85 on channel 16, and Mod 20, too; see [The Sound Journal title](#the-sound-journal-title) |
-| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, then from 58 (A#2) up the screens' sources, five each for the left, centre and right monitors and the hologram (58 to 77), and 84 (C6) and 85 turn the Sound Journal title on and off, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
+| MIDI | with `NOTES=1`, notes from 36 (C1) up on channel `NOTE_CHANNEL` (16) switch the views in the order above, then from 48 (C2) up play lights on, lights off, monitors on, monitors off, hologram on, hologram off, go to warp, drop out of warp, drift and hold steady, then from 58 (A#2) up the screens' sources, five each for the left, centre and right monitors and the hologram (58 to 77) and the desk's two (78, 79), and 84 (C6) and 85 turn the Sound Journal title on and off, from a JTunnel plugin sending a Bitwig track's MIDI, once the app accepts that plugin's sender too |
 | Light switches | CCs 40 to 44 on channel 16 from `Bitwig` fade the Cabin, Desk, Screens and Glow lights and all of them (the master) off and on; see [Light switches](#light-switches). They are always on, whatever `CC` says |
 | Camera CCs | with `CC=1` (a JStream whose cameras take MIDI, JStream #1631; CCs 28 and 29 and autofocus need protocol 0.167, and without it the import maps 20 to 27 and says so; a JStream whose cameras don't take MIDI imports the rest without them), CCs from `CC_FIRST` (20) up on channel `CC_CHANNEL` (16) from the sender `CC_INPUT` (`Bitwig`) offset the camera in every view: 20 right, 21 up, 22 forward, 23 pan right, 24 tilt up, 25 zoom in, 26 focus further, 27 more blur (aperture), 28 roll clockwise, 29 past its middle turns autofocus off. `CC=1` also turns on each view's depth of field, and autofocus where JStream has it. Each rests at the view until its CC first moves, and is smoothed over `CC_SMOOTHING_MS` (50), the autofocus switch not at all |
 
@@ -314,6 +314,7 @@ views' and the cockpit sequences' notes, so they move up if those gain any):
 | Centre monitor | 6 to 0 | 63 to 67 |
 | Right monitor | Y, U, I, O, P | 68 to 72 |
 | Hologram | Z, X, C, V, B | 73 to 77 |
+| Desk (below) | N (pads and meters), K (camera) | 78, 79 |
 
 The selected source's key lights amber under its screen: the five soft keys under each
 monitor, and a row of five on the dash just in front of and right of the hologram's
@@ -325,6 +326,13 @@ with the others, and the unlit keys go dark with the lights as the desk's unlit 
 show each monitor's starting page, whatever its key picks, since a card glows only with a
 source's own frame, not a scene's. It needs channels and
 sequences (protocol 0.170); without them the screens show what they did before.
+
+The desk's grid controller switches the same way: its subscene, `src_desk`, draws the
+pads and the meter bridge (with their unlit pages under them, which still dim with the
+lights) or a camera feed, `desk_feed`, over the whole 8:3 surface, which suits a camera
+looking down on a long grid controller. Point `src_desk_feed` at the camera in the app.
+Ctrl+Alt+Shift+N shows the pads and meters, Ctrl+Alt+Shift+K the camera (the sequences
+`desk_grid` and `desk_feed`; MIDI notes 78 and 79). The desk has no soft keys to light.
 
 ### Where a warp arrives
 

@@ -35,6 +35,10 @@ atlas lights its key. The atlas holds a dim strip of unlit keys there and, over 
 block per key, which follows the key's slot channel, the glow switch and the master: the
 keys are LEDs, so the Glow and Master switches darken them as they do the others.
 
+The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pads and
+meter bridge, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
+Ctrl+Alt+Shift+N and K. It has no keys to light.
+
 Everything here is generic JStream: group scenes as sources, channels, sequences with
 lanes, hotkeys and `channel` motion modifiers.
 """
@@ -165,3 +169,68 @@ def edits(hologram=True, gates=(), unlit_gates=()):
               {"type": "item.set_motion", "scene_id": "atlas", "item_id": "key_" + ch[4:],
                "motion": [_follow(ch)] + list(gates)}]
     return e + keys
+
+
+# ---- the desk's grid controller: its pads and meter bridge, or a camera ----
+# The desk is the atlas's 960 x 360 (8:3) cell at 0, 720 (build_daw.py: the pads, the
+# meter bridge and their unlit pages under them). Its subscene, `src_desk`, draws each slot
+# in the canvas's middle 8:3 (1920 x 720), and one atlas item, `a_desk`, fills the cell
+# from the 16:9 subscene, so nothing is stretched. A long camera picture, such as one
+# looking down on a grid controller, fits the cell's 8:3 well.
+DESK = (0, 720, 960, 360)
+DESK_H = W * 3 / 8
+# (slot, its name, its key after Ctrl+Alt+Shift)
+DESK_SLOTS = [("grid", "Pads and meters", "KeyN"), ("feed", "Camera feed", "KeyK")]
+
+
+def desk_controls():
+    """What a person plays for the desk, in note order: [(name, key chord, action)]."""
+    return [(f"Desk: {name}", "Ctrl+Alt+Shift+" + key, action("desk", slot)) for slot, name, key in DESK_SLOTS]
+
+
+def desk_edits(layers):
+    """The desk's subscene. `layers` are the atlas items on the desk's cell, bottom up:
+    (item, source, x, y, w, h, motion), which the subscene's `grid` slot draws at the same
+    places (each keeping its motion, the lights' switches on the unlit pads) and the
+    atlas gives up for `a_desk`. The `feed` slot is a camera, `desk_feed`, a stand-in still
+    until a person points it at a camera."""
+    sid = "src_desk"
+    dx, dy, dw, dh = DESK
+    sx, sy = W / dw, DESK_H / dh
+    top = (H - DESK_H) / 2
+    e = [{"type": "source.create", "source_id": "desk_feed",
+          "name": "Desk camera feed (swap for a camera, such as one over a controller)",
+          "kind": {"type": "builtin", "kind": "image"}, "settings": {"file": asset(STANDIN)}},
+         {"type": "scene.create", "scene_id": sid, "name": "Desk source", "role": "group"},
+         {"type": "source.create", "source_id": sid, "name": "Desk source",
+          "kind": {"type": "scene", "scene_id": sid}, "settings": {}}]
+    for slot, name, _ in DESK_SLOTS:
+        ch = channel("desk", slot)
+        e.append({"type": "channel.set", "channel": {
+            "channel_id": ch, "name": f"Desk: {name}", "default": 1.0 if slot == "grid" else 0.0}})
+        if slot == "feed":
+            placed = [(ch, "desk_feed", dx, dy, dw, dh, [], "fill")]
+        else:
+            placed = [(f"{ch}_{item[2:]}", source, x, y, w, h, motion, "stretch")
+                      for item, source, x, y, w, h, motion in layers]
+        for item, source, x, y, w, h, motion, fit in placed:
+            e += [{"type": "item.add", "scene_id": sid, "item_id": item, "source_id": source,
+                   "geometry": {"center": {"x": (x - dx + w / 2) * sx, "y": top + (y - dy + h / 2) * sy},
+                                "size": {"width": w * sx, "height": h * sy}, "fit_mode": fit}},
+                  {"type": "item.set_motion", "scene_id": sid, "item_id": item,
+                   "motion": [_follow(ch)] + list(motion)}]
+    for slot, name, key in DESK_SLOTS:
+        lanes = [{"target": {"channel": channel("desk", other)},
+                  "points": [{"at_ms": FADE_MS, "value": 1.0 if other == slot else 0.0, "curve": "linear"}]}
+                 for other, _, _ in DESK_SLOTS]
+        e += [{"type": "timeline.set", "scene_id": sid, "timeline": {
+                  "timeline_id": sequence("desk", slot), "name": f"Desk: {name}",
+                  "duration_ms": FADE_MS, "lanes": lanes}},
+              {"type": "hotkey.set", "chord": "Ctrl+Alt+Shift+" + key, "action": action("desk", slot)}]
+    e += [{"type": "item.remove", "item_id": item} for item, *_ in layers]
+    # Under the screens' covers, so the desk's monitor switch still blacks it.
+    e += [{"type": "item.add", "scene_id": "atlas", "item_id": "a_desk", "source_id": sid,
+           "geometry": {"center": {"x": dx + dw / 2, "y": dy + dh / 2}, "size": {"width": dw, "height": dh},
+                        "fit_mode": "fill"}},
+          {"type": "item.reorder", "item_id": "a_desk", "index": 1}]
+    return e

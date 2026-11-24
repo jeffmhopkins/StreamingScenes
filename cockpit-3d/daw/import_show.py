@@ -205,6 +205,9 @@ if SOURCES:
     must(batch(sources.edits(HOLOGRAM, [gate("glow"), gate("master")],
                              [gate("cabin", off=-0.5), gate("desk"), gate("master")]),
                "screen sources"), "screen sources")
+    # The desk too: its pads and meter bridge (with their unlit pages, which keep the
+    # lights' switches) or a camera.
+    must(batch(sources.desk_edits(BUILT["DESK_LAYERS"]), "desk source"), "desk source")
 
 
 # ---- two 2D scenes from the same live data ----
@@ -300,6 +303,12 @@ if NOTES:
                    "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
                    "action": action}
                   for i, (_, _, action) in enumerate(sources.controls(HOLOGRAM))]
+        # The desk's two after the hologram's five, whether or not it has them.
+        first += len(sources.controls(True))
+        notes += [{"type": "binding.set",
+                   "trigger": {"kind": "midi_note", "note": first + i, "channel": NOTE_CHANNEL},
+                   "action": action}
+                  for i, (_, _, action) in enumerate(sources.desk_controls())]
     # The title's on and off, on notes of their own (TITLE_NOTE, 84 and 85: C6 and C#6),
     # clear of the views' and the sequences' notes however many of those there are.
     notes += [{"type": "binding.set",

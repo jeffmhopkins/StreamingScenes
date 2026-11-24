@@ -360,6 +360,11 @@ if SWITCHES or CHANNELS:
     unlit = [gate("cabin", off=-0.5), gate("desk"), gate("master")]
     must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": item, "motion": unlit}
                 for item, *_ in DESK_UNLIT], "unlit pads"), "unlit pads")
+# The desk's atlas items, bottom up, each with its motion (sources.py's desk subscene
+# takes them over).
+DESK_LAYERS = [(item, sid, x, y, w, h, unlit if SWITCHES or CHANNELS else [])
+               for item, sid, x, y, w, h in DESK_UNLIT]
+DESK_LAYERS += [("a_launcher", "launcher", 0, 720, 600, 360, []), ("a_bridge", "bridge", 612, 720, 348, 360, [])]
 
 # ---- the cockpit ----
 cam = SHOTS["cockpit"]
