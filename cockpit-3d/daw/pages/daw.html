@@ -222,7 +222,7 @@ function playedTracks() { const t = []; counts.forEach((n, i) => { if (n) t.push
 function pick(list, n) { return list[n % list.length]; }
 // A note started on track ti: the counters, the chroma, the dot matrices' registers.
 function onNote(ti, p, v) {
-  counts[ti]++; total++;
+  counts[ti] = (counts[ti] || 0) + 1; total++;
   started.unshift([p, v, ti]); if (started.length > 8) started.pop();
   chroma[p % 12] = Math.max(chroma[p % 12], 0.4 + 0.6 * v / 127);
   READOUTS.forEach(([cell, kind], i) => {
@@ -458,7 +458,11 @@ const views = {
     // A note above or below the roll's range folds onto it by whole octaves, so it loops
     // round rather than leaving the roll.
     const top = 44, low = 38, high = 82, ph = 236;
-    const Y = p => { while (p > high) p -= 12; while (p < low) p += 12; return top + ph - (p - low) / (high - low) * ph; };
+    const Y = p => {
+      if (!Number.isFinite(p)) p = low;
+      while (p > high) p -= 12; while (p < low) p += 12;
+      return top + ph - (p - low) / (high - low) * ph;
+    };
     for (let k = Math.ceil(b - span); k <= b; k++) {
       x.fillStyle = k % 4 === 0 ? `rgba(${AMBER},.22)` : 'rgba(255,255,255,.05)'; x.fillRect(X(k), top, 1, H - top - 10);
     }
@@ -576,7 +580,11 @@ const views = {
 function take() {
   D = jstream.data();
   const c = clock(), b = c.beats || 0;
-  if (b < lastBeats - 1) { history.length = 0; for (const k in onsets) delete onsets[k]; }
+  if (b < lastBeats - 1) {  // the clock went back: start the counts and patterns again
+    history.length = 0; for (const k in onsets) delete onsets[k];
+    counts.fill(0); counts.length = 8; total = 0; started.length = 0; chroma.fill(0);
+    for (const k in regs) delete regs[k];
+  }
   // the pitch classes' glow fades over about a beat
   const fade = Math.pow(0.25, Math.max(0, Math.min(1, b - Math.max(0, lastBeats))));
   for (let i = 0; i < 12; i++) chroma[i] *= fade;
