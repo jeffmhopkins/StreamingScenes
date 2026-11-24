@@ -27,7 +27,19 @@ The rig, in the model's metres (glTF: +y up, the pilot faces -z):
 - the beam, a light cone standing on it up to the panel;
 - the panel, a 16:9 card floating over the dash, above the monitors and in front of the
   windshield, facing the pilot, with a slow bob;
-- a faint sheet of light 6 cm in front of the panel.
+- a faint sheet of light 6 cm in front of the panel;
+- a point light in front of the beam, in the hologram's colour, that throws its glow on
+  the dash, the monitors and the desk while it is shown.
+
+The panel's top stays under the overhead console's lower edge as the wide view sees it:
+that camera's eye is at the panel's height, so moving the panel nearer alone never clears
+the console, and the panel sits a little lower and nearer than it first did, at about the
+same size on screen.
+
+The light takes one of the 8 lights a model is lit by only while the hologram is shown (a
+hidden light lights nothing and takes no slot). `add` puts it at the bottom of the
+scene's stack, so it is always among the 8: while it is on, the last light in stacking
+order, a pad light of the desk's, gives up its slot.
 
 The panel shows `holo_feed`, an image source holding the 2D cockpit's caller still, until
 `source <id>` (an `item.set_source` on `holo_card`) puts any other source there: a webcam
@@ -52,14 +64,24 @@ STANDIN = os.path.join(ROOT, "starship-cockpit", "pages", "caller.png")
 COLOR = os.environ.get("HOLO_COLOR", "#5ad2ff")
 
 CARD, BEAM, LENS, FLARE, HAZE = "holo_card", "holo_beam", "holo_lens", "holo_flare", "holo_haze"
+LIGHT = "holo_light"
 FEED = "holo_feed"
 SHOW, HIDE, TOGGLE = "holo_show", "holo_hide", "holo_toggle"
 TOGGLE_KEY, HIDE_KEY = "Ctrl+Alt+KeyH", "Ctrl+Alt+Shift+KeyH"
 
-# Where the rig stands, in model metres.
-LENS_AT = (0.0, 0.79, -1.28)
-PANEL_AT = (0.0, 1.42, -1.28)
-PANEL_W, PANEL_H = 0.70, 0.39375
+# Where the rig stands, in model metres. The panel's top (with the haze's 8% more and the
+# bob) stays under 1.59 m, where the overhead console's lower edge hides it from the wide
+# view, and its bottom over the monitor case from the seat; the lens sits 15 mm over the
+# dash, which slopes down toward the pilot.
+LENS_AT = (0.0, 0.776, -1.20)
+PANEL_AT = (0.0, 1.385, -1.20)
+PANEL_W, PANEL_H = 0.64, 0.36
+# The hologram's light: in front of the beam, a little over the monitors' bottom edge, so
+# it lights the dash, the monitors' faces and the desk. HOLO_LIGHT sets its strength; 0
+# leaves it out.
+LIGHT_AT = (0.0, 1.0, -1.10)
+LIGHT_INTENSITY = float(os.environ.get("HOLO_LIGHT", "1.6"))
+LIGHT_RANGE_PX = 1000.0
 # How long the beam and then the panel take to materialise, from the bottom up.
 BEAM_REVEAL_S, PANEL_REVEAL_S = 0.25, 0.5
 BEAM_TOP = PANEL_AT[1] - PANEL_H / 2
@@ -141,7 +163,7 @@ def _sequences(scene, holo_inputs=()):
              {"channel_id": "holo_panel", "name": "Hologram panel"}]
     show = _timeline(SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
                                            (PANEL_FROM, "item.show", CARD),
-                                           (PANEL_FROM, "item.show", HAZE)])
+                                           (PANEL_FROM, "item.show", HAZE)] + _lit(0, "show"))
     show["duration_ms"] = PANEL_UP
     # From nothing: each lane holds at 0 until its card shows, then rises.
     show["lanes"] = [_lane("holo_beam", (0, 0.0, "linear"), (BEAM_UP, 1.0, "ease_out")),
@@ -152,7 +174,8 @@ def _sequences(scene, holo_inputs=()):
     show["starts"] = [{"type": "channel", "channel_id": "holo", "edge": "rises"}]
     show["stops"] = [{"type": "channel", "channel_id": "holo", "edge": "falls"}]
     hide = _timeline(HIDE, "Hologram off", [(PANEL_DOWN, "item.hide", CARD), (PANEL_DOWN, "item.hide", HAZE),
-                                            (BEAM_DOWN, "item.hide", BEAM), (BEAM_DOWN, "item.hide", FLARE)])
+                                            (BEAM_DOWN, "item.hide", BEAM), (BEAM_DOWN, "item.hide", FLARE)]
+                     + _lit(BEAM_DOWN, "hide"))
     hide["duration_ms"] = BEAM_DOWN
     # From wherever they are: the panel first, then the beam.
     hide["lanes"] = [_lane("holo_panel", (PANEL_DOWN, 0.0, "ease_in")),
@@ -163,6 +186,12 @@ def _sequences(scene, holo_inputs=()):
         {"type": "item.set_motion", "item_id": BEAM, "motion": [_reveal("holo_beam")]},
         {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _reveal("holo_panel")]},
         {"type": "item.set_motion", "item_id": HAZE, "motion": [_reveal("holo_panel")]},
+    ] + ([
+        # The light comes up with the beam and goes on with the panel: its opacity follows
+        # each channel for half, so it is full with both and half with the beam alone.
+        {"type": "item.set_motion", "item_id": LIGHT, "motion": [
+            _dim("beam", "holo_beam"), _dim("panel", "holo_panel")]},
+    ] if LIGHT_INTENSITY > 0 else []) + [
         {"type": "timeline.set", "scene_id": scene, "timeline": show},
         {"type": "timeline.set", "scene_id": scene, "timeline": hide},
         {"type": "hotkey.set", "chord": TOGGLE_KEY,
@@ -170,6 +199,19 @@ def _sequences(scene, holo_inputs=()):
         {"type": "hotkey.set", "chord": HIDE_KEY,
          "action": {"type": "channel.set_value", "channel_id": "holo", "value": 0.0}},
     ])
+
+
+def _lit(at, how):
+    """The light's cue in a show (`how` "show"), hide ("hide") or toggle ("toggle")
+    timeline, at `at` ms; none without the light."""
+    return [(at, f"item.{how}", LIGHT)] if LIGHT_INTENSITY > 0 else []
+
+
+def _dim(mid, channel):
+    """A modifier that takes half the light's opacity away while `channel` reads 0."""
+    return {"modifier_id": mid, "property": "opacity", "enabled": True, "clock": "engine",
+            "kind": "channel", "channel_id": channel, "smoothing_ms": 0, "curve": "linear",
+            "from": -0.5, "to": 0.0}
 
 
 def _bob():
@@ -220,6 +262,23 @@ def edits(scene="cockpit", channels=False, holo_inputs=()):
     e += add(HAZE, "holo_haze_art", _geo((PANEL_AT[0], PANEL_AT[1], PANEL_AT[2] + 0.06),
                                          PANEL_W * 1.08, PANEL_H * 1.08, fit_mode="stretch"),
              HAZE_FX, 0.0, "fade", delay=150, opacity=0.35)
+    if LIGHT_INTENSITY > 0:
+        q = p(*LIGHT_AT)
+        e += [
+            {"type": "source.create", "source_id": LIGHT, "name": "Hologram light",
+             "kind": {"type": "builtin", "kind": "light"},
+             "settings": {"type": "point", "color": COLOR, "intensity": LIGHT_INTENSITY,
+                          "range_px": LIGHT_RANGE_PX}},
+            {"type": "item.add", "scene_id": scene, "item_id": LIGHT, "source_id": LIGHT,
+             "geometry": {"center": {"x": q["x"], "y": q["y"]}, "size": {"width": 40, "height": 40},
+                          "depth_px": q["z"]}},
+            # First in the stack, so it is among the 8 lights a model is lit by.
+            {"type": "item.reorder", "item_id": LIGHT, "index": 0},
+            {"type": "item.set_transition", "item_id": LIGHT, "transition": {
+                "delay_ms": 0, "easing": "inherit", "glide": "auto",
+                "appear": "fade", "disappear": "fade"}},
+            {"type": "item.set_visible", "item_id": LIGHT, "visible": False},
+        ]
     e += [
         {"type": "item.set_motion", "item_id": BEAM, "motion": [_pop(BEAM_REVEAL_S)]},
         {"type": "item.set_motion", "item_id": CARD, "motion": [_bob(), _pop(PANEL_REVEAL_S)]},
@@ -227,14 +286,14 @@ def edits(scene="cockpit", channels=False, holo_inputs=()):
         {"type": "timeline.set", "scene_id": scene, "timeline": _timeline(
             SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
                                   (120, "item.show", CARD),
-                                  (120, "item.show", HAZE)])},
+                                  (120, "item.show", HAZE)] + _lit(0, "show"))},
         {"type": "timeline.set", "scene_id": scene, "timeline": _timeline(
             HIDE, "Hologram off", [(0, "item.hide", CARD), (0, "item.hide", HAZE), (250, "item.hide", BEAM),
-                                   (250, "item.hide", FLARE)])},
+                                   (250, "item.hide", FLARE)] + _lit(0, "hide"))},
         {"type": "timeline.set", "scene_id": scene, "timeline": _timeline(
             TOGGLE, "Hologram on or off", [(0, "item.toggle", FLARE), (0, "item.toggle", BEAM),
                                            (120, "item.toggle", CARD),
-                                           (120, "item.toggle", HAZE)])},
+                                           (120, "item.toggle", HAZE)] + _lit(0, "toggle"))},
         {"type": "hotkey.set", "chord": TOGGLE_KEY,
          "action": {"type": "timeline.play", "timeline_id": TOGGLE}},
         {"type": "hotkey.set", "chord": HIDE_KEY,

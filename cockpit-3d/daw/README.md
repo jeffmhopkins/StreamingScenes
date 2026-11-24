@@ -120,7 +120,9 @@ so Mods 20 to 32 stay free: assign one to a camera channel in JStream (the chann
 inputs) to play it from Bitwig.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
-glow (the default) those are the sun, the cabin and the six pad lights. `GLOW=0` builds
+glow (the default) those are the sun, the cabin and the six pad lights. The hologram's
+light counts only while the hologram is shown, and it is first in the stack, so then the
+last pad light gives up its slot. `GLOW=0` builds
 the earlier set: no cards, a light per track around the cabin, the desk's and the
 screens' glow. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
 `BLOOM` and `LEVEL_MS` tune it. The bloom's radius is 16 px. `render_daw.py` waits
@@ -283,8 +285,15 @@ A holographic display that projects up out of the dash, the 3D
 version of the 2D cockpit's incoming-transmission hologram: the projector's lens flares,
 a beam rises from it, and a 16:9 panel floats over the dash in front of the windshield,
 tinted blue, see-through where the picture is dark, with scanlines, a sweep band, an edge
-glow, flicker and the odd glitch, and a faint sheet of light 6 cm in front of it. It is
-made of cards in the cockpit's 3D space, so panning the camera shows it in depth.
+glow, flicker and the odd glitch, and a faint sheet of light 6 cm in front of it. A light in
+its colour comes up with the beam and the panel and lights the dash, the monitors and the
+desk around it. It is made of cards in the cockpit's 3D space, so panning the camera shows
+it in depth.
+
+The panel floats 1.2 m ahead of the pilot's eye, over the centre monitor, 0.64 × 0.36 m.
+Its top stays under the overhead console's lower edge as the wide view sees it: that
+camera's eye is level with the top, so moving the panel nearer alone doesn't clear the
+console. Its bottom stays clear of the monitor case from the pilot's seat.
 `hologram.py` builds it, and `import_show.py` calls it.
 
 | | |
@@ -292,7 +301,8 @@ made of cards in the cockpit's 3D space, so panning the camera shows it in depth
 | Show, hide | With sequences: Ctrl+Alt+H sets the channel `holo` to 1 and Ctrl+Alt+Shift+H to 0, as Mod 7 does; its rising past one half starts `holo_show` and its falling `holo_hide`, so an agent sends `channel.set_value` on `holo`, as `python3 hologram.py show` and `hide` do. Without: Ctrl+Alt+H (the timeline `holo_toggle`), Ctrl+Alt+Shift+H (`holo_hide`); `holo_show` shows it |
 | What it shows | the image source `holo_feed` (the 2D cockpit's caller still) until `item.set_source` on `holo_card` names another, such as a webcam or a screen capture made in the Sources panel: `python3 hologram.py source <source id>` |
 | Its look | JStream's built-in `hologram` video filter on each card (`holo_fx`), with the `additive` blend; `HOLO_COLOR` changes the colour (default `#5ad2ff`) |
-| Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card` and `holo_haze`; the art is in `hologram/` (`make_art.py` draws it) |
+| Its pieces | `holo_lens` (dim while off), `holo_flare`, `holo_beam`, `holo_card`, `holo_haze` and `holo_light`; the art is in `hologram/` (`make_art.py` draws it) |
+| Its light | `holo_light`, a point light in the hologram's colour in front of the beam, shown and hidden with the cards. With sequences it is at half with the beam and full with the panel (its opacity follows `holo_beam` and `holo_panel`). `HOLO_LIGHT` sets its strength (1.6); 0 leaves it out. It takes one of the model's 8 lights only while shown (see [Light switches](#light-switches)) |
 
 The cards sit behind the cabin model's centre, so JStream would sort them under the
 model and show them only through the windows. `hologram.py` turns off `depth_sort` on the
