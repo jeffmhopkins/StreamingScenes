@@ -1,5 +1,6 @@
 """What the cockpit's three main monitors and its hologram show, each switchable: every one
-shows a subscene of its own (a group scene placed as a source), and the subscene holds one
+shows a subscene of its own (a scene placed as a source, listed in the Scenes panel's
+`Monitor sources` folder), and the subscene holds one
 item per source it can show, so switching is a sequence that fades one item in and the
 others out. The selected source's soft key under the screen lights.
 
@@ -40,7 +41,7 @@ The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pa
 meter bridge, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
 Ctrl+Alt+Shift+N and K. It has no keys to light.
 
-Everything here is generic JStream: group scenes as sources, item visibility, channels,
+Everything here is generic JStream: scenes as sources, scene folders, item visibility, channels,
 sequences with cues and lanes, hotkeys and `channel` motion modifiers.
 """
 import os
@@ -125,7 +126,7 @@ def edits(hologram=True, gates=(), unlit_gates=()):
         if screen == "holo" and not hologram:
             continue
         sid = "src_" + screen
-        e += [{"type": "scene.create", "scene_id": sid, "name": f"{name} source", "role": "group"},
+        e += [{"type": "scene.create", "scene_id": sid, "name": f"{name} source"},
               {"type": "source.create", "source_id": sid, "name": f"{name} source",
                "kind": {"type": "scene", "scene_id": sid}, "settings": {}}]
         for slot, sname, source in SLOTS:
@@ -180,6 +181,18 @@ def edits(hologram=True, gates=(), unlit_gates=()):
     return e + keys
 
 
+FOLDER = "monitor_sources"
+FOLDER_NAME = "Monitor sources"
+
+
+def filing(hologram=True):
+    """The edits that make the scene list's `Monitor sources` folder and file every
+    subscene in it. Separate, since a JStream before scene folders has none."""
+    ids = [s for s, *_ in SCREENS if hologram or s != "holo"] + ["desk"]
+    return ([{"type": "folder.create", "folder_id": FOLDER, "name": FOLDER_NAME}]
+            + [{"type": "scene.set_folder", "scene_id": "src_" + s, "folder_id": FOLDER} for s in ids])
+
+
 # ---- the desk's grid controller: its pads and meter bridge, or a camera ----
 # The desk is the atlas's 960 x 360 (8:3) cell at 0, 720 (build_daw.py: the pads, the
 # meter bridge and their unlit pages under them). Its subscene, `src_desk`, draws each slot
@@ -210,7 +223,7 @@ def desk_edits(layers):
     e = [{"type": "source.create", "source_id": "desk_feed",
           "name": "Desk camera feed (swap for a camera, such as one over a controller)",
           "kind": {"type": "builtin", "kind": "image"}, "settings": {"file": asset(STANDIN)}},
-         {"type": "scene.create", "scene_id": sid, "name": "Desk source", "role": "group"},
+         {"type": "scene.create", "scene_id": sid, "name": "Desk source"},
          {"type": "source.create", "source_id": sid, "name": "Desk source",
           "kind": {"type": "scene", "scene_id": sid}, "settings": {}}]
     members = {}

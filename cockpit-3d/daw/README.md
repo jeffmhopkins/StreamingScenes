@@ -277,8 +277,8 @@ three back to the middle over 6 s.
 
 ### Switching what the screens show
 
-The three main monitors and the hologram each show a subscene (a group scene placed as a
-source), `src_left`, `src_center`, `src_right` and `src_holo`, which holds one item per
+The three main monitors and the hologram each show a subscene (a scene placed as a
+source, listed in the Scenes panel's `Monitor sources` folder), `src_left`, `src_center`, `src_right` and `src_holo`, which holds one item per
 source it can show. `sources.py` builds them. Each has five, one per soft key under its
 screen, left to right:
 
@@ -292,7 +292,8 @@ screen, left to right:
 
 The left monitor starts on the transport, the centre on the arrangement, the right on the
 device and the hologram on its feed. A screen shows whatever is visible in its subscene,
-so you customise it as any scene: open `src_center` (say) in the app and toggle its items'
+so you customise it as any scene: open "Centre monitor source" (`src_center`) from the Scenes panel's `Monitor sources`
+folder and toggle its items'
 visibility, point an item at a webcam, a capture or anything else (or send
 `item.set_source`), or add, move, crop and layer items of your own.
 
