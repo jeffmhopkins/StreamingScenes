@@ -17,14 +17,15 @@ one per soft key, left to right:
 | 5 | `feed` (`holo_feed` on the hologram) | a camera feed: a stand-in still until a person points the item at a webcam or a capture |
 
 The left monitor starts on the transport, the centre on the arrangement, the right on the
-device, and the hologram on its feed, as before. A person changes what a slot shows by
-pointing its item (`src_<screen>_<slot>`, in the subscene) at another source, in the app
-or with `item.set_source`; the key and its sequence still pick it.
+device, and the hologram on its feed, as before. Because the screen is just the subscene,
+a person customises it as any scene: toggle an item's visibility in the app, point an
+item (`src_<screen>_<slot>`) at another source, or add, move and layer items of their own.
 
-Each slot is a channel, `src_<screen>_<slot>` (1 shown, 0 not), that its item's opacity
-and its key's light follow. A sequence a slot, `<screen>_<slot>` ("Centre monitor:
-Mixer"), takes its screen's five channels to that slot in FADE_MS (150), from wherever
-they are, so a second press mid-fade glides on. Play one from the app's sequences, a
+A sequence a slot, `<screen>_<slot>` ("Centre monitor: Mixer"), runs `item.show` on that
+slot's item and `item.hide` on the other four at its start, and takes the screen's five
+channels, `src_<screen>_<slot>` (1 selected, 0 not), to that slot in FADE_MS (150); the
+channels only light the keys. Items a person adds are left alone by the keys. Showing or
+hiding an item by hand doesn't move the key lights. Play one from the app's sequences, a
 hotkey (KEYS: Ctrl+Alt+Shift with 1 to 5 for the left monitor, 6 to 0 the centre, Y to
 P the right and Z to B the hologram), a MIDI note (import_show.py's NOTES), a show cue or
 an agent's `timeline.play`.
@@ -39,8 +40,8 @@ The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pa
 meter bridge, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
 Ctrl+Alt+Shift+N and K. It has no keys to light.
 
-Everything here is generic JStream: group scenes as sources, channels, sequences with
-lanes, hotkeys and `channel` motion modifiers.
+Everything here is generic JStream: group scenes as sources, item visibility, channels,
+sequences with cues and lanes, hotkeys and `channel` motion modifiers.
 """
 import os
 import sys
@@ -103,6 +104,13 @@ def _follow(ch):
             "from": -1.0, "to": 0.0}
 
 
+def _shows(sid, items):
+    """A sequence's cues at its start: show each (item, True) and hide each (item, False)
+    in subscene `sid`."""
+    return [{"at_ms": 0, "action": {"type": "item.show" if shown else "item.hide",
+                                    "item_id": item, "scene_id": sid}} for item, shown in items]
+
+
 def edits(hologram=True, gates=(), unlit_gates=()):
     """The subscenes, their channels and sequences, the hotkeys, the key lights in the
     `atlas` scene, and the screens pointed at the subscenes. `gates` are more motion
@@ -129,7 +137,7 @@ def edits(hologram=True, gates=(), unlit_gates=()):
                    "source_id": source or FEED[screen],
                    "geometry": {"center": {"x": W / 2, "y": H / 2}, "size": {"width": W, "height": H},
                                 "fit_mode": "fill" if slot == "feed" else "stretch"}},
-                  {"type": "item.set_motion", "scene_id": sid, "item_id": ch, "motion": [_follow(ch)]}]
+                  {"type": "item.set_visible", "scene_id": sid, "item_id": ch, "visible": slot == start}]
         for slot, sname, _ in SLOTS:
             lanes = [{"target": {"channel": channel(screen, other)},
                       "points": [{"at_ms": FADE_MS, "value": 1.0 if other == slot else 0.0,
@@ -138,7 +146,8 @@ def edits(hologram=True, gates=(), unlit_gates=()):
             # views and sequences take most of its.
             e.append({"type": "timeline.set", "scene_id": sid, "timeline": {
                 "timeline_id": sequence(screen, slot), "name": f"{name}: {sname}",
-                "duration_ms": FADE_MS, "lanes": lanes}})
+                "duration_ms": FADE_MS, "lanes": lanes,
+                "cues": _shows(sid, [(channel(screen, o), o == slot) for o, _, _ in SLOTS])}})
         for (slot, _, _), chord in zip(SLOTS, chords):
             keys.append({"type": "hotkey.set", "chord": "Ctrl+Alt+Shift+" + chord,
                          "action": action(screen, slot)})
@@ -204,6 +213,7 @@ def desk_edits(layers):
          {"type": "scene.create", "scene_id": sid, "name": "Desk source", "role": "group"},
          {"type": "source.create", "source_id": sid, "name": "Desk source",
           "kind": {"type": "scene", "scene_id": sid}, "settings": {}}]
+    members = {}
     for slot, name, _ in DESK_SLOTS:
         ch = channel("desk", slot)
         e.append({"type": "channel.set", "channel": {
@@ -213,19 +223,24 @@ def desk_edits(layers):
         else:
             placed = [(f"{ch}_{item[2:]}", source, x, y, w, h, motion, "stretch")
                       for item, source, x, y, w, h, motion in layers]
+        members[slot] = [p[0] for p in placed]
         for item, source, x, y, w, h, motion, fit in placed:
             e += [{"type": "item.add", "scene_id": sid, "item_id": item, "source_id": source,
                    "geometry": {"center": {"x": (x - dx + w / 2) * sx, "y": top + (y - dy + h / 2) * sy},
                                 "size": {"width": w * sx, "height": h * sy}, "fit_mode": fit}},
-                  {"type": "item.set_motion", "scene_id": sid, "item_id": item,
-                   "motion": [_follow(ch)] + list(motion)}]
+                  {"type": "item.set_visible", "scene_id": sid, "item_id": item,
+                   "visible": slot == "grid"}]
+            if motion:
+                e.append({"type": "item.set_motion", "scene_id": sid, "item_id": item,
+                          "motion": list(motion)})
     for slot, name, key in DESK_SLOTS:
         lanes = [{"target": {"channel": channel("desk", other)},
                   "points": [{"at_ms": FADE_MS, "value": 1.0 if other == slot else 0.0, "curve": "linear"}]}
                  for other, _, _ in DESK_SLOTS]
         e += [{"type": "timeline.set", "scene_id": sid, "timeline": {
                   "timeline_id": sequence("desk", slot), "name": f"Desk: {name}",
-                  "duration_ms": FADE_MS, "lanes": lanes}},
+                  "duration_ms": FADE_MS, "lanes": lanes,
+                  "cues": _shows(sid, [(i, o == slot) for o, _, _ in DESK_SLOTS for i in members[o]])}},
               {"type": "hotkey.set", "chord": "Ctrl+Alt+Shift+" + key, "action": action("desk", slot)}]
     e += [{"type": "item.remove", "item_id": item} for item, *_ in layers]
     # Under the screens' covers, so the desk's monitor switch still blacks it.
