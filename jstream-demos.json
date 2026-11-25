@@ -1,6 +1,6 @@
 {
   "schema_version": 23,
-  "rev": 577,
+  "rev": 579,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -19158,7 +19158,48 @@
           "name": "Left monitor: Arrangement",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_transport",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_arrange",
+                "scene_id": "src_left",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_device",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_mixer",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_feed",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19222,7 +19263,48 @@
           "name": "Left monitor: Device",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_transport",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_arrange",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_device",
+                "scene_id": "src_left",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_mixer",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_feed",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19286,7 +19368,48 @@
           "name": "Left monitor: Camera feed",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_transport",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_arrange",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_device",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_mixer",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_feed",
+                "scene_id": "src_left",
+                "type": "item.show"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19350,7 +19473,48 @@
           "name": "Left monitor: Mixer",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_transport",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_arrange",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_device",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_mixer",
+                "scene_id": "src_left",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_feed",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19414,7 +19578,48 @@
           "name": "Left monitor: Transport",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_transport",
+                "scene_id": "src_left",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_arrange",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_device",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_mixer",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_left_feed",
+                "scene_id": "src_left",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19499,20 +19704,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_left_transport",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         },
         {
           "id": "src_left_arrange",
@@ -19538,20 +19730,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_left_arrange",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_left_device",
@@ -19577,20 +19756,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_left_device",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_left_mixer",
@@ -19616,20 +19782,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_left_mixer",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_left_feed",
@@ -19655,20 +19808,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_left_feed",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         }
       ]
     },
@@ -19682,7 +19822,48 @@
           "name": "Centre monitor: Arrangement",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_transport",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_arrange",
+                "scene_id": "src_center",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_device",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_mixer",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_feed",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19746,7 +19927,48 @@
           "name": "Centre monitor: Device",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_transport",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_arrange",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_device",
+                "scene_id": "src_center",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_mixer",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_feed",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19810,7 +20032,48 @@
           "name": "Centre monitor: Camera feed",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_transport",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_arrange",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_device",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_mixer",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_feed",
+                "scene_id": "src_center",
+                "type": "item.show"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19874,7 +20137,48 @@
           "name": "Centre monitor: Mixer",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_transport",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_arrange",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_device",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_mixer",
+                "scene_id": "src_center",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_feed",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -19938,7 +20242,48 @@
           "name": "Centre monitor: Transport",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_transport",
+                "scene_id": "src_center",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_arrange",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_device",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_mixer",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_center_feed",
+                "scene_id": "src_center",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20023,20 +20368,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_center_transport",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_center_arrange",
@@ -20062,20 +20394,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_center_arrange",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         },
         {
           "id": "src_center_device",
@@ -20101,20 +20420,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_center_device",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_center_mixer",
@@ -20140,20 +20446,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_center_mixer",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_center_feed",
@@ -20179,20 +20472,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_center_feed",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         }
       ]
     },
@@ -20206,7 +20486,48 @@
           "name": "Right monitor: Arrangement",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_transport",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_arrange",
+                "scene_id": "src_right",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_device",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_mixer",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_feed",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20270,7 +20591,48 @@
           "name": "Right monitor: Device",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_transport",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_arrange",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_device",
+                "scene_id": "src_right",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_mixer",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_feed",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20334,7 +20696,48 @@
           "name": "Right monitor: Camera feed",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_transport",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_arrange",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_device",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_mixer",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_feed",
+                "scene_id": "src_right",
+                "type": "item.show"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20398,7 +20801,48 @@
           "name": "Right monitor: Mixer",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_transport",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_arrange",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_device",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_mixer",
+                "scene_id": "src_right",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_feed",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20462,7 +20906,48 @@
           "name": "Right monitor: Transport",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_transport",
+                "scene_id": "src_right",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_arrange",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_device",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_mixer",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_right_feed",
+                "scene_id": "src_right",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20547,20 +21032,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_right_transport",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_right_arrange",
@@ -20586,20 +21058,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_right_arrange",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_right_device",
@@ -20625,20 +21084,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_right_device",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         },
         {
           "id": "src_right_mixer",
@@ -20664,20 +21110,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_right_mixer",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_right_feed",
@@ -20703,20 +21136,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_right_feed",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         }
       ]
     },
@@ -20730,7 +21150,48 @@
           "name": "Hologram: Arrangement",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_transport",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_arrange",
+                "scene_id": "src_holo",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_device",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_mixer",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_feed",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20794,7 +21255,48 @@
           "name": "Hologram: Device",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_transport",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_arrange",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_device",
+                "scene_id": "src_holo",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_mixer",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_feed",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20858,7 +21360,48 @@
           "name": "Hologram: Camera feed",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_transport",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_arrange",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_device",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_mixer",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_feed",
+                "scene_id": "src_holo",
+                "type": "item.show"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20922,7 +21465,48 @@
           "name": "Hologram: Mixer",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_transport",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_arrange",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_device",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_mixer",
+                "scene_id": "src_holo",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_feed",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -20986,7 +21570,48 @@
           "name": "Hologram: Transport",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_transport",
+                "scene_id": "src_holo",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_arrange",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_device",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_mixer",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_holo_feed",
+                "scene_id": "src_holo",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -21071,20 +21696,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_holo_transport",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_holo_arrange",
@@ -21110,20 +21722,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_holo_arrange",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_holo_device",
@@ -21149,20 +21748,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_holo_device",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_holo_mixer",
@@ -21188,20 +21774,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_holo_mixer",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         },
         {
           "id": "src_holo_feed",
@@ -21227,20 +21800,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_holo_feed",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         }
       ]
     },
@@ -21254,7 +21814,48 @@
           "name": "Desk: Camera feed",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_launcher_unlit",
+                "scene_id": "src_desk",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_bridge_unlit",
+                "scene_id": "src_desk",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_launcher",
+                "scene_id": "src_desk",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_bridge",
+                "scene_id": "src_desk",
+                "type": "item.hide"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_feed",
+                "scene_id": "src_desk",
+                "type": "item.show"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -21285,7 +21886,48 @@
           "name": "Desk: Pads and meters",
           "duration_ms": 150,
           "loop": "once",
-          "cues": [],
+          "cues": [
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_launcher_unlit",
+                "scene_id": "src_desk",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_bridge_unlit",
+                "scene_id": "src_desk",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_launcher",
+                "scene_id": "src_desk",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_grid_bridge",
+                "scene_id": "src_desk",
+                "type": "item.show"
+              }
+            },
+            {
+              "at_ms": 0,
+              "action": {
+                "item_id": "src_desk_feed",
+                "scene_id": "src_desk",
+                "type": "item.hide"
+              }
+            }
+          ],
           "lanes": [
             {
               "target": {
@@ -21339,17 +21981,6 @@
           },
           "visible": true,
           "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_desk_grid",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
             {
               "modifier_id": "switch_cabin",
               "property": "opacity",
@@ -21412,17 +22043,6 @@
           "visible": true,
           "motion": [
             {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_desk_grid",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
               "modifier_id": "switch_cabin",
               "property": "opacity",
               "kind": "channel",
@@ -21481,20 +22101,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_desk_grid",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         },
         {
           "id": "src_desk_grid_bridge",
@@ -21520,20 +22127,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_desk_grid",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": true
         },
         {
           "id": "src_desk_feed",
@@ -21559,20 +22153,7 @@
             "right": 0,
             "bottom": 0
           },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "source",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "src_desk_feed",
-              "smoothing_ms": 0,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
+          "visible": false
         }
       ]
     },

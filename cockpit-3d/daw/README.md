@@ -291,13 +291,17 @@ screen, left to right:
 | 5 | `src_<screen>_feed` | a camera feed: the source `feed` (`holo_feed` on the hologram), a stand-in still until you point it elsewhere |
 
 The left monitor starts on the transport, the centre on the arrangement, the right on the
-device and the hologram on its feed. To put a webcam, a capture or anything else on a
-screen, open its subscene in the app and point one of its items at that source (or send
-`item.set_source`); the key then picks it.
+device and the hologram on its feed. A screen shows whatever is visible in its subscene,
+so you customise it as any scene: open `src_center` (say) in the app and toggle its items'
+visibility, point an item at a webcam, a capture or anything else (or send
+`item.set_source`), or add, move, crop and layer items of your own.
 
-Each item is a channel, `src_<screen>_<slot>` (1 shown, 0 not), and a sequence a key,
-`<screen>_<slot>` ("Centre monitor: Mixer"), takes its screen's five channels to that
-key's in `SOURCE_FADE_MS` (150 ms), from wherever they are, so the pictures cross-fade.
+A sequence a key, `<screen>_<slot>` ("Centre monitor: Mixer"), shows that key's item and
+hides the subscene's other four (cues running `item.show` and `item.hide` at its start),
+so the screen cuts to it. Items you added yourself are left as you set them. The sequence
+also takes the screen's five channels, `src_<screen>_<slot>` (1 selected, 0 not), to that
+key in `SOURCE_FADE_MS` (150 ms); they only light the soft keys, so showing or hiding an
+item by hand doesn't move the lit key.
 Play one from the app's sequences, a cue, an agent's `timeline.play`, or these (the notes follow the
 views' and the cockpit sequences' notes, so they move up if those gain any):
 
@@ -314,7 +318,7 @@ monitor, and a row of five on the dash just in front of and right of the hologra
 lens. Each key's face is a quad on the model's `screens` material that maps one block of
 the atlas's key strip (the bottom 16 px of the readouts' space, under the LEDs; see the
 model's README), and the atlas has a lit block a key
-there, following its channel. The keys are LEDs: the Glow and Master switches darken them
+there, following its channel (the key last pressed, not what is visible). The keys are LEDs: the Glow and Master switches darken them
 with the others, and the unlit keys go dark with the lights as the desk's unlit pads do. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
 show each monitor's starting page, whatever its key picks, since a card glows only with a
 source's own frame, not a scene's. It needs channels and
@@ -323,7 +327,7 @@ sequences (protocol 0.170); without them the screens show what they did before.
 The desk's grid controller switches the same way: its subscene, `src_desk`, draws the
 pads and the meter bridge (with their unlit pages under them, which still dim with the
 lights) or a camera feed, `desk_feed`, over the whole 8:3 surface, which suits a camera
-looking down on a long grid controller. Point `src_desk_feed` at the camera in the app.
+looking down on a long grid controller. Point `src_desk_feed` at the camera in the app, or toggle the subscene's items as on the monitors.
 Ctrl+Alt+Shift+N shows the pads and meters, Ctrl+Alt+Shift+K the camera (the sequences
 `desk_grid` and `desk_feed`; MIDI notes 78 and 79). The desk has no soft keys to light.
 
