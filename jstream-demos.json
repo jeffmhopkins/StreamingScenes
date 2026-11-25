@@ -562,12 +562,12 @@
           "source_id": "s_studio_c0_dim",
           "geometry": {
             "center": {
-              "x": 348.0,
-              "y": 260.0
+              "x": 312.0,
+              "y": 465.0
             },
             "size": {
-              "width": 2408.602,
-              "height": 1354.8387
+              "width": 6279.57,
+              "height": 3532.258
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -588,12 +588,12 @@
           "source_id": "img_editor",
           "geometry": {
             "center": {
-              "x": 348.0,
-              "y": 260.0
+              "x": 312.0,
+              "y": 465.0
             },
             "size": {
-              "width": 360.0,
-              "height": 280.0
+              "width": 288.0,
+              "height": 730.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -603,9 +603,9 @@
           },
           "crop": {
             "left": 12,
-            "top": 128,
-            "right": 1971,
-            "bottom": 1024
+            "top": 96,
+            "right": 2086,
+            "bottom": 335
           },
           "visible": false,
           "effects": [
@@ -626,12 +626,12 @@
           "source_id": "s_studio_c0_box",
           "geometry": {
             "center": {
-              "x": 348.0,
-              "y": 260.0
+              "x": 312.0,
+              "y": 465.0
             },
             "size": {
-              "width": 366.69055,
-              "height": 286.69055
+              "width": 305.44324,
+              "height": 747.44324
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -664,12 +664,12 @@
           "source_id": "s_studio_c0_panel",
           "geometry": {
             "center": {
-              "x": 648.4301,
-              "y": 260.0
+              "x": 769.9785,
+              "y": 465.0
             },
             "size": {
-              "width": 217.44325,
-              "height": 84.97013
+              "width": 566.90564,
+              "height": 221.52927
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -703,12 +703,12 @@
           "source_id": "s_studio_c0_t",
           "geometry": {
             "center": {
-              "x": 607.09,
-              "y": 232.5687
+              "x": 662.2,
+              "y": 393.48267
             },
             "size": {
-              "width": 114.69,
-              "height": 16.73
+              "width": 299.02,
+              "height": 43.61
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -729,12 +729,12 @@
           "source_id": "s_studio_c0_b",
           "geometry": {
             "center": {
-              "x": 648.43,
-              "y": 269.19952
+              "x": 769.98,
+              "y": 488.98447
             },
             "size": {
-              "width": 197.37,
-              "height": 37.63
+              "width": 514.58,
+              "height": 98.12
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -755,12 +755,12 @@
           "source_id": "s_studio_c1_dim",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 3617.6118,
-              "height": 2034.9066
+              "width": 4560.25,
+              "height": 2565.1406
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -781,12 +781,12 @@
           "source_id": "img_editor",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 704.0,
-              "height": 410.0
+              "width": 888.0,
+              "height": 510.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -795,10 +795,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 678,
-            "top": 328,
-            "right": 755,
-            "bottom": 616
+            "left": 537,
+            "top": 280,
+            "right": 601,
+            "bottom": 503
           },
           "visible": false,
           "effects": [
@@ -819,12 +819,12 @@
           "source_id": "s_studio_c1_box",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 713.7969,
-              "height": 419.7969
+              "width": 900.3333,
+              "height": 522.3333
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -857,12 +857,12 @@
           "source_id": "s_studio_c1_panel",
           "geometry": {
             "center": {
-              "x": 1464.3441,
-              "y": 450.0
+              "x": 1606.0,
+              "y": 470.0
             },
             "size": {
-              "width": 318.39905,
-              "height": 86.70251
+              "width": 400.83334,
+              "height": 109.15
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -896,12 +896,12 @@
           "source_id": "s_studio_c1_t",
           "geometry": {
             "center": {
-              "x": 1420.69,
-              "y": 428.69174
+              "x": 1551.05,
+              "y": 443.175
             },
             "size": {
-              "width": 201.71,
-              "height": 24.49
+              "width": 253.93,
+              "height": 30.83
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -922,12 +922,12 @@
           "source_id": "s_studio_c1_b",
           "geometry": {
             "center": {
-              "x": 1464.34,
-              "y": 463.47073
+              "x": 1606.0,
+              "y": 486.95834
             },
             "size": {
-              "width": 289.01,
-              "height": 36.74
+              "width": 363.83,
+              "height": 46.25
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -948,12 +948,12 @@
           "source_id": "s_studio_c2_dim",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 430.0
+              "x": 1590.4,
+              "y": 390.0
             },
             "size": {
-              "width": 5333.3335,
-              "height": 3000.0
+              "width": 4989.247,
+              "height": 2806.4517
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -974,12 +974,12 @@
           "source_id": "img_editor",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 430.0
+              "x": 1590.4,
+              "y": 390.0
             },
             "size": {
-              "width": 408.0,
-              "height": 620.0
+              "width": 332.8,
+              "height": 580.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -988,10 +988,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 1894,
-            "top": 128,
-            "right": 12,
-            "bottom": 480
+            "left": 2022,
+            "top": 96,
+            "right": 5,
+            "bottom": 576
           },
           "visible": false,
           "effects": [
@@ -1012,12 +1012,12 @@
           "source_id": "s_studio_c2_box",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 430.0
+              "x": 1590.4,
+              "y": 390.0
             },
             "size": {
-              "width": 422.81482,
-              "height": 634.8148
+              "width": 346.65903,
+              "height": 593.859
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1050,12 +1050,12 @@
           "source_id": "s_studio_c2_panel",
           "geometry": {
             "center": {
-              "x": 1077.3334,
-              "y": 430.0
+              "x": 1174.5376,
+              "y": 390.0
             },
             "size": {
-              "width": 481.48148,
-              "height": 159.62962
+              "width": 450.41815,
+              "height": 149.33095
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1089,12 +1089,12 @@
           "source_id": "s_studio_c2_t",
           "geometry": {
             "center": {
-              "x": 991.31,
-              "y": 383.51852
+              "x": 1094.06,
+              "y": 346.51733
             },
             "size": {
-              "width": 264.99,
-              "height": 37.04
+              "width": 247.89,
+              "height": 34.65
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -1115,12 +1115,12 @@
           "source_id": "s_studio_c2_b",
           "geometry": {
             "center": {
-              "x": 1077.33,
-              "y": 450.37036
+              "x": 1174.54,
+              "y": 409.05615
             },
             "size": {
-              "width": 437.04,
-              "height": 83.33
+              "width": 408.84,
+              "height": 77.96
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -1141,12 +1141,12 @@
           "source_id": "s_studio_c3_dim",
           "geometry": {
             "center": {
-              "x": 1356.0,
-              "y": 920.0
+              "x": 1358.4,
+              "y": 942.5
             },
             "size": {
-              "width": 3960.0,
-              "height": 2227.5
+              "width": 3984.0,
+              "height": 2241.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1167,12 +1167,12 @@
           "source_id": "img_editor",
           "geometry": {
             "center": {
-              "x": 1356.0,
-              "y": 920.0
+              "x": 1358.4,
+              "y": 942.5
             },
             "size": {
-              "width": 792.0,
-              "height": 220.0
+              "width": 796.8,
+              "height": 185.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1182,9 +1182,9 @@
           },
           "crop": {
             "left": 1280,
-            "top": 1232,
-            "right": 12,
-            "bottom": 16
+            "top": 1296,
+            "right": 5,
+            "bottom": 8
           },
           "visible": false,
           "effects": [
@@ -1205,12 +1205,12 @@
           "source_id": "s_studio_c3_box",
           "geometry": {
             "center": {
-              "x": 1356.0,
-              "y": 920.0
+              "x": 1358.4,
+              "y": 942.5
             },
             "size": {
-              "width": 803.0,
-              "height": 231.0
+              "width": 807.86664,
+              "height": 196.06667
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1243,12 +1243,12 @@
           "source_id": "s_studio_c3_panel",
           "geometry": {
             "center": {
-              "x": 1138.75,
-              "y": 731.4875
+              "x": 1139.8334,
+              "y": 771.01166
             },
             "size": {
-              "width": 357.5,
-              "height": 118.525
+              "width": 359.66666,
+              "height": 119.24333
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -1282,12 +1282,12 @@
           "source_id": "s_studio_c3_t",
           "geometry": {
             "center": {
-              "x": 1103.66,
-              "y": 696.975
+              "x": 1104.53,
+              "y": 736.29
             },
             "size": {
-              "width": 254.31,
-              "height": 27.5
+              "width": 255.85,
+              "height": 27.67
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -1308,12 +1308,12 @@
           "source_id": "s_studio_c3_b",
           "geometry": {
             "center": {
-              "x": 1138.75,
-              "y": 746.6125
+              "x": 1139.83,
+              "y": 786.22833
             },
             "size": {
-              "width": 324.5,
-              "height": 61.88
+              "width": 326.47,
+              "height": 62.25
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -1336,13 +1336,13 @@
       "name": "Scenes",
       "camera": {
         "position": {
-          "x": 462.57587,
-          "y": 260.0,
-          "z": 545.145
+          "x": 610.71564,
+          "y": 465.0,
+          "z": 1421.2709
         },
         "target": {
-          "x": 462.57587,
-          "y": 260.0,
+          "x": 610.71564,
+          "y": 465.0,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -1382,13 +1382,13 @@
       "name": "Canvas",
       "camera": {
         "position": {
-          "x": 1103.7719,
-          "y": 450.0,
-          "z": 818.7832
+          "x": 1151.2084,
+          "y": 470.0,
+          "z": 1032.1329
         },
         "target": {
-          "x": 1103.7719,
-          "y": 450.0,
+          "x": 1151.2084,
+          "y": 470.0,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -1428,13 +1428,13 @@
       "name": "Inspector",
       "camera": {
         "position": {
-          "x": 1294.2963,
-          "y": 430.0,
-          "z": 1207.1068
+          "x": 1353.0643,
+          "y": 390.0,
+          "z": 1129.2289
         },
         "target": {
-          "x": 1294.2963,
-          "y": 430.0,
+          "x": 1353.0643,
+          "y": 390.0,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -1474,13 +1474,13 @@
       "name": "Outputs",
       "camera": {
         "position": {
-          "x": 1356.0,
-          "y": 851.1125,
-          "z": 896.2768
+          "x": 1358.4,
+          "y": 873.195,
+          "z": 901.70874
         },
         "target": {
-          "x": 1356.0,
-          "y": 851.1125,
+          "x": 1358.4,
+          "y": 873.195,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -1802,6 +1802,17 @@
                 "border_width": 1.0,
                 "radius": 10.0
               }
+            },
+            {
+              "id": "shadow",
+              "kind": "drop_shadow",
+              "kind_version": 1,
+              "settings": {
+                "blur": 36.0,
+                "color": "#000000a6",
+                "offset_x": 0.0,
+                "offset_y": 12.0
+              }
             }
           ]
         },
@@ -1892,6 +1903,17 @@
                 "border_width": 1.0,
                 "radius": 10.0
               }
+            },
+            {
+              "id": "shadow",
+              "kind": "drop_shadow",
+              "kind_version": 1,
+              "settings": {
+                "blur": 36.0,
+                "color": "#000000a6",
+                "offset_x": 0.0,
+                "offset_y": 12.0
+              }
             }
           ]
         },
@@ -1981,6 +2003,17 @@
                 "border_color": "#2e333bff",
                 "border_width": 1.0,
                 "radius": 10.0
+              }
+            },
+            {
+              "id": "shadow",
+              "kind": "drop_shadow",
+              "kind_version": 1,
+              "settings": {
+                "blur": 36.0,
+                "color": "#000000a6",
+                "offset_x": 0.0,
+                "offset_y": 12.0
               }
             }
           ]
@@ -5081,12 +5114,12 @@
           "source_id": "s_fx_c0_dim",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 497.5
+              "x": 1590.4,
+              "y": 235.0
             },
             "size": {
-              "width": 2120.9578,
-              "height": 1193.0387
+              "width": 2117.647,
+              "height": 1191.1765
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5107,12 +5140,12 @@
           "source_id": "img_effects",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 497.5
+              "x": 1590.4,
+              "y": 235.0
             },
             "size": {
-              "width": 408.0,
-              "height": 245.0
+              "width": 332.8,
+              "height": 230.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5121,10 +5154,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 1894,
-            "top": 536,
-            "right": 12,
-            "bottom": 672
+            "left": 2022,
+            "top": 128,
+            "right": 5,
+            "bottom": 1104
           },
           "visible": false,
           "effects": [
@@ -5145,12 +5178,12 @@
           "source_id": "s_fx_c0_box",
           "geometry": {
             "center": {
-              "x": 1548.0,
-              "y": 497.5
+              "x": 1590.4,
+              "y": 235.0
             },
             "size": {
-              "width": 413.88235,
-              "height": 250.88235
+              "width": 338.68234,
+              "height": 235.88235
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5183,8 +5216,8 @@
           "source_id": "s_fx_c0_panel",
           "geometry": {
             "center": {
-              "x": 1238.1177,
-              "y": 497.5
+              "x": 1318.1177,
+              "y": 235.0
             },
             "size": {
               "width": 191.17647,
@@ -5222,8 +5255,8 @@
           "source_id": "s_fx_c0_t",
           "geometry": {
             "center": {
-              "x": 1200.45,
-              "y": 484.70587
+              "x": 1280.45,
+              "y": 222.20589
             },
             "size": {
               "width": 98.18,
@@ -5248,8 +5281,8 @@
           "source_id": "s_fx_c0_b",
           "geometry": {
             "center": {
-              "x": 1238.12,
-              "y": 505.58823
+              "x": 1318.12,
+              "y": 243.08824
             },
             "size": {
               "width": 173.53,
@@ -5274,12 +5307,12 @@
           "source_id": "s_fx_c1_dim",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 3617.6118,
-              "height": 2034.9066
+              "width": 4560.25,
+              "height": 2565.1406
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5300,12 +5333,12 @@
           "source_id": "img_effects",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 704.0,
-              "height": 410.0
+              "width": 888.0,
+              "height": 510.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5314,10 +5347,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 678,
-            "top": 328,
-            "right": 755,
-            "bottom": 616
+            "left": 537,
+            "top": 280,
+            "right": 601,
+            "bottom": 503
           },
           "visible": false,
           "effects": [
@@ -5338,12 +5371,12 @@
           "source_id": "s_fx_c1_box",
           "geometry": {
             "center": {
-              "x": 936.0,
-              "y": 450.0
+              "x": 940.0,
+              "y": 470.0
             },
             "size": {
-              "width": 713.7969,
-              "height": 419.7969
+              "width": 900.3333,
+              "height": 522.3333
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5376,12 +5409,12 @@
           "source_id": "s_fx_c1_panel",
           "geometry": {
             "center": {
-              "x": 1464.3441,
-              "y": 450.0
+              "x": 1606.0,
+              "y": 470.0
             },
             "size": {
-              "width": 318.39905,
-              "height": 105.56153
+              "width": 400.83334,
+              "height": 132.89166
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -5415,12 +5448,12 @@
           "source_id": "s_fx_c1_t",
           "geometry": {
             "center": {
-              "x": 1377.41,
-              "y": 419.26224
+              "x": 1496.55,
+              "y": 431.30417
             },
             "size": {
-              "width": 115.13,
-              "height": 24.49
+              "width": 144.94,
+              "height": 30.83
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -5441,12 +5474,12 @@
           "source_id": "s_fx_c1_b",
           "geometry": {
             "center": {
-              "x": 1464.34,
-              "y": 463.47073
+              "x": 1606.0,
+              "y": 486.95834
             },
             "size": {
-              "width": 289.01,
-              "height": 36.74
+              "width": 363.83,
+              "height": 46.25
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -5469,13 +5502,13 @@
       "name": "Item effects",
       "camera": {
         "position": {
-          "x": 1447.2646,
-          "y": 497.5,
-          "z": 480.0417
+          "x": 1489.6647,
+          "y": 235.0,
+          "z": 479.2924
         },
         "target": {
-          "x": 1447.2646,
-          "y": 497.5,
+          "x": 1489.6647,
+          "y": 235.0,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -5515,13 +5548,13 @@
       "name": "Result",
       "camera": {
         "position": {
-          "x": 1103.7719,
-          "y": 450.0,
-          "z": 818.7832
+          "x": 1151.2084,
+          "y": 470.0,
+          "z": 1032.1329
         },
         "target": {
-          "x": 1103.7719,
-          "y": 450.0,
+          "x": 1151.2084,
+          "y": 470.0,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -9602,7 +9635,7 @@
             },
             "size": {
               "width": 1400.0,
-              "height": 1043.0
+              "height": 603.75
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9651,7 +9684,7 @@
             },
             "size": {
               "width": 300.0,
-              "height": 443.2258
+              "height": 508.4453
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9700,7 +9733,7 @@
             },
             "size": {
               "width": 1400.0,
-              "height": 875.0
+              "height": 630.0
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9745,7 +9778,7 @@
           "geometry": {
             "center": {
               "x": 756.5,
-              "y": 774.675
+              "y": 573.20624
             },
             "size": {
               "width": 6965.0,
@@ -9771,11 +9804,11 @@
           "geometry": {
             "center": {
               "x": 756.5,
-              "y": 774.675
+              "y": 573.20624
             },
             "size": {
               "width": 1393.0,
-              "height": 365.05
+              "height": 416.5875
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9785,9 +9818,9 @@
           },
           "crop": {
             "left": 0,
-            "top": 655,
-            "right": 8,
-            "bottom": 119
+            "top": 231,
+            "right": 12,
+            "bottom": 110
           },
           "visible": false,
           "effects": [
@@ -9809,11 +9842,11 @@
           "geometry": {
             "center": {
               "x": 756.5,
-              "y": 774.675
+              "y": 573.20624
             },
             "size": {
               "width": 1412.3472,
-              "height": 384.39722
+              "height": 435.93472
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9847,7 +9880,7 @@
           "geometry": {
             "center": {
               "x": 374.39236,
-              "y": 454.0592
+              "y": 226.8217
             },
             "size": {
               "width": 628.7847,
@@ -9886,7 +9919,7 @@
           "geometry": {
             "center": {
               "x": 338.14,
-              "y": 393.3573
+              "y": 166.1198
             },
             "size": {
               "width": 498.25,
@@ -9912,7 +9945,7 @@
           "geometry": {
             "center": {
               "x": 374.39,
-              "y": 480.66162
+              "y": 253.42413
             },
             "size": {
               "width": 570.74,
@@ -9937,12 +9970,12 @@
           "source_id": "s_show_c1_dim",
           "geometry": {
             "center": {
-              "x": 392.5,
-              "y": 811.18
+              "x": 256.0,
+              "y": 597.35626
             },
             "size": {
-              "width": 3140.215,
-              "height": 1766.371
+              "width": 3375.8064,
+              "height": 1898.8911
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9963,12 +9996,12 @@
           "source_id": "img_show_edit",
           "geometry": {
             "center": {
-              "x": 392.5,
-              "y": 811.18
+              "x": 256.0,
+              "y": 597.35626
             },
             "size": {
-              "width": 343.0,
-              "height": 365.05
+              "width": 84.0,
+              "height": 392.4375
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -9977,10 +10010,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 184,
-            "top": 697,
-            "right": 1024,
-            "bottom": 77
+            "left": 281,
+            "top": 298,
+            "right": 2124,
+            "bottom": 88
           },
           "visible": false,
           "effects": [
@@ -10001,12 +10034,12 @@
           "source_id": "s_show_c1_box",
           "geometry": {
             "center": {
-              "x": 392.5,
-              "y": 811.18
+              "x": 256.0,
+              "y": 597.35626
             },
             "size": {
-              "width": 351.7228,
-              "height": 373.77283
+              "width": 93.37724,
+              "height": 401.81473
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10039,12 +10072,12 @@
           "source_id": "s_show_c1_panel",
           "geometry": {
             "center": {
-              "x": 721.01074,
-              "y": 811.18
+              "x": 466.7903,
+              "y": 597.35626
             },
             "size": {
-              "width": 283.49164,
-              "height": 77.19695
+              "width": 304.7603,
+              "height": 82.98858
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10078,12 +10111,12 @@
           "source_id": "s_show_c1_t",
           "geometry": {
             "center": {
-              "x": 701.5,
-              "y": 792.2079
+              "x": 445.81,
+              "y": 576.96075
             },
             "size": {
-              "width": 218.29,
-              "height": 21.81
+              "width": 234.67,
+              "height": 23.44
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10104,12 +10137,12 @@
           "source_id": "s_show_c1_b",
           "geometry": {
             "center": {
-              "x": 721.01,
-              "y": 823.1739
+              "x": 466.79,
+              "y": 610.24994
             },
             "size": {
-              "width": 257.32,
-              "height": 32.71
+              "width": 276.63,
+              "height": 35.16
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10130,12 +10163,12 @@
           "source_id": "s_show_c2_dim",
           "geometry": {
             "center": {
-              "x": 833.5,
-              "y": 970.2375
+              "x": 802.0,
+              "y": 754.33124
             },
             "size": {
-              "width": 6195.0,
-              "height": 3484.6875
+              "width": 5880.0,
+              "height": 3307.5
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10156,12 +10189,12 @@
           "source_id": "img_show_edit",
           "geometry": {
             "center": {
-              "x": 833.5,
-              "y": 970.2375
+              "x": 802.0,
+              "y": 754.33124
             },
             "size": {
-              "width": 1239.0,
-              "height": 36.505
+              "width": 1176.0,
+              "height": 42.2625
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10170,10 +10203,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 176,
-            "top": 1066,
-            "right": 8,
-            "bottom": 83
+            "left": 281,
+            "top": 905,
+            "right": 128,
+            "bottom": 121
           },
           "visible": false,
           "effects": [
@@ -10194,12 +10227,12 @@
           "source_id": "s_show_c2_box",
           "geometry": {
             "center": {
-              "x": 833.5,
-              "y": 970.2375
+              "x": 802.0,
+              "y": 754.33124
             },
             "size": {
-              "width": 1256.2084,
-              "height": 53.713333
+              "width": 1192.3334,
+              "height": 58.595833
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10232,12 +10265,12 @@
           "source_id": "s_show_c2_panel",
           "geometry": {
             "center": {
-              "x": 493.6354,
-              "y": 829.1605
+              "x": 479.41666,
+              "y": 616.62085
             },
             "size": {
-              "width": 559.2708,
-              "height": 185.41978
+              "width": 530.8333,
+              "height": 175.99167
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10271,12 +10304,12 @@
           "source_id": "s_show_c2_t",
           "geometry": {
             "center": {
-              "x": 490.65,
-              "y": 775.1694
+              "x": 476.59,
+              "y": 565.375
             },
             "size": {
-              "width": 501.68,
-              "height": 43.02
+              "width": 476.17,
+              "height": 40.83
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10297,12 +10330,12 @@
           "source_id": "s_show_c2_b",
           "geometry": {
             "center": {
-              "x": 493.64,
-              "y": 852.82196
+              "x": 479.42,
+              "y": 639.07916
             },
             "size": {
-              "width": 507.65,
-              "height": 64.53
+              "width": 481.83,
+              "height": 61.25
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10327,8 +10360,8 @@
               "y": 540.0
             },
             "size": {
-              "width": 3812.695,
-              "height": 2144.641
+              "width": 4373.723,
+              "height": 2460.2192
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10354,7 +10387,7 @@
             },
             "size": {
               "width": 300.0,
-              "height": 443.2258
+              "height": 508.4453
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10391,8 +10424,8 @@
               "y": 540.0
             },
             "size": {
-              "width": 310.59082,
-              "height": 453.81662
+              "width": 312.14923,
+              "height": 520.59454
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10425,12 +10458,12 @@
           "source_id": "s_show_c3_panel",
           "geometry": {
             "center": {
-              "x": 1299.3652,
+              "x": 1271.3138,
               "y": 540.0
             },
             "size": {
-              "width": 344.20163,
-              "height": 134.50342
+              "width": 394.85,
+              "height": 154.29523
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10464,12 +10497,12 @@
           "source_id": "s_show_c3_t",
           "geometry": {
             "center": {
-              "x": 1258.86,
-              "y": 496.57764
+              "x": 1224.85,
+              "y": 490.18814
             },
             "size": {
-              "width": 231.43,
-              "height": 26.48
+              "width": 265.48,
+              "height": 30.37
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10490,12 +10523,12 @@
           "source_id": "s_show_c3_b",
           "geometry": {
             "center": {
-              "x": 1299.37,
-              "y": 554.5624
+              "x": 1271.31,
+              "y": 556.7052
             },
             "size": {
-              "width": 312.43,
-              "height": 59.57
+              "width": 358.4,
+              "height": 68.34
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10517,11 +10550,11 @@
           "geometry": {
             "center": {
               "x": 2014.0,
-              "y": 660.3125
+              "y": 461.25
             },
             "size": {
-              "width": 2964.7058,
-              "height": 1667.6471
+              "width": 2438.7097,
+              "height": 1371.7742
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10543,11 +10576,11 @@
           "geometry": {
             "center": {
               "x": 2014.0,
-              "y": 660.3125
+              "y": 461.25
             },
             "size": {
               "width": 308.0,
-              "height": 284.375
+              "height": 283.5
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10557,9 +10590,9 @@
           },
           "crop": {
             "left": 0,
-            "top": 475,
-            "right": 1248,
-            "bottom": 199
+            "top": 172,
+            "right": 1996,
+            "bottom": 460
           },
           "visible": false,
           "effects": [
@@ -10581,11 +10614,11 @@
           "geometry": {
             "center": {
               "x": 2014.0,
-              "y": 660.3125
+              "y": 461.25
             },
             "size": {
-              "width": 316.2353,
-              "height": 292.6103
+              "width": 314.7742,
+              "height": 290.2742
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10618,12 +10651,12 @@
           "source_id": "s_show_c4_panel",
           "geometry": {
             "center": {
-              "x": 2316.2354,
-              "y": 660.3125
+              "x": 2289.9355,
+              "y": 461.25
             },
             "size": {
-              "width": 267.64706,
-              "height": 88.73529
+              "width": 220.16129,
+              "height": 72.991936
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10657,12 +10690,12 @@
           "source_id": "s_show_c4_t",
           "geometry": {
             "center": {
-              "x": 2259.31,
-              "y": 634.47424
+              "x": 2243.11,
+              "y": 439.99597
             },
             "size": {
-              "width": 129.09,
-              "height": 20.59
+              "width": 106.19,
+              "height": 16.94
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10683,12 +10716,12 @@
           "source_id": "s_show_c4_b",
           "geometry": {
             "center": {
-              "x": 2316.24,
-              "y": 671.63605
+              "x": 2289.94,
+              "y": 470.5645
             },
             "size": {
-              "width": 242.94,
-              "height": 30.88
+              "width": 199.84,
+              "height": 25.4
             },
             "fit_mode": "fit",
             "rotation_deg": 0.0,
@@ -10710,7 +10743,7 @@
           "geometry": {
             "center": {
               "x": 2710.5,
-              "y": 642.8125
+              "y": 464.4
             },
             "size": {
               "width": 5425.0,
@@ -10736,11 +10769,11 @@
           "geometry": {
             "center": {
               "x": 2710.5,
-              "y": 642.8125
+              "y": 464.4
             },
             "size": {
               "width": 1085.0,
-              "height": 249.375
+              "height": 289.8
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10749,10 +10782,10 @@
             "depth_px": 2.0
           },
           "crop": {
-            "left": 352,
-            "top": 475,
-            "right": 8,
-            "bottom": 240
+            "left": 563,
+            "top": 172,
+            "right": 12,
+            "bottom": 449
           },
           "visible": false,
           "effects": [
@@ -10774,11 +10807,11 @@
           "geometry": {
             "center": {
               "x": 2710.5,
-              "y": 642.8125
+              "y": 464.4
             },
             "size": {
               "width": 1100.0695,
-              "height": 264.44446
+              "height": 304.86945
             },
             "fit_mode": "stretch",
             "rotation_deg": 0.0,
@@ -10812,7 +10845,7 @@
           "geometry": {
             "center": {
               "x": 2412.8784,
-              "y": 875.05817
+              "y": 716.85815
             },
             "size": {
               "width": 489.75696,
@@ -10851,7 +10884,7 @@
           "geometry": {
             "center": {
               "x": 2326.86,
-              "y": 827.7778
+              "y": 669.57776
             },
             "size": {
               "width": 272.52,
@@ -10877,7 +10910,7 @@
           "geometry": {
             "center": {
               "x": 2412.88,
-              "y": 895.7786
+              "y": 737.5787
             },
             "size": {
               "width": 444.55,
@@ -10905,12 +10938,12 @@
       "camera": {
         "position": {
           "x": 756.5,
-          "y": 653.513,
+          "y": 452.04428,
           "z": 1576.406
         },
         "target": {
           "x": 756.5,
-          "y": 653.513,
+          "y": 452.04428,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -10950,13 +10983,13 @@
       "name": "Loop",
       "camera": {
         "position": {
-          "x": 541.8783,
-          "y": 811.18,
-          "z": 710.7328
+          "x": 416.58524,
+          "y": 597.35626,
+          "z": 764.0548
         },
         "target": {
-          "x": 541.8783,
-          "y": 811.18,
+          "x": 416.58524,
+          "y": 597.35626,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -10996,13 +11029,13 @@
       "name": "Bookmarks",
       "camera": {
         "position": {
-          "x": 833.5,
-          "y": 862.47034,
-          "z": 1402.13
+          "x": 802.0,
+          "y": 652.04376,
+          "z": 1330.8352
         },
         "target": {
-          "x": 833.5,
-          "y": 862.47034,
+          "x": 802.0,
+          "y": 652.04376,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -11042,12 +11075,12 @@
       "name": "Notes",
       "camera": {
         "position": {
-          "x": 1458.6322,
+          "x": 1431.9445,
           "y": 540.0,
-          "z": 862.9369
+          "z": 989.9158
         },
         "target": {
-          "x": 1458.6322,
+          "x": 1431.9445,
           "y": 540.0,
           "z": 0.0
         },
@@ -11088,13 +11121,13 @@
       "name": "Continue",
       "camera": {
         "position": {
-          "x": 2155.0293,
-          "y": 660.3125,
-          "z": 671.00934
+          "x": 2130.008,
+          "y": 461.25,
+          "z": 551.9593
         },
         "target": {
-          "x": 2155.0293,
-          "y": 660.3125,
+          "x": 2130.008,
+          "y": 461.25,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -11135,12 +11168,12 @@
       "camera": {
         "position": {
           "x": 2710.5,
-          "y": 737.1849,
+          "y": 558.7724,
           "z": 1227.8539
         },
         "target": {
           "x": 2710.5,
-          "y": 737.1849,
+          "y": 558.7724,
           "z": 0.0
         },
         "fov_deg": 45.0,
@@ -24801,7 +24834,10 @@
         "type": "builtin",
         "kind": "desktop_audio"
       },
-      "kind_version": 1
+      "kind_version": 1,
+      "settings": {
+        "device": ""
+      }
     },
     {
       "id": "desk_feed",
@@ -29331,10 +29367,10 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 682,
+        "height": 642,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 1126
+        "width": 921
       }
     },
     {
@@ -29456,10 +29492,10 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 686,
+        "height": 678,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 1166
+        "width": 1168
       }
     },
     {
@@ -30331,7 +30367,7 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 318,
+        "height": 361,
         "radius": 12.0,
         "shape": "rectangle",
         "width": 1168
@@ -30459,7 +30495,7 @@
         "height": 686,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 645
+        "width": 159
       }
     },
     {
@@ -30581,7 +30617,7 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 50,
+        "height": 57,
         "radius": 12.0,
         "shape": "rectangle",
         "width": 1168
@@ -30709,7 +30745,7 @@
         "height": 686,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 469
+        "width": 411
       }
     },
     {
@@ -30831,10 +30867,10 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 568,
+        "height": 686,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 614
+        "width": 743
       }
     },
     {
@@ -30956,7 +30992,7 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 281,
+        "height": 324,
         "radius": 12.0,
         "shape": "rectangle",
         "width": 1168
@@ -31084,7 +31120,7 @@
         "height": 686,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 877
+        "width": 280
       }
     },
     {
@@ -31206,10 +31242,10 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 686,
+        "height": 678,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 1166
+        "width": 1168
       }
     },
     {
@@ -31334,7 +31370,7 @@
         "height": 686,
         "radius": 12.0,
         "shape": "rectangle",
-        "width": 457
+        "width": 400
       }
     },
     {
@@ -31456,7 +31492,7 @@
         "color": "#00000000",
         "color2": "#000000ff",
         "fill": "solid",
-        "height": 336,
+        "height": 283,
         "radius": 12.0,
         "shape": "rectangle",
         "width": 1168
