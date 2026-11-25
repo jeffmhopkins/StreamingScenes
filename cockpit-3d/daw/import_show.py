@@ -185,6 +185,11 @@ if SOURCES:
     # The desk too: its pads and meter bridge (with their unlit pages, which keep the
     # lights' switches) or a camera.
     must(batch(sources.desk_edits(BUILT["DESK_LAYERS"]), "desk source"), "desk source")
+    # Listed in the Scenes panel, so a person opens one and toggles what it shows.
+    text, ok = batch(sources.filing(HOLOGRAM), "monitor sources folder")
+    if not ok:
+        print("no scene folders in this JStream: the monitor sources are left unfiled",
+              file=sys.stderr)
 
 
 # ---- two 2D scenes from the same live data ----

@@ -1,6 +1,6 @@
 {
   "schema_version": 23,
-  "rev": 579,
+  "rev": 585,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -19151,7 +19151,7 @@
     {
       "id": "src_left",
       "name": "Left monitor source",
-      "role": "group",
+      "folder": "monitor_sources",
       "timelines": [
         {
           "timeline_id": "left_arrange",
@@ -19815,7 +19815,7 @@
     {
       "id": "src_center",
       "name": "Centre monitor source",
-      "role": "group",
+      "folder": "monitor_sources",
       "timelines": [
         {
           "timeline_id": "center_arrange",
@@ -20479,7 +20479,7 @@
     {
       "id": "src_right",
       "name": "Right monitor source",
-      "role": "group",
+      "folder": "monitor_sources",
       "timelines": [
         {
           "timeline_id": "right_arrange",
@@ -21143,7 +21143,7 @@
     {
       "id": "src_holo",
       "name": "Hologram source",
-      "role": "group",
+      "folder": "monitor_sources",
       "timelines": [
         {
           "timeline_id": "holo_arrange",
@@ -21807,7 +21807,7 @@
     {
       "id": "src_desk",
       "name": "Desk source",
-      "role": "group",
+      "folder": "monitor_sources",
       "timelines": [
         {
           "timeline_id": "desk_feed",
@@ -32036,6 +32036,10 @@
       "id": "cockpit_views",
       "name": "Views",
       "scene": "cockpit"
+    },
+    {
+      "id": "monitor_sources",
+      "name": "Monitor sources"
     }
   ],
   "labels": [
