@@ -392,13 +392,13 @@ scene("s_title_push", "Push", [], variant_of="s_title",
 
 # ---------------------------------------------------------------- 2 The studio
 K_STUDIO = screenshot_chapter("s_studio", "Tour 2 · The studio", [("ed", "editor.jpg", 960, 540, 1600)], [
-    ("Scenes", "ed", (0.005, 0.08, 0.23, 0.36), "Scenes and sources",
+    ("Scenes", "ed", (0.005, 0.06, 0.185, 0.79), "Scenes and sources",
      "A scene stacks sources: cameras, screen and window capture, media, browser pages, text, timers and audio visualisers.", "right"),
-    ("Canvas", "ed", (0.265, 0.205, 0.705, 0.615), "Composited on the GPU",
+    ("Canvas", "ed", (0.21, 0.175, 0.765, 0.685), "Composited on the GPU",
      "Each item can be cropped, turned in 3D, blended and given effects, live.", "right"),
-    ("Inspector", "ed", (0.74, 0.08, 0.995, 0.70), "Edits undo per client",
+    ("Inspector", "ed", (0.79, 0.06, 0.998, 0.64), "Edits undo per client",
      "Your undo never takes back a change made by another client: a browser, the command line or an agent.", "left"),
-    ("Outputs", "ed", (0.50, 0.77, 0.995, 0.99), "Outputs apart from scenes",
+    ("Outputs", "ed", (0.50, 0.81, 0.998, 0.995), "Outputs apart from scenes",
      "Outputs take video mixes and audio buses, so a stream and a recording can carry different pictures and sound.", "above"),
 ])
 
@@ -467,7 +467,8 @@ mf_items = backdrop_items("mf") + [
 for key, (x, y, w) in MF.items():
     h = w * 9 / 16
     it = item(f"mf_i_{key}", f"img_{key}", geom(x + w / 2, y + h / 2, w, h, fit="stretch"),
-              effects=[fx("round", "rounded_corners", radius=10.0, border_width=1.0, border_color=T["border"])])
+              effects=[fx("round", "rounded_corners", radius=10.0, border_width=1.0, border_color=T["border"]),
+                       fx("shadow", "drop_shadow", color="#000000a6", offset_x=0.0, offset_y=12.0, blur=36.0)])
     it["crop"] = feed_crop(key)
     mf_items.append(it)
     text_src(f"mf_tag_{key}", f"What you make: {FEEDS[key][2]} label",
@@ -679,9 +680,9 @@ scene("s_link", "Tour 8 · Connected", ln_items, labels=LABEL, folder="f_tour",
 
 # ---------------------------------------------------------------- 4 Effects
 K_FX = screenshot_chapter("s_fx", "Tour 4 · Effects", [("fx", "effects.jpg", 960, 540, 1600)], [
-    ("Item effects", "fx", (0.74, 0.335, 0.995, 0.58), "Effects on one item",
+    ("Item effects", "fx", (0.79, 0.08, 0.998, 0.31), "Effects on one item",
      "Rounded corners and a drop shadow on this item only, applied live, in order.", "left"),
-    ("Result", "fx", (0.265, 0.205, 0.705, 0.615), "Shader packs",
+    ("Result", "fx", (0.21, 0.175, 0.765, 0.685), "Shader packs",
      "Beyond the built-in filters, shader sources and filters can be written as WGSL effect packs.", "right"),
 ])
 
@@ -742,17 +743,17 @@ K_CAM = screenshot_chapter("s_cam", "Tour 12 · Cameras & going live", [
 K_SHOW = screenshot_chapter("s_show", "Tour 11 · Shows", [
     ("ed", "show-edit.jpg", 760, 540, 1400), ("bm", "bookmark-inspector.jpg", 1640, 540, 300),
     ("run", "show-run.jpg", 2560, 540, 1400)], [
-    ("Tracks", "ed", (0.0, 0.55, 0.995, 0.90), "A show is the whole run order",
+    ("Tracks", "ed", (0.0, 0.21, 0.995, 0.90), "A show is the whole run order",
      "Program, overlay, keyframe, sequence and audio tracks on one timeline, saved with the project.", "above"),
-    ("Loop", "ed", (0.115, 0.585, 0.36, 0.935), "Loops hold until you're ready",
+    ("Loop", "ed", (0.11, 0.27, 0.17, 0.92), "Loops hold until you're ready",
      "A loop repeats a span, like a waiting room, until you press Continue.", "right"),
-    ("Bookmarks", "ed", (0.11, 0.895, 0.995, 0.93), "Bookmarks pause or play through",
+    ("Bookmarks", "ed", (0.11, 0.82, 0.95, 0.89), "Bookmarks pause or play through",
      "Jump to any bookmark and the studio is set as playing there would have left it.", "above"),
     ("Notes", "bm", (0.0, 0.0, 1.0, 1.0), "Notes for whoever runs it",
      "Each bookmark has a name, a pausing switch, an arrival transition, its own Go to key, and a note like this tour's talking points.", "left"),
-    ("Continue", "run", (0.0, 0.475, 0.22, 0.80), "One button runs it",
+    ("Continue", "run", (0.0, 0.15, 0.22, 0.60), "One button runs it",
      "Continue is an action like any other, so a key, a MIDI pad or a click can press it.", "right"),
-    ("Run view", "run", (0.22, 0.475, 0.995, 0.76), "A view for show time",
+    ("Run view", "run", (0.22, 0.15, 0.995, 0.61), "A view for show time",
      "Now and next, every bookmark as a button, and clocks against the planned length.", "below"),
 ], base_cam=cam(760 + 0.1 * dist(1800), 540 - 0.04 * dist(1800), dist(1800), 760, 540))
 
