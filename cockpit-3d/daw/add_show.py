@@ -7,7 +7,9 @@ a project imported before the show existed.
 It makes the `tour_tag` scene the show lays over the cockpit, then sets the show; run again,
 it sets the show again in place. Save the project afterwards (File › Save, or Ctrl+S).
 JS_TOKEN and JS_MCP are as for ../jstream/mcp.py. Needs a JStream with shows (protocol
-0.177, JStream ADR-0210).
+0.177, JStream ADR-0210). The show glides to the views' keyframes (`view_…`, with the
+preset `view_glide`), so in a project imported when the views were sequences its view
+markers do nothing: import the show again for those.
 """
 import os
 import sys

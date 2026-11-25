@@ -1,8 +1,8 @@
 """The cockpit tour: a JStream show (JStream ADR-0210, protocol 0.177) that runs through the
 DAW cockpit for an audience, with a readable script in every bookmark's note.
 
-It plays only what import_show.py makes: the camera views (views.py, as sequences), the
-cockpit's sequences (ship_sequences.py: lights, monitors, warp), the hologram's
+It plays only what import_show.py makes: the camera views (views.py, keyframes of the
+cockpit, on the show's keyframe track), the cockpit's sequences (ship_sequences.py: lights, monitors, warp), the hologram's
 (hologram.py), and the `desk_2d` and `brb_2d` scenes. It adds one small scene of its
 own, `tour_tag`, a corner tag that the show lays over the cockpit.
 
@@ -16,6 +16,7 @@ from views import view_id
 
 S = 1000
 FADE = "fade"  # import_show.py's fade preset
+GLIDE = "view_glide"  # and its glide, which the views move with
 
 
 def _play(tid):
@@ -23,7 +24,8 @@ def _play(tid):
 
 
 def _view(shot):
-    return _play(view_id(shot))
+    """A glide to a view: a marker on the keyframe track, not a cue."""
+    return {"keyframe_id": view_id(shot)}
 
 
 # (bookmark id, name, scene on program, length, pausing, [(offset ms, cue id, action)], note)
@@ -46,9 +48,9 @@ CHAPTERS = [
         (0, "seat_wide", _view("seat_wide")),
         (7 * S, "seat_close", _view("seat")),
     ],
-     "Let's sit down. The camera views are sequences too: each one glides the scene camera "
-     "from wherever it is to the view, so I can cut between them on a key, a MIDI note or a "
-     "cue in this show.\n\n"
+     "Let's sit down. The camera views are keyframes of the scene: each one glides the "
+     "camera from wherever it is to the view, so I can move between them on a key, a MIDI "
+     "note or a marker in this show.\n\n"
      "From the pilot's seat you see the three monitors wrapped around you, and the desk "
      "below them."),
     ("desk", "The desk", "cockpit", 18 * S, True, [
@@ -113,7 +115,7 @@ CHAPTERS = [
 
 
 def _build():
-    program, bookmarks, cues, overlays = [], [], [], []
+    program, bookmarks, cues, markers, overlays = [], [], [], [], []
     t = 0
     for n, (bid, name, scene, length, pausing, chapter_cues, note) in enumerate(CHAPTERS):
         clip = {"clip_id": "c_" + bid, "scene_id": scene, "length_ms": length}
@@ -128,7 +130,11 @@ def _build():
         if not pausing:
             b["pausing"] = False
         bookmarks.append(b)
-        cues += [{"cue_id": cid, "at_ms": t + off, "action": action} for off, cid, action in chapter_cues]
+        for off, cid, action in chapter_cues:
+            if "keyframe_id" in action:
+                markers.append(dict(action, marker_id=cid, at_ms=t + off, preset_id=GLIDE))
+            else:
+                cues.append({"cue_id": cid, "at_ms": t + off, "action": action})
         if scene == "cockpit":
             overlays.append({"clip_id": "tag_" + bid, "scene_id": "tour_tag", "start_ms": t + 600,
                              "length_ms": length - 1200, "fade_in_ms": 500, "fade_out_ms": 400})
@@ -145,7 +151,8 @@ def _build():
         "name": "Cockpit tour",
         "program": program,
         "overlays": [{"track_id": "v2", "name": "Tag", "clips": tags}],
-        "sequences": [{"track_id": "s1", "name": "Views, lights and ship", "cues": cues}],
+        "keyframes": markers,
+        "sequences": [{"track_id": "s1", "name": "Lights and ship", "cues": cues}],
         "bookmarks": bookmarks,
         "loops": [{"loop_id": "preshow_loop", "name": "Pre-show", "start_ms": 0,
                    "end_ms": CHAPTERS[0][3], "leave": "at_once"}],

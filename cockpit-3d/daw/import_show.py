@@ -3,13 +3,13 @@
 
 - the 3D DAW cockpit (build_daw.py): the model, its screens atlas, the sky, the lights,
   the reflections, the filters, and the data modifiers that move them with Bitwig;
-- the camera views (views.py) as sequences of the cockpit scene, each gliding the
-  cockpit's camera from wherever it is to the view, and a hotkey for each: Ctrl+Alt+1 to
-  9, 0, - and = (a JStream before sequences, protocol 0.170, gets them as keyframes);
+- the camera views (views.py) as keyframes of the cockpit scene, filed in a `Views` folder
+  under it (a JStream before scene folders, protocol 0.190, leaves them unfiled), each
+  glided to from wherever the camera is, and a hotkey for each: Ctrl+Alt+1 to 9, 0, - and =;
 - the hologram (hologram.py), a display that projects up from the dash: Ctrl+Alt+H
   shows it, Ctrl+Alt+Shift+H hides it (before sequences, Ctrl+Alt+H shows or hides it), and its `holo_feed` source is the one to swap
   for a camera or a screen capture;
-- the Sound Journal title (title.py): the cockpit darkened and slightly blurred under the
+- the Sound Journal title (title.py): whatever is on program darkened under the
   JMH shield and "Sound Journal", faded in by Ctrl+Alt+J and out by Ctrl+Alt+Shift+J;
 - two 2D scenes beside it, "DAW desk 2D" and "Be right back", from the same live data;
 - hotkeys for the scenes: Ctrl+Alt+F1 the cockpit, F2 the 2D desk, F3 be right back;
@@ -31,10 +31,11 @@ no page server and no copies, since the screens' pages go in inline and the mode
 read from this checkout. JS_TOKEN and JS_MCP are as for ../jstream/mcp.py; build_daw.py's
 variables tune the cockpit.
 
-Bitwig's state reaches the scene once the app receives from the JTunnel sender named
-`Bitwig` (the app's own setting, "Receive from JTunnel senders", which only a person
-changes). With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI switches the
-views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
+Bitwig's state reaches the scene once the app receives from its JTunnel sender (the app's
+own setting, "Receive from JTunnel senders", which only a person changes). The cockpit
+names no input, so it reads whichever sender sends (in the desktop app, the live one),
+whatever its name. With NOTES=1, a JTunnel plugin on a Bitwig track that sends MIDI
+switches the views with notes 36 (C1) up on channel 16, in VIEWS order, once the app accepts that
 plugin's sender too: an accepted sender's MIDI reaches the bindings.
 """
 import os
@@ -55,13 +56,8 @@ WARM = int(os.environ.get("WARM", "3"))
 CC = os.environ.get("CC", "0") == "1"
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
 CC_FIRST = int(os.environ.get("CC_FIRST", "20"))
-CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_INPUT = os.environ.get("CC_INPUT", "")
 CC_SMOOTHING_MS = int(os.environ.get("CC_SMOOTHING_MS", "50"))
-# How the camera follows its view channels: a little smoothing hides the values thread's
-# ticks, which aren't in step with the frames.
-VIEW_SMOOTHING_MS = int(os.environ.get("VIEW_SMOOTHING_MS", "40"))
-# SEQUENCES=0 makes the views keyframes, as before JStream had sequences.
-SEQUENCES = os.environ.get("SEQUENCES", "1") == "1"
 
 # The camera's CCs, from CC_FIRST up, in this order: the property and how far the CC's
 # top (127) takes it from the view. Each rests at the view (from 0), since a CC reads 0
@@ -120,63 +116,44 @@ mcp._close()
 mcp.S["sid"] = None
 init()
 
-from views import SHOTS, VIEWS, sequences, view_id  # noqa: E402
+from views import SHOTS, VIEWS, filing, keyframes, view_id  # noqa: E402
 
-# ---- the camera views ----
+# Whether this JStream has sequences (protocol 0.170), which the cockpit's lights, monitors,
+# warp and hologram are: one protocol after the channels they move (build_daw.py's CHANNELS).
+SEQ = CHANNELS
+
+# ---- the camera views: a keyframe of the cockpit each, glided to with a Move, whose preset
+# has an ID of its own so a project with a `glide` already (the demo project's tour) keeps it ----
+GLIDE = "view_glide"
 must(op({"type": "transition.create", "preset_id": "fade", "name": f"Fade {FADE_MS} ms",
          "kind": "fade", "duration_ms": FADE_MS, "easing": "ease_in_out"}), "fade")
-VIEW_CHANNELS, VIEW_MOTION, VIEW_TIMELINES = sequences(GLIDE_MS, VIEW_SMOOTHING_MS)
-
-
-def sequence_views():
-    """The views as sequences: channels for the camera's fields, the cockpit's camera
-    following them, and a sequence a view that glides them there. All or nothing, so a
-    JStream without sequences (before protocol 0.170) refuses the lot."""
-    edits = [{"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS["cockpit"]}]
-    edits += [{"type": "channel.set", "channel": ch} for ch in VIEW_CHANNELS]
-    edits.append({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": VIEW_MOTION})
-    edits += [{"type": "timeline.set", "scene_id": "cockpit", "timeline": t} for t in VIEW_TIMELINES]
-    text, ok = batch(edits, "view sequences")
-    if not ok:
-        print("no sequences in this JStream (protocol 0.170): the views are keyframes",
-              file=sys.stderr)
-    return ok
-
-
-def keyframe_views():
-    """The views as keyframes of the cockpit, each switched to with a glide."""
-    must(op({"type": "transition.create", "preset_id": "glide", "name": f"Glide {GLIDE_MS} ms",
-             "kind": "move", "duration_ms": GLIDE_MS, "easing": "ease_in_out"}), "glide")
-    edits = []
-    for shot, name, _ in VIEWS:
-        if shot == "cockpit":
-            edits.append({"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS[shot]})
-            continue
-        edits += [{"type": "scene.create_variant", "scene_id": "view_" + shot,
-                   "variant_of": "cockpit", "name": f"Cockpit · {name}"},
-                  {"type": "scene.set_camera", "scene_id": "view_" + shot, "camera": SHOTS[shot]}]
-    must(batch(edits, "views"), "views")
-
-
-SEQ = SEQUENCES and sequence_views()
-if not SEQ:
-    keyframe_views()
-
-
-def view_scene(shot):
-    """The scene a view draws through: the cockpit itself with sequences, else its keyframe."""
-    return "cockpit" if SEQ or shot == "cockpit" else "view_" + shot
+# Eased in and out as the views were when they were sequences: a lane's `ease_in_out` is
+# smoothstep, 3t² - 2t³, which is exactly this cubic Bézier; a Move's own `ease_in_out` is a
+# steeper cubic.
+SMOOTHSTEP = {"cubic_bezier": {"x1": 1 / 3, "y1": 0.0, "x2": 2 / 3, "y2": 1.0}}
+must(op({"type": "transition.create", "preset_id": GLIDE, "name": f"View glide {GLIDE_MS} ms",
+         "kind": "move", "duration_ms": GLIDE_MS, "easing": SMOOTHSTEP}), "glide")
+must(batch([{"type": "scene.set_camera", "scene_id": "cockpit", "camera": SHOTS["cockpit"]}]
+           + keyframes(), "views"), "views")
+# Each view glides in however it is switched to (the Scenes list, Studio's take, a Stream
+# Deck key), not only from its hotkey: its own transition in is the glide.
+must(batch([{"type": "scene.set_transitions", "scene_id": view_id(shot), "transition_in": GLIDE}
+            for shot, _, _ in VIEWS], "views' glide"), "views' glide")
+text, ok = batch(filing(), "views folder")
+if not ok:
+    print("no scene folders in this JStream (protocol 0.190): the views are left unfiled",
+          file=sys.stderr)
 
 
 def view_action(shot):
-    """What a view's hotkey or note runs."""
-    if SEQ:
-        return {"type": "timeline.play", "timeline_id": view_id(shot)}
-    return {"type": "scene.switch", "scene_id": view_scene(shot), "preset_id": "glide"}
+    """What a view's hotkey or note runs: a glide to its keyframe, from wherever the camera
+    is, mid-glide too."""
+    return {"type": "scene.switch", "scene_id": view_id(shot), "preset_id": GLIDE}
 
 
-# One camera a scene that draws a view: with sequences, the cockpit's alone.
-VIEW_CAMERAS = {view_scene(shot): SHOTS[shot] for shot, _, _ in VIEWS if view_scene(shot) != "cockpit"}
+# Every scene that draws a view, and its camera: the cockpit (the wide view's) and each
+# view's keyframe.
+VIEW_CAMERAS = {view_id(shot): SHOTS[shot] for shot, _, _ in VIEWS}
 VIEW_CAMERAS["cockpit"] = SHOTS["cockpit"]
 
 
@@ -208,6 +185,11 @@ if SOURCES:
     # The desk too: its pads and meter bridge (with their unlit pages, which keep the
     # lights' switches) or a camera.
     must(batch(sources.desk_edits(BUILT["DESK_LAYERS"]), "desk source"), "desk source")
+    # Listed in the Scenes panel, so a person opens one and toggles what it shows.
+    text, ok = batch(sources.filing(HOLOGRAM), "monitor sources folder")
+    if not ok:
+        print("no scene folders in this JStream: the monitor sources are left unfiled",
+              file=sys.stderr)
 
 
 # ---- two 2D scenes from the same live data ----
@@ -270,15 +252,14 @@ if SHIP:
             for _, key, action in ship_sequences.CONTROLS if key]
     must(batch(seq, "ship sequences"), "ship sequences")
 
-# ---- the Sound Journal title (title.py): the cockpit darkened and blurred under the JMH
+# ---- the Sound Journal title (title.py): an overlay darkening program under the JMH
 # shield and "Sound Journal", faded in on Ctrl+Alt+J and out on Ctrl+Alt+Shift+J ----
 import title  # noqa: E402
 
 TITLE = False
 if SHIP:
     try:
-        title.add("cockpit", [BUILT["cc_input"](title.TITLE_CC, 0.0, 1.0, 50)]
-                  + BUILT["mod_inputs"]("title"))
+        title.add()
         TITLE = True
     except SystemExit as e:
         print(f"no Sound Journal title ({e}); importing the rest", file=sys.stderr)
@@ -319,17 +300,15 @@ if NOTES:
 
 if CC:
     # Camera motion belongs to the scene's family, so the cockpit's offsets every view
-    # alike and carries through a glide between them. With sequences the views' own
-    # channels come first in the same list, and the CCs add to wherever they put it.
+    # alike and carries through a glide between them.
     motion = [{"modifier_id": "cc_" + prop, "property": prop, "kind": "midi",
-               "controller": CC_FIRST + i, "channel": CC_CHANNEL, "input": CC_INPUT,
+               "controller": CC_FIRST + i, "channel": CC_CHANNEL, **({"input": CC_INPUT} if CC_INPUT else {}),
                "from": 0, "to": to,
                "smoothing_ms": 0 if prop == "autofocus" else CC_SMOOTHING_MS}
               for i, (prop, to) in enumerate(CAMERA_CCS)]
     # Roll and the autofocus switch are the last two: a JStream before protocol 0.167 caps
     # a camera at 8 modifiers and has no autofocus, so it gets the first 8 only.
-    base = VIEW_MOTION if SEQ else []
-    text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": base + motion})
+    text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit", "motion": motion})
     if ok:
         cams = []
         for sid, view in VIEW_CAMERAS.items():
@@ -341,7 +320,7 @@ if CC:
         print("camera CCs: 20 to 29, autofocus on")
     else:
         text, ok = op({"type": "scene.set_camera_motion", "scene_id": "cockpit",
-                       "motion": base + motion[:8]})
+                       "motion": motion[:8]})
         if ok:
             print("camera CCs: 20 to 27; this JStream has no roll CC or autofocus (before "
                   "protocol 0.167)", file=sys.stderr)
@@ -353,7 +332,7 @@ if CC:
 # the scene list, and last, since opening the project puts its first scene on program ----
 must(batch([{"type": "scene.set_role", "scene_id": "atlas", "role": "group"},
             {"type": "scene.reorder", "scene_id": "atlas",
-             "index": (1 if SEQ else len(VIEWS)) + 2 + TITLE}], "atlas"), "atlas")
+             "index": 1 + len(VIEWS) + 2 + TITLE}], "atlas"), "atlas")
 
 # ---- the cockpit tour, a show (show_tour.py) that runs through all of it; a JStream
 # without shows (before protocol 0.177) imports the rest ----
@@ -369,7 +348,7 @@ text, ok = op({"type": "studio.set_warm", "scenes": WARM})
 if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
-print("imported: views Ctrl+Alt+1..0, -, =" + (" (sequences)" if SEQ else " (keyframes)")
+print("imported: views Ctrl+Alt+1..0, -, = (keyframes)"
       + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W; drift D, Shift+D" if SHIP else "")
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ

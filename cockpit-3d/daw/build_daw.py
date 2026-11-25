@@ -34,12 +34,12 @@ from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
-from live_readouts import READOUTS_AT, SIDE_AT  # noqa: E402
+from live_readouts import SIDE_AT  # noqa: E402
 from ship_sequences import DRIFT_DEG  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
-INPUT = os.environ.get("DAW_INPUT", "Bitwig")
+INPUT = os.environ.get("DAW_INPUT", "")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
@@ -53,7 +53,7 @@ SHIP_PITCH = float(os.environ.get("SHIP_PITCH", "0"))
 SHIP_ROLL = float(os.environ.get("SHIP_ROLL", "0"))
 WARP = float(os.environ.get("WARP", "0"))
 SHIP_CC_CHANNEL = int(os.environ.get("SHIP_CC_CHANNEL", "16"))
-SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "Bitwig")
+SHIP_CC_INPUT = os.environ.get("SHIP_CC_INPUT", "")
 SHIP_CC_WARP = int(os.environ.get("SHIP_CC_WARP", "30"))
 SHIP_CC_YAW = int(os.environ.get("SHIP_CC_YAW", "31"))
 SHIP_CC_PITCH = int(os.environ.get("SHIP_CC_PITCH", "32"))
@@ -101,7 +101,7 @@ SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
 SWITCH_UP = os.environ.get("SWITCH_UP", "off")
 SWITCH_FADE_MS = int(os.environ.get("SWITCH_FADE_MS", "2000"))
 CC_CHANNEL = int(os.environ.get("CC_CHANNEL", "16"))
-CC_INPUT = os.environ.get("CC_INPUT", "Bitwig")
+CC_INPUT = os.environ.get("CC_INPUT", "")
 # The groups, in CC order, then the master.
 GROUPS = ["cabin", "desk", "screens", "glow"]
 SWITCH_CC = {g: SWITCH_FIRST + i for i, g in enumerate(GROUPS + ["master"])}
@@ -136,10 +136,16 @@ def must(result, what):
     return text
 
 
+def _input(name):
+    """The `input` field naming the sender `name`, or none at all, which reads any sender
+    (or, in the desktop app, the live one)."""
+    return {"input": name} if name else {}
+
+
 def data(mid, prop, key, field, frm, to, smoothing=60, states=None, rng=(0.0, 1.0), curve="linear", **kw):
     """A `data` motion modifier (ADR-0171 decision 3) on `prop`."""
     m = {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "data",
-         "input": INPUT, "key": key, "field": field, "range": list(rng), "smoothing_ms": smoothing,
+         **_input(INPUT), "key": key, "field": field, "range": list(rng), "smoothing_ms": smoothing,
          "curve": curve, "from": frm, "to": to}
     if states:
         m["states"] = states
@@ -159,14 +165,14 @@ def follow(mid, prop, channel, at0, at1, smoothing=30, **kw):
 def cc_input(controller, at0, at1, smoothing, channel=CC_CHANNEL, sender=CC_INPUT):
     """A channel's input reading a MIDI CC: `at0` at 0 and `at1` at 127, as channel values."""
     return {"kind": "midi", "control": "cc", "controller": controller, "channel": channel,
-            "input": sender, "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
+            **_input(sender), "smoothing_ms": smoothing, "curve": "linear", "from": at0, "to": at1}
 
 
 def mod_inputs(channel, smoothing=30):
     """`channel`'s JTunnel Mod as a list of one input, 0 to 1 onto 0 to 1: [] without one."""
     if not MODS or channel not in MOD:
         return []
-    return [{"kind": "data", "input": MOD_INPUT or INPUT, "key": "params",
+    return [{"kind": "data", **_input(MOD_INPUT or INPUT), "key": "params",
              "field": f"values.{MOD[channel] - 1}", "range": [0.0, 1.0], "smoothing_ms": smoothing,
              "curve": "linear", "from": 0.0, "to": 1.0}]
 
@@ -179,7 +185,7 @@ def gate(group, prop="opacity", off=-1.0, **kw):
     frm, to = (0.0, off) if SWITCH_UP == "off" else (off, 0.0)
     m = {"modifier_id": f"switch_{group}", "property": prop, "enabled": True, "clock": "engine",
          "kind": "midi", "control": "cc", "controller": SWITCH_CC[group], "channel": CC_CHANNEL,
-         "input": CC_INPUT, "smoothing_ms": SWITCH_FADE_MS, "curve": "linear", "from": frm, "to": to}
+         **_input(CC_INPUT), "smoothing_ms": SWITCH_FADE_MS, "curve": "linear", "from": frm, "to": to}
     m.update(kw)
     return m
 
@@ -296,14 +302,6 @@ ed += [src("bridge", "Meter bridge", "browser", {
         **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
 DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
 ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
-# The consoles' amber readouts and small LEDs: one page, `readouts`, in the space the side
-# monitors gave up; each readout and LED of the model maps its own cell of it
-# (tools/live_readouts.py).
-RX, RY, RW, RH = READOUTS_AT
-ed += [src("readouts", "Console readouts and LEDs", "browser", {
-        **page("readouts", RW, RH), "width": RW, "height": RH, "fps": 30,
-        "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
-       add("atlas", "a_readouts", "readouts", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 ed += [
     add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
     add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
@@ -328,16 +326,7 @@ if CHANNELS or SWITCHES:
     else:
         ed += [cover("a_off", 0, 0, 1920, 1080)]
     ed += [cover("off_master", 0, 0, 1920, 1080)]
-# The readouts and LEDs belong to the Glow switch, as the model's glowing materials do: a
-# black cover over their page, cleared while the glow is on (`off_master` covers them with
-# the rest while the master is off).
-if SWITCHES or CHANNELS:
-    ed += [src("readouts_off", "Readouts off", "color", {"color": "#000000ff", "width": 64, "height": 64}),
-           add("atlas", "off_readouts", "readouts_off", geo(RX + RW / 2, RY + RH / 2, RW, RH, fit_mode="stretch"))]
 must(batch(ed, "atlas"), "atlas")
-if SWITCHES or CHANNELS:
-    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "off_readouts",
-             "motion": [uncover("glow")]}), "readouts switch")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
         "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
@@ -578,7 +567,7 @@ motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0
 # rests until its CC first moves (a CC reads 0 until then).
 def cc(mid, prop, controller, frm, to, **kw):
     return {"modifier_id": mid, "property": prop, "enabled": True, "clock": "engine", "kind": "midi",
-            "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, "input": SHIP_CC_INPUT,
+            "control": "cc", "controller": controller, "channel": SHIP_CC_CHANNEL, **_input(SHIP_CC_INPUT),
             "from": frm, "to": to, "smoothing_ms": SHIP_CC_SMOOTHING_MS, **kw}
 
 

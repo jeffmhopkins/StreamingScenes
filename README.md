@@ -23,14 +23,16 @@ set it up in JStream, and demo videos and stills.
 | Lightning tour (no pauses) | The title, Keyframes, the 3D cockpit stills and Thanks, looping. |
 
 Open it from a checkout of this repo (**File › Open project…**): its pictures, fonts and the
-cockpit's model are found by their paths from the root. It needs a JStream with shows
-(protocol 0.177). The cockpit's screens follow Bitwig once the app receives from the
-JTunnel sender `Bitwig` ([its README](cockpit-3d/daw/README.md#importing-the-show)).
+cockpit's model are found by their paths from the root. It needs a JStream with scene folders
+(protocol 0.190, the alpha.13 train), where the cockpit's views are keyframes in a `Views`
+folder under it. The cockpit's screens follow Bitwig once the app receives from
+Bitwig's JTunnel sender, whatever its name: the project names no input, so it reads the
+live sender ([its README](cockpit-3d/daw/README.md#importing-the-show)).
 
 Bitwig: the cockpit is built with every Bitwig input its import offers, all on MIDI
-channel 16 from the JTunnel sender `Bitwig`:
+channel 16, from whichever JTunnel sender is live:
 - the live data on its screens, readouts, desk lights and LEDs
-- the light switches (CCs 40 to 44), the ship (CCs 30 to 33) and the Sound Journal title (CC 45)
+- the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
 - the camera CCs 20 to 29, which also give each view its depth of field and autofocus
 - notes from 36 up that switch the views and play the cockpit's sequences
 - the JTunnel Mods
