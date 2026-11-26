@@ -3,7 +3,7 @@
 <body><canvas id="c" width="640" height="360"></canvas><script>
 // One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
-// transport, arrange, device, notes, mixer, clip, scenes, iso, isopads, bridge, bridgepads, panels or readouts (or `window.DAW_VIEW`, set by a
+// transport, arrange, device, notes, mixer, clip, scenes, iso, isopads, bridge, bridgepads, panels, clocks or readouts (or `window.DAW_VIEW`, set by a
 // script ahead of this one when the page is given to JStream inline). Everything that moves or
 // blinks follows the data (the clock key's beats), never the page's own clock, so a
 // render on a held clock draws the same picture every time. `?w=` (or `window.DAW_W`) sets
@@ -186,6 +186,38 @@ function wave(list, w, h) {
   const n = 120, dx = (w - 12) / (n - 1), off = n - list.length;
   list.forEach((v, i) => { const px = 6 + (off + i) * dx, py = h - 8 - Math.min(1, v) * (h - 16); i ? x.lineTo(px, py) : x.moveTo(px, py); });
   x.stroke();
+}
+// Seven-segment text: each character a cell of width cw (a '.' or ':' after a character
+// lights between it and the next), every cell's unlit 8 dim behind it, as an LED display.
+function segLine(text, px, py, cw, h) {
+  const cells = [];
+  for (const ch of String(text)) {
+    if ((ch === '.' || ch === ':') && cells.length) cells[cells.length - 1].mark = ch;
+    else cells.push({ ch });
+  }
+  cells.forEach((c, i) => {
+    const cx = px + i * cw, w = cw * .72, t = Math.max(2, w / 6);
+    seg(8, cx, py, w, h, AMB_DIM); seg(c.ch, cx, py, w, h, AMB);
+    const dx = cx + w + (cw - w) / 2 - t / 2;
+    x.fillStyle = c.mark === '.' ? AMB : AMB_DIM; x.fillRect(dx, py + h - t, t, t);
+    x.fillStyle = c.mark === ':' ? AMB : AMB_DIM;
+    x.fillRect(dx, py + h * .3, t, t); x.fillRect(dx, py + h * .65, t, t);
+  });
+}
+// The stopwatch: from the engine's clock, since the last reset (or since the app opened).
+// A reset is the shared value `stopwatch.reset` turning true (the `Stopwatch reset`
+// sequence), or JTunnel Mod STOPWATCH_MOD crossing its middle either way (a toggle).
+const STOPWATCH_MOD = 25;
+let swBase = 0, swMod = null;
+function swNow() { return window.jstream && jstream.clock ? jstream.clock.now() : performance.now() / 1000; }
+function swReset() { swBase = swNow(); dirty = true; }
+if (window.jstream && jstream.addEventListener) jstream.addEventListener('value', e => {
+  const d = e.detail || e; if (d.name === 'stopwatch.reset' && d.value) swReset();
+});
+function swMods() {
+  const v = ((D.params && D.params.values) || [])[STOPWATCH_MOD - 1];
+  if (typeof v !== 'number') return;
+  const on = v >= .5; if (swMod !== null && on !== swMod) swReset(); swMod = on;
 }
 const NAMES = ['C', 'C#', 'd', 'd#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'b'];
 const panel = {
@@ -678,6 +710,23 @@ const views = {
       panel[name](w, h); x.restore();
     }
   },
+  // The two seven-segment displays (cockpit-3d/tools/live_panels.py, CLOCKS), 640 x 160:
+  // left, the transport's bar.beat.sixteenth over its tempo; right, the stopwatch.
+  clocks() {
+    swMods();
+    x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+    for (const px of [0, 320]) { x.fillStyle = 'rgb(10,6,3)'; x.fillRect(px + 2, 2, 316, H - 4); }
+    const c = clock(), six = Math.min(4, Math.floor((c.beatPhase || 0) * 4) + 1);
+    segLine(`${String((c.bar || 1) % 1000).padStart(3)}.${c.beat || 1}.${six}`, 14, 14, 58, 84);
+    const t = c.tempo || 0;
+    segLine(`${String(Math.floor(t) % 1000).padStart(3)}.${Math.floor(t * 10) % 10}`, 14, 112, 26, 34);
+    txt('BPM', 126, 140, 14, `rgba(${AMBER},.7)`, 'left', 700);
+    x.fillStyle = c.playing ? `rgb(${GREEN})` : `rgb(${RED})`; x.fillRect(290, 132, 14, 8);
+    const s = Math.max(0, Math.floor(swNow() - swBase)), hh = Math.floor(s / 3600) % 100;
+    const mm = Math.floor(s / 60) % 60, ss = s % 60, p2 = n => String(n).padStart(2, '0');
+    segLine(`${p2(hh)}:${p2(mm)}:${p2(ss)}`, 334, 30, 48, 80);
+    txt('ELAPSED', 334, 140, 14, `rgba(${AMBER},.7)`, 'left', 700);
+  },
   // The consoles' amber readouts and small LEDs, live (see drawReadouts).
   readouts() { drawReadouts(); },
   scenes() {
@@ -742,7 +791,7 @@ function take() {
 }
 function draw() {
   if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
-  else if (window.jstream && jstream.data) { if (dirty || fading) { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts'].includes(VIEW)) scan(); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (dirty || fading || VIEW === 'clocks') { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }

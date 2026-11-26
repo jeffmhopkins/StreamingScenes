@@ -42,6 +42,7 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/live_panels.py`](tools/live_panels.py) | The console's live panel: the button panel that shows a cell of the screens atlas, and where. |
 | [`tools/live_readouts.py`](tools/live_readouts.py) | Runs last: gives the side monitors smaller cells and moves every amber readout and every LED of 2 cm or less onto the `screens` material, each in a cell of its own, so a live source can drive each one. [`tools/unlive_readouts.py`](tools/unlive_readouts.py) puts the readouts and LEDs back and keeps the side cells, as the committed model has them. See [Readouts and LEDs](#readouts-and-leds). |
 | [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panel to an exported `cockpit.gltf` without Blender. |
+| [`tools/add_transport.py`](tools/add_transport.py) | Adds the transport's beat and play lights and two seven-segment displays (the transport's, in front of the left monitor, and a stopwatch, under the right one) to a built model, placed by the console's layout. See [Transport lights and displays](#transport-lights-and-displays). |
 | [`tools/trim_live_panels.py`](tools/trim_live_panels.py) | Takes the readouts' retired live panels off a model built with them, by where they sit, so it also works on a copy whose screens were re-mapped. |
 | [`tools/softkeys.py`](tools/softkeys.py), [`tools/add_softkeys.py`](tools/add_softkeys.py) | The soft keys a scene can light: where they are and which atlas pixels light them, and the script that adds their lights and the hologram's keys to an exported `cockpit.gltf`. See [Soft keys](#soft-keys). |
 | [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles none of several thousand sampled views can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
@@ -54,7 +55,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 147,281 (the optimised 147,201, then the soft keys' 100, less the 20 of the retired readout panels) | 2,000,000 |
+| Triangles | 147,345 (the optimised 147,201, then the soft keys' 100, less the 20 of the retired readout panels, then the transport lights' and displays' 64) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -182,8 +183,22 @@ readouts were live panels too, and are the model's own amber readouts again
 (`READOUTS_RETIRED`; `tools/trim_live_panels.py` takes their quads off an older build).
 
 The side monitors are a third as wide as the big ones, so their cells are a quarter as big
-(320 × 180, still more pixels a millimetre than the big monitors get). The 640 × 540 they
-leave, 1280, 540 to 1920, 1080, is free.
+(320 × 180, still more pixels a millimetre than the big monitors get). Of the 640 × 540
+they leave, 1280, 540 to 1920, 1080, the top 640 × 160 holds the transport's displays
+(below); the rest is free.
+
+### Transport lights and displays
+
+`tools/add_transport.py` adds, over two of the amber readouts (`CLOCKS` in
+[`tools/live_panels.py`](tools/live_panels.py)), a display each on `screens`: the left
+wing's readout in front of the left monitor (`console_wing_L_fwdb`, 16 × 8 cm) maps
+1280, 540 to 1600, 700 for the transport's position and tempo, and the right wing's under
+the right monitor (`console_wing_R_fwdbbb`, 7 × 3 cm) maps 1600, 540 to 1920, 700 for a
+stopwatch (node `transport_panel`). Along the left readout's far edge, toward the monitor,
+it adds a row of LEDs (node `transport_leds`): four beat lights, each its own material
+(`led_beat_1` to `led_beat_4`, amber), and a play light whose face is stripes of
+`led_play` (green) and `led_stop` (red), so it shows whichever is lit. The DAW scene drives
+them ([daw/README.md](daw/README.md#transport-lights-and-stopwatch)).
 
 ### Readouts and LEDs
 
@@ -204,7 +219,8 @@ and give the model source `texture` = that scene and `texture_material` = `scree
 `panel`, `paint`, `paint_dark`, `floor`, `leather`, `plastic`, `hexpanel` (tiling PBR sets),
 `glass` (blended and unlit), `decals` (alpha-masked labels and stripes), `readout` (the amber
 displays, emissive from the readout atlas), `light_strip` and `led_amber`, `led_red`,
-`led_green`, `led_blue` (emissive), `glow_amber` (the dim orange accent strips), and
+`led_green`, `led_blue`, `led_beat_1` to `led_beat_4`, `led_play`, `led_stop` (emissive),
+`glow_amber` (the dim orange accent strips), and
 `screens` above.
 
 ## In JStream
