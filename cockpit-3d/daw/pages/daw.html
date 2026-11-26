@@ -894,17 +894,31 @@ function unchanged() {
   if (now === showing) return true;
   showing = now; return false;
 }
+// `?debug=1` (or `window.DAW_DEBUG = 1`) prints, in the bottom-right corner, the page's
+// frames (rAF callbacks), draws and data updates a second over the last 2 s, and whether
+// the data's clock plays and keeps pace: to tell a browser that slows the page's frames
+// from data that slows down. Drawn every frame, so the page paints every frame.
+const DEBUG = String(window.DAW_DEBUG ?? new URLSearchParams(location.search).get('debug') ?? '0') === '1';
+const rates = { frames: [], draws: [], updates: [] };
+function debugRates() {
+  const now = performance.now(), per = k => { const a = rates[k]; while (a.length && a[0] < now - 2000) a.shift(); return (a.length / 2).toFixed(1); };
+  rates.frames.push(now);
+  const c = dataClock(), t = `F ${per('frames')} D ${per('draws')} U ${per('updates')} ${c.playing ? 'PLAY' : 'STOP'}${pace ? ' PACE' : ''}`;
+  x.save(); x.font = `700 12px ${MONO}`; const w = x.measureText(t).width + 10;
+  x.fillStyle = '#000'; x.fillRect(W - w, H - 18, w, 18); x.fillStyle = '#ff0'; x.textAlign = 'left'; x.fillText(t, W - w + 5, H - 5); x.restore();
+}
 let fresh = false;   // an update came since the last frame: it is taken once, at the frame
 function draw() {
-  if (fresh) { fresh = false; take(); }
+  if (fresh) { fresh = false; take(); if (DEBUG) rates.updates.push(performance.now()); }
   const before = shown;
   shown = ahead(dataClock(), before);
   // Only the views that move with the clock draw every frame; the rest change only with
   // the data, and draw when it does.
   const moving = SMOOTH && shown.playing && MOVES;
   if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
-  else if (window.jstream && jstream.data) { if (fading || moving || VIEW === 'clocks' || (dirty && !unchanged())) { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (fading || moving || VIEW === 'clocks' || (dirty && !unchanged())) { views[VIEW](); if (DEBUG) rates.draws.push(performance.now()); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
+  if (DEBUG) debugRates();
   requestAnimationFrame(draw);
 }
 // An update reports each key that changed as an event of its own; the page reads them all
