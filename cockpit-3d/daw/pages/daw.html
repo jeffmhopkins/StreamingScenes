@@ -5,8 +5,9 @@
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
 // transport, arrange, device, notes, mixer, clip, scenes, iso, isopads, bridge, bridgepads, panels, clocks or readouts (or `window.DAW_VIEW`, set by a
 // script ahead of this one when the page is given to JStream inline). Everything that moves or
-// blinks follows the data (the clock key's beats), never the page's own clock, so a
-// render on a held clock draws the same picture every time. `?w=` (or `window.DAW_W`) sets
+// blinks follows the data (the clock key's beats), so a render on a held clock draws the
+// same picture every time; while the data's clock runs in real time, the page runs it on
+// between updates, for smooth motion (see `ahead`). `?w=` (or `window.DAW_W`) sets
 // the width and `?h=` (or `window.DAW_H`) the height; the desk's note grid is 600 wide, and the
 // `readouts` view (the consoles' amber readouts and small LEDs) is 640 x 540.
 const VIEW = window.DAW_VIEW || new URLSearchParams(location.search).get('view') || 'transport';
@@ -51,7 +52,10 @@ function frame(title, right) {
   if (right) txt(right, W - 16, 24, 13, `rgba(${CYAN},.8)`, 'right', 500);
 }
 function scan() { for (let y = 0; y < H; y += 3) { x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, y, W, 1); } }
-function clock() { return D.clock || { beats: 0, bar: 1, beat: 1, beatPhase: 0, playing: false, tempo: 0 }; }
+function dataClock() { return D.clock || { beats: 0, bar: 1, beat: 1, beatPhase: 0, playing: false, tempo: 0 }; }
+// The clock this draw shows: the data's, moved on between updates while it plays (see ahead).
+let shown = null;
+function clock() { return shown || dataClock(); }
 function blinkOn() { return Math.floor((clock().beats || 0) * 2) % 2 === 0; }
 function tracks() {
   const out = [];
@@ -754,7 +758,8 @@ const views = {
 
 function take() {
   D = jstream.data();
-  const c = clock(), b = c.beats || 0;
+  const c = dataClock(), b = c.beats || 0;
+  paced(c);
   if (b < lastBeats - 1) {  // the clock went back: start the counts and patterns again
     history.length = 0; for (const k in onsets) delete onsets[k];
     counts.fill(0); counts.length = 8; total = 0; started.length = 0; chroma.fill(0);
@@ -792,12 +797,53 @@ function take() {
   for (const k in onsets) onsets[k] = onsets[k].filter(t => t > b - 4);
   dirty = true;
 }
+// ---- smooth motion between data updates ----
+// The engine sends the page at most one update a page frame, on its own timer, so updates
+// land out of step with the page's frames: some frames get none and some two. A page that
+// drew only on an update would paint fewer frames than its rate, and what moves (the
+// playheads, the notes' scroll, the beat lamps) would step unevenly. So while the transport
+// plays the page draws every frame, and the clock it shows runs on from the last update at
+// the tempo: by at most AHEAD_MS, never past the next beat (so the bar and beat stay the
+// data's) and never back. It runs on only while the data's clock has been keeping pace with
+// the page's, so a render on a held clock, stepped slower than real time, draws exactly the
+// data. `?smooth=0` (or `window.DAW_SMOOTH = 0`) draws only on updates, as before.
+const SMOOTH = String(window.DAW_SMOOTH ?? new URLSearchParams(location.search).get('smooth') ?? '1') !== '0';
+const AHEAD_MS = 150;
+let tick = null;     // [the data's beats, page ms] when they last changed
+let pace = false;    // whether the data's clock has been running in real time
+function paced(c) {
+  const ms = performance.now(), b = c.beats || 0;
+  if (tick && b === tick[0]) return;
+  if (tick && c.playing && c.tempo > 0) {
+    const dt = ms - tick[1], rate = (b - tick[0]) * 60000 / c.tempo / Math.max(1, dt);
+    pace = dt < 400 && rate > 0.6 && rate < 1.6;
+  } else pace = false;
+  tick = [b, ms];
+}
+function ahead(c, before) {
+  if (!SMOOTH || !pace || !tick || !c.playing || !(c.tempo > 0) || c.beats !== tick[0]) return c;
+  const room = 1 - (c.beatPhase || 0) - 1e-3, b = c.beats || 0;
+  let d = Math.min(AHEAD_MS, performance.now() - tick[1]) * c.tempo / 60000;
+  // Never back: an update a little behind the last frame's clock holds it (a loop or a
+  // jump, more than a tenth of a beat back, is the data's own).
+  if (before && before.playing && before.beats > b && before.beats - b < 0.1) d = Math.max(d, before.beats - b);
+  d = Math.max(0, Math.min(d, room));
+  if (!d) return c;
+  return Object.assign({}, c, { beats: b + d, beatPhase: (c.beatPhase || 0) + d, seconds: (c.seconds || 0) + d * 60 / c.tempo });
+}
+let fresh = false;   // an update came since the last frame: it is taken once, at the frame
 function draw() {
+  if (fresh) { fresh = false; take(); }
+  const before = shown;
+  shown = ahead(dataClock(), before);
+  const moving = SMOOTH && shown.playing;
   if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
-  else if (window.jstream && jstream.data) { if (dirty || fading || VIEW === 'clocks') { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (dirty || fading || moving || VIEW === 'clocks') { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }
-if (window.jstream && jstream.addEventListener) jstream.addEventListener('data', take);
+// An update reports each key that changed as an event of its own; the page reads them all
+// once, at its next frame, rather than once a key.
+if (window.jstream && jstream.addEventListener) jstream.addEventListener('data', () => { fresh = true; });
 requestAnimationFrame(draw);
 </script></body></html>
