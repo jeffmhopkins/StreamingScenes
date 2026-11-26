@@ -11,13 +11,13 @@ one per soft key, left to right:
 
 | Key | Source | On every monitor and the hologram |
 |---|---|---|
-| 1 | `p_transport` | the transport page |
+| 1 | `p_transport` (`p_notes` on the left monitor) | the transport page (the left monitor: the notes page) |
 | 2 | `p_arrange` | the arrangement page |
 | 3 | `p_device` | the device page |
 | 4 | `p_mixer` | the mixer page |
 | 5 | `feed` (`holo_feed` on the hologram) | a camera feed: a stand-in still until a person points the item at a webcam or a capture |
 
-The left monitor starts on the transport, the centre on the arrangement, the right on the
+The left monitor starts on the notes, the centre on the arrangement, the right on the
 device, and the hologram on its feed, as before. Because the screen is just the subscene,
 a person customises it as any scene: toggle an item's visibility in the app, point an
 item (`src_<screen>_<slot>`) at another source, or add, move and layer items of their own.
@@ -63,10 +63,19 @@ KEY_UNLIT = os.environ.get("KEY_UNLIT", "#2a2219ff")
 SLOTS = [("transport", "Transport", "p_transport"), ("arrange", "Arrangement", "p_arrange"),
          ("device", "Device", "p_device"), ("mixer", "Mixer", "p_mixer"),
          ("feed", "Camera feed", None)]
+# A screen whose first key shows something else: the left monitor's is the notes page (the
+# notes playing, scrolling), which it starts on.
+FIRST_SLOT = {"left": ("notes", "Notes", "p_notes")}
+
+
+def slots(screen):
+    """`screen`'s five slots, left to right."""
+    return [FIRST_SLOT.get(screen, SLOTS[0])] + SLOTS[1:]
+
 # (screen, its name, the atlas item or hologram card that shows it, the slot it starts on,
 # the keys after Ctrl+Alt+Shift, one a slot)
 SCREENS = [
-    ("left", "Left monitor", "a_left", "transport", ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5"]),
+    ("left", "Left monitor", "a_left", "notes", ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5"]),
     ("center", "Centre monitor", "a_center", "arrange", ["Digit6", "Digit7", "Digit8", "Digit9", "Digit0"]),
     ("right", "Right monitor", "a_right", "device", ["KeyY", "KeyU", "KeyI", "KeyO", "KeyP"]),
     ("holo", "Hologram", "holo_card", "feed", ["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB"]),
@@ -94,7 +103,7 @@ def controls(hologram=True):
     for screen, name, _, _, keys in SCREENS:
         if screen == "holo" and not hologram:
             continue
-        for (slot, sname, _), key in zip(SLOTS, keys):
+        for (slot, sname, _), key in zip(slots(screen), keys):
             out.append((f"{name}: {sname}", "Ctrl+Alt+Shift+" + key, action(screen, slot)))
     return out
 
@@ -129,7 +138,7 @@ def edits(hologram=True, gates=(), unlit_gates=()):
         e += [{"type": "scene.create", "scene_id": sid, "name": f"{name} source"},
               {"type": "source.create", "source_id": sid, "name": f"{name} source",
                "kind": {"type": "scene", "scene_id": sid}, "settings": {}}]
-        for slot, sname, source in SLOTS:
+        for slot, sname, source in slots(screen):
             ch = channel(screen, slot)
             e += [{"type": "channel.set", "channel": {
                       "channel_id": ch, "name": f"{name}: {sname}",
@@ -139,17 +148,17 @@ def edits(hologram=True, gates=(), unlit_gates=()):
                    "geometry": {"center": {"x": W / 2, "y": H / 2}, "size": {"width": W, "height": H},
                                 "fit_mode": "fill" if slot == "feed" else "stretch"}},
                   {"type": "item.set_visible", "scene_id": sid, "item_id": ch, "visible": slot == start}]
-        for slot, sname, _ in SLOTS:
+        for slot, sname, _ in slots(screen):
             lanes = [{"target": {"channel": channel(screen, other)},
                       "points": [{"at_ms": FADE_MS, "value": 1.0 if other == slot else 0.0,
-                                  "curve": "linear"}]} for other, _, _ in SLOTS]
+                                  "curve": "linear"}]} for other, _, _ in slots(screen)]
             # On the subscene: a scene holds at most 32 timelines, and the cockpit's
             # views and sequences take most of its.
             e.append({"type": "timeline.set", "scene_id": sid, "timeline": {
                 "timeline_id": sequence(screen, slot), "name": f"{name}: {sname}",
                 "duration_ms": FADE_MS, "lanes": lanes,
-                "cues": _shows(sid, [(channel(screen, o), o == slot) for o, _, _ in SLOTS])}})
-        for (slot, _, _), chord in zip(SLOTS, chords):
+                "cues": _shows(sid, [(channel(screen, o), o == slot) for o, _, _ in slots(screen)])}})
+        for (slot, _, _), chord in zip(slots(screen), chords):
             keys.append({"type": "hotkey.set", "chord": "Ctrl+Alt+Shift+" + chord,
                          "action": action(screen, slot)})
         e.append({"type": "item.set_source", "item_id": shown_on, "source_id": sid})
@@ -171,7 +180,7 @@ def edits(hologram=True, gates=(), unlit_gates=()):
         screen = screen_name.replace("screen_", "").replace("hologram", "holo")
         if screen == "holo" and not hologram:
             continue
-        ch = channel(screen, SLOTS[i][0])
+        ch = channel(screen, slots(screen)[i][0])
         sx, sy, sw, sh = softkeys.slot(n)
         e += [{"type": "item.add", "scene_id": "atlas", "item_id": "key_" + ch[4:], "source_id": "key_lit",
                "geometry": {"center": {"x": sx + sw / 2, "y": sy + sh / 2},

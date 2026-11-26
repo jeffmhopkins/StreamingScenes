@@ -308,13 +308,13 @@ screen, left to right:
 
 | Key | Item | Shows |
 |---|---|---|
-| 1 | `src_<screen>_transport` | the transport page |
+| 1 | `src_<screen>_transport` (`src_left_notes` on the left monitor) | the transport page (the left monitor: the notes page, the same as the far right side monitor's) |
 | 2 | `src_<screen>_arrange` | the arrangement |
 | 3 | `src_<screen>_device` | the device |
 | 4 | `src_<screen>_mixer` | the mixer |
 | 5 | `src_<screen>_feed` | a camera feed: the source `feed` (`holo_feed` on the hologram), a stand-in still until you point it elsewhere |
 
-The left monitor starts on the transport, the centre on the arrangement, the right on the
+The left monitor starts on the notes, the centre on the arrangement, the right on the
 device and the hologram on its feed. A screen shows whatever is visible in its subscene,
 so you customise it as any scene: open "Centre monitor source" (`src_center`) from the Scenes panel's `Monitor sources`
 folder and toggle its items'
@@ -336,7 +336,7 @@ views' and the cockpit sequences' notes, so they move up if those gain any):
 | Centre monitor | 6 to 0 | 63 to 67 |
 | Right monitor | Y, U, I, O, P | 68 to 72 |
 | Hologram | Z, X, C, V, B | 73 to 77 |
-| Desk (below) | N (pads and meters), K (camera) | 78, 79 |
+| Desk (below) | N (pads), K (camera) | 78, 79 |
 
 The selected source's key lights amber under its screen: the five soft keys under each
 monitor, and a row of five on the dash just in front of and right of the hologram's

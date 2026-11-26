@@ -14657,7 +14657,7 @@
           ]
         },
         {
-          "id": "key_left_transport",
+          "id": "key_left_notes",
           "source_id": "key_lit",
           "geometry": {
             "center": {
@@ -14686,7 +14686,7 @@
               "modifier_id": "source",
               "property": "opacity",
               "kind": "channel",
-              "channel_id": "src_left_transport",
+              "channel_id": "src_left_notes",
               "smoothing_ms": 0,
               "curve": "linear",
               "from": -1.0,
@@ -19343,7 +19343,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19384,7 +19384,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19448,7 +19448,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19489,7 +19489,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19553,7 +19553,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19594,7 +19594,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19658,7 +19658,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19699,7 +19699,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19755,15 +19755,15 @@
           ]
         },
         {
-          "timeline_id": "left_transport",
-          "name": "Left monitor: Transport",
+          "timeline_id": "left_notes",
+          "name": "Left monitor: Notes",
           "duration_ms": 150,
           "loop": "once",
           "cues": [
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.show"
               }
@@ -19804,7 +19804,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19862,8 +19862,8 @@
       ],
       "items": [
         {
-          "id": "src_left_transport",
-          "source_id": "p_transport",
+          "id": "src_left_notes",
+          "source_id": "p_notes",
           "geometry": {
             "center": {
               "x": 960.0,
@@ -32144,7 +32144,7 @@
       "chord": "Ctrl+Alt+Shift+Digit1",
       "action": {
         "type": "timeline.play",
-        "timeline_id": "left_transport"
+        "timeline_id": "left_notes"
       }
     },
     {
@@ -32749,7 +32749,7 @@
       },
       "action": {
         "type": "timeline.play",
-        "timeline_id": "left_transport"
+        "timeline_id": "left_notes"
       }
     },
     {
@@ -33974,8 +33974,8 @@
       "off_value": 0.0
     },
     {
-      "channel_id": "src_left_transport",
-      "name": "Left monitor: Transport",
+      "channel_id": "src_left_notes",
+      "name": "Left monitor: Notes",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -35000,7 +35000,7 @@
           "bookmark_id": "monitors",
           "name": "The monitors",
           "at_ms": 62000,
-          "note": "The centre monitor is the arrangement, with the play head and the song's sections.\n\nOn the left, the transport: tempo, bar and beat, and the section we're in. On the right, the device on the selected track and its parameters.\n\nThese are web pages drawn from JStream's page API. JStream hands them Bitwig's state, and they draw it."
+          "note": "The centre monitor is the arrangement, with the play head and the song's sections.\n\nOn the left, the notes playing, scrolling past as Bitwig plays them. On the right, the device on the selected track and its parameters.\n\nThese are web pages drawn from JStream's page API. JStream hands them Bitwig's state, and they draw it."
         },
         {
           "bookmark_id": "consoles",

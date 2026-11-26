@@ -68,7 +68,7 @@ CHAPTERS = [
         (16 * S, "mon_right", _view("monitor_r")),
     ],
      "The centre monitor is the arrangement, with the play head and the song's sections.\n\n"
-     "On the left, the transport: tempo, bar and beat, and the section we're in. On the "
+     "On the left, the notes playing, scrolling past as Bitwig plays them. On the "
      "right, the device on the selected track and its parameters.\n\n"
      "These are web pages drawn from JStream's page API. JStream hands them Bitwig's state, "
      "and they draw it."),
