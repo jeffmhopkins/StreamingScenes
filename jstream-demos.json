@@ -16624,7 +16624,7 @@
         {
           "timeline_id": "drift",
           "name": "Drift",
-          "duration_ms": 150000,
+          "duration_ms": 450000,
           "loop": "loop",
           "cues": [],
           "lanes": [
@@ -16634,52 +16634,52 @@
               },
               "points": [
                 {
-                  "at_ms": 25950,
+                  "at_ms": 77850,
                   "value": 0.3384,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 33500,
+                  "at_ms": 100500,
                   "value": 0.3997,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 42550,
+                  "at_ms": 127650,
                   "value": 0.2844,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 55875,
+                  "at_ms": 167625,
                   "value": 0.6795,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 78775,
+                  "at_ms": 236325,
                   "value": 0.0645,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 94225,
+                  "at_ms": 282675,
                   "value": 0.5974,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 100350,
+                  "at_ms": 301050,
                   "value": 0.5554,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 111375,
+                  "at_ms": 334125,
                   "value": 0.7186,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 134850,
+                  "at_ms": 404550,
                   "value": 0.3447,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 150000,
+                  "at_ms": 450000,
                   "value": 0.95,
                   "curve": "ease_in_out"
                 }
@@ -16691,42 +16691,42 @@
               },
               "points": [
                 {
-                  "at_ms": 26425,
+                  "at_ms": 79275,
                   "value": 0.8497,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 43375,
+                  "at_ms": 130125,
                   "value": 0.3753,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 55225,
+                  "at_ms": 165675,
                   "value": 0.7113,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 81250,
+                  "at_ms": 243750,
                   "value": 0.05,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 96775,
+                  "at_ms": 290325,
                   "value": 0.7988,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 125450,
+                  "at_ms": 376350,
                   "value": 0.4787,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 136875,
+                  "at_ms": 410625,
                   "value": 0.7237,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 150000,
+                  "at_ms": 450000,
                   "value": 0.0661,
                   "curve": "ease_in_out"
                 }
@@ -16738,52 +16738,52 @@
               },
               "points": [
                 {
-                  "at_ms": 19450,
+                  "at_ms": 58350,
                   "value": 0.2248,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 32200,
+                  "at_ms": 96600,
                   "value": 0.8431,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 50425,
+                  "at_ms": 151275,
                   "value": 0.1832,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 59925,
+                  "at_ms": 179775,
                   "value": 0.4138,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 64700,
+                  "at_ms": 194100,
                   "value": 0.3816,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 74900,
+                  "at_ms": 224700,
                   "value": 0.5915,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 94150,
+                  "at_ms": 282450,
                   "value": 0.05,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 108100,
+                  "at_ms": 324300,
                   "value": 0.7759,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 124875,
+                  "at_ms": 374625,
                   "value": 0.2821,
                   "curve": "ease_in_out"
                 },
                 {
-                  "at_ms": 150000,
+                  "at_ms": 450000,
                   "value": 0.8227,
                   "curve": "ease_in_out"
                 }
