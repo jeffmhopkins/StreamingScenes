@@ -83,7 +83,8 @@ def box_sides(mesh, top, cx, cz):
 def face(mesh, top, x0, x1, z0, z1):
     up = B2G @ (top[:3, :3] @ np.array([0, -1.0, 0]))
     y = -LED_H
-    mesh.quad([to_g(top, x0, y, z1), to_g(top, x1, y, z1), to_g(top, x1, y, z0), to_g(top, x0, y, z0)], up)
+    # Counter-clockwise seen from outside (the leaf's -y), or the renderer culls it.
+    mesh.quad([to_g(top, x0, y, z0), to_g(top, x1, y, z0), to_g(top, x1, y, z1), to_g(top, x0, y, z1)], up)
 
 
 def add(path):
@@ -114,10 +115,11 @@ def add(path):
         t, (pw, ph), _ = placements({leaf: 1})[leaf]
         u0, u1, v0, v1 = ax / ATLAS_W, (ax + aw) / ATLAS_W, ay / ATLAS_H, (ay + ah) / ATLAS_H
         y = -READOUT_DEPTH
-        # glTF v down: the picture's top edge is the readout's far side (+z, toward the monitor).
-        panel.quad([to_g(t, -pw / 2, y, ph / 2), to_g(t, pw / 2, y, ph / 2),
-                    to_g(t, pw / 2, y, -ph / 2), to_g(t, -pw / 2, y, -ph / 2)],
-                   B2G @ (t[:3, :3] @ np.array([0, -1.0, 0])), [(u0, v0), (u1, v0), (u1, v1), (u0, v1)])
+        # glTF v down: the picture's top edge is the readout's far side (+z, toward the
+        # monitor). Counter-clockwise seen from outside, as add_live_panels.py winds them.
+        panel.quad([to_g(t, -pw / 2, y, -ph / 2), to_g(t, pw / 2, y, -ph / 2),
+                    to_g(t, pw / 2, y, ph / 2), to_g(t, -pw / 2, y, ph / 2)],
+                   B2G @ (t[:3, :3] @ np.array([0, -1.0, 0])), [(u0, v1), (u1, v1), (u1, v0), (u0, v0)])
 
     binpath = os.path.join(os.path.dirname(path), g["buffers"][0]["uri"])
     blob = bytearray(open(binpath, "rb").read())
