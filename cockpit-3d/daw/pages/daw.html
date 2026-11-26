@@ -721,7 +721,6 @@ const views = {
     const t = c.tempo || 0;
     segLine(`${String(Math.floor(t) % 1000).padStart(3)}.${Math.floor(t * 10) % 10}`, 14, 112, 26, 34);
     txt('BPM', 126, 140, 14, `rgba(${AMBER},.7)`, 'left', 700);
-    x.fillStyle = c.playing ? `rgb(${GREEN})` : `rgb(${RED})`; x.fillRect(290, 132, 14, 8);
     const s = Math.max(0, Math.floor(swNow() - swBase)), hh = Math.floor(s / 3600) % 100;
     const mm = Math.floor(s / 60) % 60, ss = s % 60, p2 = n => String(n).padStart(2, '0');
     segLine(`${p2(hh)}:${p2(mm)}:${p2(ss)}`, 334, 30, 48, 80);
