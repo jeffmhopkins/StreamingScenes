@@ -182,8 +182,7 @@ if SOURCES:
     must(batch(sources.edits(HOLOGRAM, [gate("glow"), gate("master")],
                              [gate("cabin", off=-0.5), gate("desk"), gate("master")]),
                "screen sources"), "screen sources")
-    # The desk too: its pads and meter bridge (with their unlit pages, which keep the
-    # lights' switches) or a camera.
+    # The desk too: its pads, switched off (they keep the lights' switches), or a camera.
     must(batch(sources.desk_edits(BUILT["DESK_LAYERS"]), "desk source"), "desk source")
     # Listed in the Scenes panel, so a person opens one and toggles what it shows.
     text, ok = batch(sources.filing(HOLOGRAM), "monitor sources folder")
@@ -250,6 +249,9 @@ if SHIP:
            for t in ship_sequences.timelines()]
     seq += [{"type": "hotkey.set", "chord": "Ctrl+Alt+" + key, "action": action}
             for _, key, action in ship_sequences.CONTROLS if key]
+    # The desk lights' twinkle and steady (desk_lights.py): Ctrl+Alt+G, Ctrl+Alt+Shift+G.
+    import desk_lights  # noqa: E402
+    seq += desk_lights.sequences()
     must(batch(seq, "ship sequences"), "ship sequences")
 
 # ---- the Sound Journal title (title.py): an overlay darkening program under the JMH
@@ -349,7 +351,8 @@ if not ok:
     print("couldn't set the warm scenes:", text[:200], file=sys.stderr)
 must(op({"type": "scene.switch", "scene_id": "cockpit"}), "switch")
 print("imported: views Ctrl+Alt+1..0, -, = (keyframes)"
-      + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W; drift D, Shift+D" if SHIP else "")
+      + ("; lights Ctrl+Alt+L on, Shift+L off; monitors M, Shift+M; warp W, Shift+W; drift D, Shift+D;"
+         " desk lights twinkle G, steady Shift+G" if SHIP else "")
       + "; scenes Ctrl+Alt+F1 3D, F2 2D desk, F3 be right back"
       + (("; hologram Ctrl+Alt+H on, Ctrl+Alt+Shift+H off" if SEQ
           else "; hologram Ctrl+Alt+H on or off, Ctrl+Alt+Shift+H off") if HOLOGRAM else "; no hologram")

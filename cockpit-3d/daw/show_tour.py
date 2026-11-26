@@ -57,10 +57,11 @@ CHAPTERS = [
         (0, "desk_view", _view("desk")),
         (9 * S, "desk_low", _view("desk_low")),
     ],
-     "The desk is the musician's view. The pad grid is an isomorphic note layout for the "
-     "track selected in Bitwig: the notes it's playing light up in that track's colour.\n\n"
-     "The bars beside it are the meter bridge, every track and the master. And the lights "
-     "over the desk swell with each track's level, in its colour."),
+     "The desk is the musician's view. The grid controller on the tray is switched off "
+     "here; point the desk at a camera and it shows a real controller. Up on the console, "
+     "the small button panel is a clip launcher for the Bitwig session.\n\n"
+     "The little LEDs all over the cockpit are four groups, Desk lights 1 to 4, each "
+     "driven by a JTunnel Mod from Bitwig."),
     ("monitors", "The monitors", "cockpit", 24 * S, True, [
         (0, "mon_centre", _view("monitor")),
         (8 * S, "mon_left", _view("monitor_l")),

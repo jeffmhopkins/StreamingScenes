@@ -1,5 +1,6 @@
-"""The console's live panels: small displays the DAW pages draw, in place of the model's
-static readouts and one button panel.
+"""The console's live panel: the button panel right of the centre console's readouts, as a
+small display the DAW `panels` page draws a clip launcher on. (The readouts were live
+panels too; they are the model's own amber readouts again, READOUTS_RETIRED.)
 
 Each entry names a greebled leaf panel of build_cockpit.py, the cell of the `panels`
 page view (cockpit-3d/daw/pages/daw.html, PANEL_AT) it shows, and how far in front of the
@@ -25,6 +26,10 @@ READOUT_DEPTH = 0.0072  # just in front of a readout's own quad, at 0.0065
 BUTTON_DEPTH = 0.017    # in front of the buttons' faces and their LEDs, at 0.015
 PANELS = {
     "console_centrebb": ("launcher", (0, 0, 160, 160), BUTTON_DEPTH),
+}
+# The readouts that were live panels too, until the desk went back to its own amber
+# readouts: trim_live_panels.py takes their quads off a model built with them.
+READOUTS_RETIRED = {
     "console_wing_L_fwdb": ("status", (160, 0, 160, 80), READOUT_DEPTH),
     "console_centreaab": ("note", (160, 80, 160, 80), READOUT_DEPTH),
     "console_centrebab": ("density", (0, 160, 160, 80), READOUT_DEPTH),

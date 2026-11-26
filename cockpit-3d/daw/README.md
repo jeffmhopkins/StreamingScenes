@@ -14,13 +14,14 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `prep.py` | Turns the funk song into `session.json`: the arrangement, tempo and chords from v42's `song.py`, the e-piano and lead notes and the lead's breath from the note lists v42's own script writes, the drums and bass notes from onsets in the MP3, and each track's meter from its band of the MP3's spectrum. |
 | `session.json` | That timeline, so a render needs no Jclap checkout. |
 | `sim.py` | `Session` plays the timeline as JTunnel state, `Tunnel` sends it: it waits for JStream's subscribe and answers with state packets (type 4), in pieces of at most 1,200 bytes. `python3 sim.py session.json` plays it in real time. |
-| `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`) the desk's note grid (`?view=iso&w=600`) and meter bridge (`?view=bridge&w=348`), each over a page of its unlit pads (`isopads`, `bridgepads`), the console's small displays (`?view=panels&w=320`), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
+| `pages/daw.html` | The seven DAW screens (`?view=transport`, `arrange`, `device`, `notes`, `mixer`, `clip`, `scenes`), the 2D desk's note grid (`?view=iso&w=600`) and meter bridge (`?view=bridge&w=348`), each over a page of its unlit pads (`isopads`, `bridgepads`), the console's clip launcher panel (`?view=panels&w=320`, its `launcher` cell), drawn only from the page API's live data (`jstream.data()`), so a held clock draws the same picture every time. |
 | `import_show.py` | Imports the whole show into a running JStream in one go, as a new project: `build_daw.py`'s cockpit, the camera views as keyframes in a `Views` folder with a hotkey each, the cockpit's sequences (lights, monitors, hologram, warp), two 2D scenes, scene hotkeys, and warm scenes. See [Importing the show](#importing-the-show). |
 | `show_tour.py` | The Cockpit tour, a show (JStream ADR-0210) that runs through the cockpit for an audience: power up, the seat, the desk, the monitors, the consoles, warp, the hologram, the 2D desk and power down, with a script in every bookmark's note. See [The cockpit tour](#the-cockpit-tour). |
 | `add_show.py` | Adds the Cockpit tour to a DAW show imported before it existed, in a running JStream. |
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into keyframes of the cockpit (`keyframes()`), filed in a folder (`filing()`). |
 | `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
+| `desk_lights.py`, `desk/` | The desk switched off (`desk/pads-off.png`, the model's own dark pads), and the cockpit's small LEDs in four groups, the channels `Desk lights 1` to `4` on JTunnel Mods 21 to 24, with a twinkle to try them. Run on its own, it changes a cockpit already in a running JStream. See [Desk lights](#desk-lights). |
 | `sources.py` | What the three main monitors, the hologram and the desk show: a subscene each, with sources to switch between and, on the monitors and the hologram, the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
@@ -31,22 +32,45 @@ scene follows a real Bitwig with the JTunnel plugin.
 
 | In the cockpit | Driven by | How |
 |---|---|---|
-| The desk's pad surface: an isomorphic note grid for the selected track, as a grid instrument lays it out (a semitone to the right, a fourth up a row, the lowest row nearest the player), its playing notes lit on every pad of their pitch in the track's colour, each C faintly; it starts on the C at or below the lowest note the track has played, and a note above or below its range folds onto it by whole octaves, so any range shows. The pads are raised silicone caps, matte when unlit and lit from under when playing, with the light brightest in the middle and spilling onto the desk; a pad lights at once and dims over 350 ms when its note ends (the page's `FADE_MS`, timed by the data's clock while the transport plays, so held-clock renders repeat). The unlit pads are a page of their own under the lit ones (`isopads`), which the cabin switch dims by half and the desk switch turns off, so with the lights off only the lit pads show | `grid.selectedTrack`, `notes.tracks[N]` (`[pitch, velocity]`), `track/N.color` | the page's `iso` view, a browser source with `page_api_data` |
-| …or, with `DESK_GRID=clips`, the clip launcher (8 tracks × 8 scenes, blinking while a clip is queued) | `track/N` `slots[].queued`, `state`, `color` | a `grid` source, cells mode, `state_field = "queued,state"` |
 | The button panel right of the centre console's readouts: a mini clip launcher, 8 tracks × 8 scenes, a playing clip full in its track's colour, a queued one blinking on the beat, the selected track marked under its column | `track/N` `slots[]`, `color`; `grid.selectedTrack`; `clock.beats` | the `panels` page (its `launcher` cell) on the model's `live_panels` |
-| The centre console's left readout: the selected track's last note (name and octave, C3 = 60) and its velocity, as a number and a bar | `notes.tracks[N]`, `grid.selectedTrack` | `panels` (`note`) |
-| The centre console's right readout: how busy the selected track is, RATE (the notes it started over the last bar, as segments and a number) and POLY (the notes it holds now, up to 8) | `notes.tracks[N]`, `clock.beats`, `grid.selectedTrack` | `panels` (`density`) |
-| The other small readouts: the section, next section, tempo, selected track and device as text (left wing); bar and beat (left wing, aft); the beat in the bar as four dots (right wing, aft); a dot per track while it plays a note (centre); every track's level and the master's as bars (overhead); the master's and the selected track's recent level as scrolling traces (right wing; overhead); the master's and the selected track's level as segment strips (centre, far left) | `markers`, `clock`, `device`, `meters`, `notes`, `grid.selectedTrack` | `panels` (`status`, `position`, `beats`, `activity`, `levels`, `masterWave`, `trackWave`, `strips`); `tools/live_panels.py` names which readout shows which |
-| The desk's meter bridge: each track's left and right and the master's, 18 silicone segments each, green to red (the master cyan to amber), each segment dimming over `FADE_MS` as the level falls | `meters` `tracks`, `master` | the page's `bridge` view, over its unlit segments (`bridgepads`), dimmed by the cabin and desk switches as the note grid's unlit pads are |
 | The seven screens | every key | browser sources with `page_api_data` |
-| The launcher's lit pads, the meters and the screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page and grid (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
-| A light over each launcher column, in its track's colour, lighting the desk and the cabin (the lead and its echo share one over their two columns) | `meters.tracks.N.0` | `data` modifier on the light's opacity, from a floor of 55%, over 220 ms (`LEVEL_MS`), so it swells with the band rather than strobing on each hit; the shared light has one for each track, each half as deep |
+| The screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
 | The warp's glow: a blue-white light pouring in through the windshield as the warp builds, so a jump to warp lights the cabin even with every switch off | the `warp` channel (CC 30, Mod 6, the warp sequences) | a `channel` modifier on a directional light's opacity, dark at rest and full (`WARP_LIGHT`, 3.0) at full warp; no switch dims it. `WARP_LIGHT=0` leaves it out |
 | The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The ship's warp drive and orientation: the sky streams past as the warp comes up, and the sky and the starlight turn around the cabin as the ship yaws, pitches and rolls | MIDI CCs from Bitwig on channel `SHIP_CC_CHANNEL` (16) from any input (`SHIP_CC_INPUT` names one): `SHIP_CC_WARP` (30) takes the warp from rest to full, and `SHIP_CC_YAW` (31), `SHIP_CC_PITCH` (32) and `SHIP_CC_ROLL` (33) each turn the ship a whole turn over the CC's travel (right, nose up, right wing down), all smoothed over `SHIP_CC_SMOOTHING_MS` (250). `WARP`, `SHIP_YAW`, `SHIP_PITCH` and `SHIP_ROLL` set where they rest. With a JStream that has ADR-0187, each jump to warp travels where the ship points: straight ahead from wherever the heading, pitch and roll have turned the sky, which swings at most `WARP_LOOK_DEG` (10) at warp; out of warp the sky stays where the jump left it and the controls turn it from there (`WARP_AIM=sky` keeps the older behaviour). On an older one, turning moves where the warp streams from, so hold the heading while at warp. The sky follows pitch and roll with a JStream that has ADR-0182; an older one turns it on the heading only | a `channel` modifier on the environment light's `warp` following the channel `warp`, which CC 30, [Mod](#jtunnel-mods) 6 and the [warp sequences](#cockpit-sequences) drive (a `midi` modifier on a JStream without channels), and `channel` modifiers on the `turn`, `tilt` and `rotation` of three nested 3D groups (the ship's rig, ADR-0164) that hold the sky and the starlight, following `ship_yaw`, `ship_pitch` and `ship_roll`, which CCs 31 to 33 and [Mods](#jtunnel-mods) 8 to 10 drive (`midi` modifiers without channels) |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
-| The model's red, green, blue and amber LEDs and orange strips | the drums', bass's, keys', master's and lead's meters | `data` modifiers on the materials' `emissive_strength`, by material name |
-| The cabin's light strips, on the beat | `clock.beatPhase` | the same, on `light_strip` |
+
+The desk itself follows nothing: its grid controller is switched off, the console's amber
+readouts show the model's own pictures, and its small LEDs are the [desk lights](#desk-lights),
+which follow only their channels.
+
+## Desk lights
+
+The model's small LEDs, all over the cockpit, are four groups by colour, each one channel
+a person or Bitwig drives (`desk_lights.py`). Nothing in the band moves them.
+
+| Channel | Name | Mod | LEDs | 0 | 1 |
+|---|---|---|---|---|---|
+| `desk_lights_1` | Desk lights 1 | 21 | the red ones (`led_red`) | dark | the model's own glow |
+| `desk_lights_2` | Desk lights 2 | 22 | the green ones (`led_green`) | dark | the model's own glow |
+| `desk_lights_3` | Desk lights 3 | 23 | the blue ones (`led_blue`) | dark | the model's own glow |
+| `desk_lights_4` | Desk lights 4 | 24 | the amber ones (`led_amber`) | dark | 0.55 of the model's glow, so the many of them don't flare under the bloom |
+
+Each starts at 1, so the LEDs are lit until its [Mod](#jtunnel-mods) first moves. Each is
+a `channel` modifier on its material's `emissive_strength`, and the Glow and Master
+[switches](#light-switches) still put every LED out, whatever its channel reads. The cabin
+lights (the overhead light, the fill and the starlight) are in no group: the Cabin switch
+keeps them. The cabin's light strips and the orange accent strips glow steadily, under the
+Glow and Master switches.
+
+`Desk lights twinkle` (Ctrl+Alt+G) loops a random twinkle, 12 s a pass, on all four
+channels, to try them without Bitwig; `Desk lights steady` (Ctrl+Alt+Shift+G) stops it and
+brings all four back to full. Whichever moved last of a channel's Mod and a sequence wins.
+
+To change a cockpit already in a running JStream, imported before the desk lights, run
+`python3 desk_lights.py` (JS_TOKEN and JS_MCP as for `../jstream/mcp.py`; `MODEL_ITEM`
+names the model's item if it isn't `model`), and `python3 ../tools/trim_live_panels.py`
+on each copy of the model the project uses.
 
 ## Light switches
 
@@ -57,10 +81,10 @@ up:
 
 | CC | Group | What it switches |
 |---|---|---|
-| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; the desk's unlit pads, to half |
-| 41 | Desk | the five pad lights over the launcher (with `GLOW=0`, the track lights, the desk's and the screens' glow); the desk's unlit pads |
+| 40 | Cabin | the overhead cabin light, the ambient fill and the starlight; the desk's pads, to half |
+| 41 | Desk | the desk's pads (with `GLOW=0`, also the track lights, the desk's and the screens' glow) |
 | 42 | Screens | every screen and the desk's grid: a black cover over the screens atlas, and the glowing cards with `GLOW_CARDS=1` |
-| 43 | Glow | the model's own LEDs and light strips: every material's glow strength |
+| 43 | Glow | the model's own LEDs ([desk lights](#desk-lights)) and light strips: every material's glow strength |
 | 44 | Master | all four, so only the sky lights the cabin and reflects off it |
 
 A CC up (64 or more, 127 fully) switches its group off, and down switches it back on
@@ -74,12 +98,10 @@ Each switch is a `midi` motion modifier on every light of its group, beside the 
 modifiers already there: it adds -1 to a light's opacity (a light's strength is its
 intensity times its opacity, and a modifier on opacity multiplies it by 1 plus what it
 adds), -1 to the black cover's while the switch is on (so the cover, opaque as placed,
-clears, and comes back as the switch turns off), -0.5 to the desk's unlit pads' for the
+clears, and comes back as the switch turns off), -0.5 to the desk's pads' for the
 Cabin switch and -1 for the Desk and Master switches, and -3 to the model's glow
-strength, which is a multiplier of 1 at rest that the LEDs' data drives raise by up to
-1.6. A model takes at most 8 motion modifiers, and the cockpit already has 6 data ones,
-so the Glow switches drive every material's glow at once (`emissive_strength` with no
-`material`). That needs a JStream where a glow strength with no material reaches every
+strength, which is a multiplier of 1 at rest that the desk lights only lower. The Glow
+switches drive every material's glow at once (`emissive_strength` with no `material`). That needs a JStream where a glow strength with no material reaches every
 material; an older one leaves the LEDs and strips lit under the Glow and Master switches,
 and everything else still switches. The sky's environment light has no switch.
 
@@ -120,18 +142,18 @@ sequences keep working beside it.
 | 9 | `ship_pitch` | pitch at rest | a whole turn nose up |
 | 10 | `ship_roll` | roll at rest | a whole turn right wing down |
 | 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
+| 20 | `title` | the Sound Journal title off | on |
+| 21 to 24 | `desk_lights_1` to `desk_lights_4` | that [group of LEDs](#desk-lights) dark | lit |
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
 CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
-Mod. Mods 20 to 32 stay free.
+Mod. Mods 25 to 32 stay free.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
-glow (the default) those are the sun, the cabin, the warp's glow and the five pad lights.
-The hologram's light counts only while the hologram is shown, and it is first in stacking
-order, so then the last pad light gives up its slot (JStream logs once that the scene has
-more lights than a model is lit by; that is expected). `GLOW=0` builds the earlier set: no
+glow (the default) those are the sun, the cabin and the warp's glow, and the hologram's
+light while the hologram is shown. `GLOW=0` builds the earlier set: no
 cards, a light per track around the cabin, the desk's and the screens' glow, of which the
-first 8 light the model. `GLOW_CARDS`, `GLOW_SCREENS`, `GLOW_DESK`, `PAD_INTENSITY`, `PAD_RANGE`, `BLOOM_AT`,
+first 8 light the model. `GLOW_CARDS`, `GLOW_SCREENS`, `BLOOM_AT`,
 `BLOOM` and `LEVEL_MS` tune it. The bloom's radius is 16 px. `render_daw.py` waits
 `WARM_S` seconds (3) at the first frame for the pages, the data and the probe. Its frames smooth the band's lights only on a JStream with ADR-0173 (#1620): an engine without it draws each snapshot with no output running at the meters' raw levels, so the lights strobe on every hit whatever `LEVEL_MS` says.
 
@@ -241,6 +263,8 @@ still work, and whichever moved last wins. An agent plays one with `timeline.pla
 | `lights_on` | L | The master on at once; the cabin's tubes flicker up, then the desk's lights come up, then the glow strips and LEDs, over 2.4 s. A group already on dips and comes back, like a reboot. |
 | `lights_off` | Shift+L | From wherever each group is: the glow goes first, then the desk, the cabin last, over 2.6 s. |
 | `monitors_on` | M | The monitors one after another, the centre first and the desk and panels last, each flickering on, 180 ms apart. One already on flickers in its turn. |
+| `desk_twinkle` | G | The [desk lights](#desk-lights) twinkle at random, looping, until `desk_steady`. |
+| `desk_steady` | Shift+G | Stops the twinkle and brings the four desk lights back to full over 0.4 s. |
 | `monitors_off` | Shift+M | The other way round, each snapping to black in its turn, 150 ms apart. |
 | `holo_show`, `holo_hide` | H shows, Shift+H hides | The hologram projecting in and dissolving out; see [The hologram](#the-hologram). |
 | `warp_in` | W | The sky's warp from wherever it is to full over 4 s, slow at first. |
@@ -320,16 +344,15 @@ lens. Each key's face is a quad on the model's `screens` material that maps one 
 the atlas's key strip (the bottom 16 px of the readouts' space, under the LEDs; see the
 model's README), and the atlas has a lit block a key
 there, following its channel (the key last pressed, not what is visible). The keys are LEDs: the Glow and Master switches darken them
-with the others, and the unlit keys go dark with the lights as the desk's unlit pads do. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
+with the others, and the unlit keys go dark with the lights as the desk's pads do. `KEY_LIT` and `KEY_UNLIT` set the two colours. The opt-in glow cards (`GLOW_CARDS=1`) still
 show each monitor's starting page, whatever its key picks, since a card glows only with a
 source's own frame, not a scene's. It needs channels and
 sequences (protocol 0.170); without them the screens show what they did before.
 
-The desk's grid controller switches the same way: its subscene, `src_desk`, draws the
-pads and the meter bridge (with their unlit pages under them, which still dim with the
-lights) or a camera feed, `desk_feed`, over the whole 8:3 surface, which suits a camera
+The desk's grid controller switches the same way: its subscene, `src_desk`, draws its
+pads switched off (which dim with the lights) or a camera feed, `desk_feed`, over the whole 8:3 surface, which suits a camera
 looking down on a long grid controller. Point `src_desk_feed` at the camera in the app, or toggle the subscene's items as on the monitors.
-Ctrl+Alt+Shift+N shows the pads and meters, Ctrl+Alt+Shift+K the camera (the sequences
+Ctrl+Alt+Shift+N shows the pads, Ctrl+Alt+Shift+K the camera (the sequences
 `desk_grid` and `desk_feed`; MIDI notes 78 and 79). The desk has no soft keys to light.
 
 ### Where a warp arrives

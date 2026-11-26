@@ -37,8 +37,8 @@ atlas lights its key. The atlas holds a dim strip of unlit keys there and, over 
 block per key, which follows the key's slot channel, the glow switch and the master: the
 keys are LEDs, so the Glow and Master switches darken them as they do the others.
 
-The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pads and
-meter bridge, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
+The desk's grid controller has a subscene too, `src_desk` (desk_edits()): its pads,
+switched off, or a camera feed (`desk_feed`) over the whole 8:3 surface, on
 Ctrl+Alt+Shift+N and K. It has no keys to light.
 
 Everything here is generic JStream: scenes as sources, scene folders, item visibility, channels,
@@ -193,16 +193,15 @@ def filing(hologram=True):
             + [{"type": "scene.set_folder", "scene_id": "src_" + s, "folder_id": FOLDER} for s in ids])
 
 
-# ---- the desk's grid controller: its pads and meter bridge, or a camera ----
-# The desk is the atlas's 960 x 360 (8:3) cell at 0, 720 (build_daw.py: the pads, the
-# meter bridge and their unlit pages under them). Its subscene, `src_desk`, draws each slot
+# ---- the desk's grid controller: its pads, switched off, or a camera ----
+# The desk is the atlas's 960 x 360 (8:3) cell at 0, 720 (build_daw.py: its dark pads). Its subscene, `src_desk`, draws each slot
 # in the canvas's middle 8:3 (1920 x 720), and one atlas item, `a_desk`, fills the cell
 # from the 16:9 subscene, so nothing is stretched. A long camera picture, such as one
 # looking down on a grid controller, fits the cell's 8:3 well.
 DESK = (0, 720, 960, 360)
 DESK_H = W * 3 / 8
 # (slot, its name, its key after Ctrl+Alt+Shift)
-DESK_SLOTS = [("grid", "Pads and meters", "KeyN"), ("feed", "Camera feed", "KeyK")]
+DESK_SLOTS = [("grid", "Pads", "KeyN"), ("feed", "Camera feed", "KeyK")]
 
 
 def desk_controls():
@@ -213,7 +212,7 @@ def desk_controls():
 def desk_edits(layers):
     """The desk's subscene. `layers` are the atlas items on the desk's cell, bottom up:
     (item, source, x, y, w, h, motion), which the subscene's `grid` slot draws at the same
-    places (each keeping its motion, the lights' switches on the unlit pads) and the
+    places (each keeping its motion, the lights' switches on the pads) and the
     atlas gives up for `a_desk`. The `feed` slot is a camera, `desk_feed`, a stand-in still
     until a person points it at a camera."""
     sid = "src_desk"

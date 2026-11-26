@@ -38,9 +38,7 @@ same size on screen.
 
 The light takes one of the 8 lights a model is lit by only while the hologram is shown (a
 hidden light lights nothing and takes no slot). `add` puts it first in stacking
-order, so it is always among the 8: while it is on, the last light in stacking
-order, a pad light of the desk's, gives up its slot, and JStream logs once that the scene
-has more lights than a model is lit by.
+order, so it is always among the 8.
 
 The panel shows `holo_feed`, an image source holding the 2D cockpit's caller still, until
 `source <id>` (an `item.set_source` on `holo_card`) puts any other source there: a webcam

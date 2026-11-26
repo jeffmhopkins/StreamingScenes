@@ -31,11 +31,11 @@ live sender ([its README](cockpit-3d/daw/README.md#importing-the-show)).
 
 Bitwig: the cockpit is built with every Bitwig input its import offers, all on MIDI
 channel 16, from whichever JTunnel sender is live:
-- the live data on its screens, readouts, desk lights and LEDs
+- the live data on its screens and the console's clip launcher panel
 - the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
 - the camera CCs 20 to 29, which also give each view its depth of field and autofocus
 - notes from 36 up that switch the views and play the cockpit's sequences
-- the JTunnel Mods
+- the JTunnel Mods, among them Desk lights 1 to 4 (Mods 21 to 24), the cockpit's LEDs in four groups
 
 See [its README](cockpit-3d/daw/README.md#what-follows-the-data). The tour's MIDI pads
 (notes 36 to 39) listen on channel 1, so they don't answer those notes.

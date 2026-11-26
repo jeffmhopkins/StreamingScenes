@@ -2,19 +2,18 @@
 screen and many of its lights following a Bitwig session that arrives as JTunnel state
 (sim.py sends it; the daemon runs with `--jtunnel-accept Bitwig@127.0.0.1:47251`).
 
-- The desk's pad surface is JStream's own `grid` source kind: the clip launcher (each
-  track a column, each scene a row, from the `track/N` keys' `slots`, blinking while a
-  clip is queued), and beside it the tracks' and the master's meters as `bars`.
+- The desk's grid controller is switched off, its pads dark (desk_lights.py); the clip
+  launcher is the small button panel right of the centre console's readouts, drawn by
+  the `panels` page.
 - The other seven screens are browser pages (pages/daw.html) that read the session's
   live data through the page API: transport, arrangement, device, mixer, scenes, clip
   and notes.
-- Lights follow the data through `data` motion modifiers: a light a track over its meter,
-  the screens' glow on the beat, the cabin lights up while the transport plays and down
-  through the break, and the sky brighter while a chorus clip plays. The model's own
-  LEDs and light strips follow the tracks and the beat by material name.
-- Each screen has a glowing lit card over it, so the screens and the desk grid bloom and
-  show bright in the reflections, and a small light per launcher column throws its
-  track's colour on the desk.
+- Lights follow the data through `data` motion modifiers: the cabin lights up while the
+  transport plays and down through the break, and the sky brighter while a chorus clip
+  plays (and, with GLOW=0, a light a track over its meter and the screens' glow on the
+  beat).
+- The model's small LEDs are four groups by colour, each a channel, `Desk lights 1` to
+  `4`, that a JTunnel Mod drives, under the Glow and Master switches (desk_lights.py).
 - Reflection probes make the cabin's surfaces reflect the screens and lights.
 
     python3 build_daw.py
@@ -36,6 +35,8 @@ sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 from live_panels import PANELS_AT  # noqa: E402
 from live_readouts import SIDE_AT  # noqa: E402
 from ship_sequences import DRIFT_DEG  # noqa: E402
+sys.path.insert(0, HERE)
+import desk_lights  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -43,8 +44,9 @@ INPUT = os.environ.get("DAW_INPUT", "")
 PROBE = os.environ.get("PROBE", "1") == "1"
 PROBE_EVERY = int(os.environ.get("PROBE_EVERY", "10"))
 GLOW = os.environ.get("GLOW", "1") == "1"
-# The desk's 8 x 8 pads: `notes` (the default) plays the selected track as an isomorphic
+# The 2D desk's 8 x 8 pads: `notes` (the default) plays the selected track as an isomorphic
 # note grid, rows a fourth apart, from the page's `iso` view; `clips` is the clip launcher.
+# The cockpit's own desk is switched off (desk_lights.py).
 DESK_GRID = os.environ.get("DESK_GRID", "notes")
 # The ship (see the ship's rig below): its heading, pitch (nose up) and roll (right wing
 # down) at rest in degrees, its warp at rest (0 to 1), and the MIDI CCs that drive them.
@@ -64,9 +66,6 @@ SHIP_CC_SMOOTHING_MS = int(os.environ.get("SHIP_CC_SMOOTHING_MS", "250"))
 # screens), so they are off until cards have depth of their own; the bloom does the glow.
 GLOW_CARDS = os.environ.get("GLOW_CARDS", "0") == "1"
 GLOW_SCREENS = float(os.environ.get("GLOW_SCREENS", "1.6"))
-GLOW_DESK = float(os.environ.get("GLOW_DESK", "4.0"))
-PAD_INTENSITY = float(os.environ.get("PAD_INTENSITY", "2.2"))
-PAD_RANGE = float(os.environ.get("PAD_RANGE", "1200"))
 BLOOM_AT = float(os.environ.get("BLOOM_AT", "0.4" if GLOW else "0.85"))
 BLOOM = float(os.environ.get("BLOOM", "0.55" if GLOW else "0.35"))
 # The light switches: a group's MIDI CC, from SWITCH_FIRST up on CC_CHANNEL from CC_INPUT,
@@ -95,6 +94,7 @@ MOD = {  # channel: its Mod number. 1 on and 0 off for the switches, 1 full for 
     "screen_center": 11, "screen_left": 12, "screen_right": 13, "screen_ovl": 14,
     "screen_ovr": 15, "screen_side_l": 16, "screen_side_r": 17, "screen_desk": 18,
     "screen_panels": 19, "title": 20,
+    "desk_lights_1": 21, "desk_lights_2": 22, "desk_lights_3": 23, "desk_lights_4": 24,
 }
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
@@ -265,21 +265,18 @@ for item, view, x, y, w, h in PAGES_AT:
         **page(view), "width": 640, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         add("atlas", item, "p_" + view, geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))]
-# The desk: the pads (the selected track's notes, or the clip launcher), and the meter
-# bridge, the tracks' meters and the master's, raised silicone pads lit from under (the
-# page's `iso` and `bridge`). The note grid and the bridge draw only their lit pads, on a
-# clear page, over a page of their unlit ones (`DESK_UNLIT`): the unlit pads show by the
-# cabin's and the desk's light, so they dim with those switches and go fully dark with
-# both off, while the lit ones stay lit.
-DESK_UNLIT = []  # (item, source, x, y, w, h): under the desk's lit pads, dimmed by the lights
-CLEAR = "#00000000"
+# The desk's grid controller is switched off, as the model has it (desk_lights.py): its
+# dark pads, `desk_pads_off`, which show by the cabin's and the desk's light, so they dim
+# with those switches and go dark with both off. The note grid (or the clip launcher, with
+# `DESK_GRID=clips`) and the meter bridge are only the DAW desk 2D scene's (import_show.py),
+# each over its page of unlit pads.
+ed += [desk_lights.pads_off_source(asset)]
 if DESK_GRID == "notes":
     ed += [src("launcher", "Note grid", "browser", {
         **page("iso", 600), "width": 600, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
         src("launcher_unlit", "Note grid, unlit pads", "browser", {
             **page("isopads", 600), "width": 600, "height": 360, "fps": 1})]
-    DESK_UNLIT.append(("a_launcher_unlit", "launcher_unlit", 0, 720, 600, 360))
 else:
     ed += [src("launcher", "Clip launcher", "grid", {
         "input": INPUT, "mode": "cells", "width": 600, "height": 360, "columns": 8, "rows": 8,
@@ -294,20 +291,16 @@ ed += [src("panels", "Console panels", "browser", {
         **page("panels", PW), "width": PW, "height": PH, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
-# The meter bridge: the tracks' meters and the master's, as one page of lit segments.
+# The meter bridge, for the 2D desk: the tracks' meters and the master's, as one page of
+# lit segments over a page of unlit ones.
 ed += [src("bridge", "Meter bridge", "browser", {
         **page("bridge", 348), "width": 348, "height": 360, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        src("bridge_unlit", "Meter bridge, unlit", "browser", {
-        **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1})]
-DESK_UNLIT.append(("a_bridge_unlit", "bridge_unlit", 612, 720, 348, 360))
-ed += [add("atlas", item, sid, geo(x + w / 2, y + h / 2, w, h)) for item, sid, x, y, w, h in DESK_UNLIT]
-ed += [
-    add("atlas", "a_launcher", "launcher", geo(300, 900, 600, 360)),
-    add("atlas", "a_bridge", "bridge", geo(612 + 174, 900, 348, 360)),
-    {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
-     "kind": {"type": "scene", "scene_id": "atlas"}},
-]
+        **page("bridgepads", 348), "width": 348, "height": 360, "fps": 1}),
+       add("atlas", "a_desk_pads_off", "desk_pads_off", geo(480, 900, 960, 360, fit_mode="stretch")),
+       {"type": "source.create", "source_id": "atlas_src", "name": "Screens atlas",
+        "kind": {"type": "scene", "scene_id": "atlas"}}]
 # The black covers that switch the screens off. A motion modifier on opacity multiplies it
 # (by 1 plus what it adds), so a cover is opaque as placed and its switch clears it: a
 # cover that started clear could never be faded in. With channels, each monitor has a cover
@@ -343,17 +336,15 @@ elif SWITCHES:
     must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": iid, "motion": [uncover(g)]}
                 for iid, g in (("a_off", "screens"), ("off_master", "master"))], "screens switch"),
          "screens switch")
-# The desk's unlit pads dim by half with the cabin's switch and go dark with the desk's or
-# the master's (opacity modifiers multiply); the lit pads above them stay lit.
+# The desk's switched-off pads dim by half with the cabin's switch and go dark with the
+# desk's or the master's (opacity modifiers multiply).
 if SWITCHES or CHANNELS:
     unlit = [gate("cabin", off=-0.5), gate("desk"), gate("master")]
-    must(batch([{"type": "item.set_motion", "scene_id": "atlas", "item_id": item, "motion": unlit}
-                for item, *_ in DESK_UNLIT], "unlit pads"), "unlit pads")
+    must(op({"type": "item.set_motion", "scene_id": "atlas", "item_id": "a_desk_pads_off", "motion": unlit}),
+         "desk pads")
 # The desk's atlas items, bottom up, each with its motion (sources.py's desk subscene
 # takes them over).
-DESK_LAYERS = [(item, sid, x, y, w, h, unlit if SWITCHES or CHANNELS else [])
-               for item, sid, x, y, w, h in DESK_UNLIT]
-DESK_LAYERS += [("a_launcher", "launcher", 0, 720, 600, 360, []), ("a_bridge", "bridge", 612, 720, 348, 360, [])]
+DESK_LAYERS = [("a_desk_pads_off", "desk_pads_off", 0, 720, 960, 360, unlit if SWITCHES or CHANNELS else [])]
 
 # ---- the cockpit ----
 cam = SHOTS["cockpit"]
@@ -377,7 +368,6 @@ must(batch([
 if GLOW and GLOW_CARDS:
     from glow import card_at
     ON_SCREENS = [("p_" + view, x, y, w, h, GLOW_SCREENS) for _, view, x, y, w, h in PAGES_AT]
-    ON_SCREENS += [("launcher", 0, 720, 600, 360, GLOW_DESK), ("bridge", 612, 720, 348, 360, GLOW_DESK)]
     cards = []
     for sid, x, y, w, h, glow in ON_SCREENS:
         g = card_at(x, y, x + w, y + h)
@@ -464,10 +454,9 @@ if WARP_LIGHT > 0:
     L += light("l_warp", "Warp glow", {"type": "directional", "color": "#a9c8ff", "intensity": WARP_LIGHT},
                (0.0, 2.0, -4.0), aim={"tilt_deg": -20.0, "turn_deg": 180.0})
 # A model is lit by at most 8 lights (the ambient and the environment aside), the first
-# in stacking order. With GLOW the 8 are the sun, the cabin, the warp's glow and the
-# launcher's pad lights (the two lead tracks' columns share one), which light the cabin
-# in the band's colours from the desk; without it, the warp's glow, the screens' glow and
-# the first four of the lights a track around the cabin.
+# in stacking order. With GLOW they are the sun, the cabin and the warp's glow (the desk
+# has no lights of its own: desk_lights.py); without it, the warp's glow, the screens' glow
+# and the first four of the lights a track around the cabin.
 if not GLOW:
     L += light("l_glow", "Screen glow", {"type": "point", "color": "#58d6ff", "intensity": 1.0, "range_px": 1100},
                (0.0, 1.0, -1.15))
@@ -487,20 +476,6 @@ for lid, name, color, at, _, inten, rng in TRACK_LIGHTS:
 if not GLOW:
     L += light("l_desk", "Desk glow", {"type": "point", "color": "#6ee0ff", "intensity": 1.4, "range_px": 700},
                (0.0, 0.92, -0.86))
-# The launcher throws its pads' colours on the desk and the screens above it: a small
-# light a track over its column, in the track's colour (the launcher's first 600 px of the
-# desk's 960 px cell, the desk 0.72 m wide, so a column is 75 px, 56 mm).
-# The lead and its echo share one light over their two columns, in between their colours,
-# so the warp's glow has a slot.
-PAD_LIGHTS = []
-if GLOW:
-    for n, (tracks, color) in enumerate([((0,), "#ff7a1a"), ((1,), "#ffc23d"), ((2,), "#2fd27a"),
-                                         ((3,), "#3aa0ff"), ((4, 5), "#e05ccd")]):
-        x = -0.36 + (sum(tracks) / len(tracks) + 0.5) * 0.05625
-        lid = f"l_pad{n}"
-        PAD_LIGHTS.append((lid, tracks))
-        L += light(lid, f"Pad light {n + 1}", {"type": "point", "color": color, "intensity": PAD_INTENSITY,
-                                                "range_px": PAD_RANGE}, (x, 0.84, -0.90), size=40)
 must(batch(L, "lights"), "lights")
 # The warp goes where the ship points (JStream ADR-0187): each jump travels straight ahead
 # from wherever the heading, pitch and roll have turned the sky, and at warp they swing it
@@ -542,10 +517,6 @@ if ARRIVALS:
 LEVEL_MS = int(os.environ.get("LEVEL_MS", "220"))
 motion = {lid: [data("level", "opacity", "meters", f"tracks.{ti}.0", -0.5, 0.0, smoothing=LEVEL_MS)]
           for lid, _, _, _, ti, _, _ in TRACK_LIGHTS}
-for lid, tracks in PAD_LIGHTS:
-    # A shared light follows each of its tracks for its share, so it keeps one's floor.
-    motion[lid] = [data(f"level{ti}" if len(tracks) > 1 else "level", "opacity", "meters", f"tracks.{ti}.0",
-                        -0.45 / len(tracks), 0.0, smoothing=LEVEL_MS) for ti in tracks]
 if not GLOW:
     motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
     # The screens' glow pulses on every beat: brightest on it, fading through it.
@@ -612,37 +583,29 @@ if not CHANNELS:
     motion["ship_yaw"] = [cc("yaw", "turn", SHIP_CC_YAW, 0.0, -360.0)]
     motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
     motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]
-# The model's own LEDs and light strips follow the band, by material name: the red LEDs
-# the drums, the green the bass, the blue the keys, the amber the master, the orange
-# accent strips the lead, and the cabin's light strips pulse on the beat. The amber LEDs'
-# and the orange accents' ranges end below 0, a fraction of the file's strength, so they
-# don't flare under the bloom's low threshold.
-LEDS = [("led_red", "meters", "tracks.0.0", -0.85, 1.6), ("led_green", "meters", "tracks.2.0", -0.85, 1.6),
-        ("led_blue", "meters", "tracks.3.0", -0.85, 1.6), ("led_amber", "meters", "master.0", -0.8, -0.45),
-        ("glow_amber", "meters", "tracks.4.0", -0.7, -0.1)]
-motion["model"] = [data(f"m_{mat}", "source", key, field, frm, to, smoothing=LEVEL_MS * 2 // 3,
-                        source={"param": "emissive_strength", "material": mat})
-                   for mat, key, field, frm, to in LEDS]
-# The cabin's yellow strips stay a soft glow under the low bloom threshold: from 0.45 of
-# their own strength on the beat to 0.25 (the file's 2.5 would flare).
-motion["model"].append(data("m_strip", "source", "clock", "beatPhase", -0.55, -0.75, smoothing=120,
-                            source={"param": "emissive_strength", "material": "light_strip"}))
+# The model's small LEDs are four groups by colour, red, green, blue and amber, each on a
+# channel, `Desk lights 1` to `4`, that JTunnel Mods 21 to 24 drive (desk_lights.py); the
+# light strips and the orange accents glow steadily. They follow nothing in the band.
+if CHANNELS:
+    must(batch(desk_lights.channels(lambda n: mod_inputs(f"desk_lights_{n - 20}")), "desk lights"),
+         "desk lights")
 # ---- the light switches: each light's group, and the master on all of them ----
 # A light's strength is its intensity times its opacity, so each switch adds -1 to its
 # lights' opacities as it fades off. The glow group's LEDs and strips are the model's
-# materials: its 8 motion modifiers are 6 data ones above and these 2, so the glow
-# switches drive every material's `emissive_strength` at once, which needs a JStream
-# that drives a glow with no material named; an older one leaves the LEDs lit.
+# materials: the glow switches drive every material's `emissive_strength` at once, which
+# needs a JStream that drives a glow with no material named; an older one leaves the LEDs
+# lit. The cabin lights are the Cabin switch's alone, in no LED group.
 LIGHT_GROUP = {"l_ambient": "cabin", "l_sun": "cabin", "l_cabin": "cabin", "l_glow": "desk",
                "l_desk": "desk"}
 LIGHT_GROUP.update({lid: "desk" for lid, *_ in TRACK_LIGHTS})
-LIGHT_GROUP.update({lid: "desk" for lid, _ in PAD_LIGHTS})  # the warp's glow is none's
+# The warp's glow is no group's.
 for lid, group in LIGHT_GROUP.items():
     if any(e.get("item_id") == lid for e in L):
         motion.setdefault(lid, []).extend(gates(group))
-# The glow's strength multiplies the file's by 1 plus its drives, and the LEDs' data
-# drives add up to 1.6, so a switch adds -3 to take it to nothing.
-motion["model"] += gates("glow", "source", off=-3.0, source={"param": "emissive_strength"})
+# The glow's strength multiplies the file's by 1 plus its drives, which are at most 0 here,
+# so a switch adding -3 takes it to nothing whatever the desk lights read.
+glow_gates = gates("glow", "source", off=-3.0, source={"param": "emissive_strength"})
+motion["model"] = desk_lights.model_motion(glow_gates) if CHANNELS else glow_gates
 for lid, mods in motion.items():
     scene = {"l_env": SHIP, "l_sun": SHIP, "ship_pitch": "ship_roll", "ship_yaw": "ship_pitch"}.get(lid, "cockpit")
     must(op({"type": "item.set_motion", "scene_id": scene, "item_id": lid, "motion": mods}), f"motion {lid}")
