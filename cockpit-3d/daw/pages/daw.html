@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><title>DAW screen</title>
-<style>html,body{margin:0;width:640px;height:360px;overflow:hidden;background:#050709}canvas{display:block}</style></head>
+<style>html,body{margin:0;width:640px;height:360px;overflow:hidden;background:#050709}canvas{display:block}canvas.layer{position:absolute;left:0;top:0}</style></head>
 <body><canvas id="c" width="640" height="360"></canvas><script>
 // One of the cockpit's DAW screens, drawn only from the JTunnel live data the page is
 // granted (JStream's page API, `jstream.data()`, ADR-0171 decision 10): ?view= picks
@@ -9,16 +9,33 @@
 // same picture every time; while the data's clock runs in real time, the page runs it on
 // between updates, for smooth motion (see `ahead`). `?w=` (or `window.DAW_W`) sets
 // the width and `?h=` (or `window.DAW_H`) the height; the desk's note grid is 600 wide, and the
-// `readouts` view (the consoles' amber readouts and small LEDs) is 640 x 540.
+// `readouts` view (the consoles' amber readouts and small LEDs) is 640 x 540. `?s=` (or
+// `window.DAW_S`) draws it that many times sharper: the page is W x H times S pixels, and
+// every view draws in its W x H units, scaled.
 const VIEW = window.DAW_VIEW || new URLSearchParams(location.search).get('view') || 'transport';
 const cv = document.getElementById('c');
 const x = cv.getContext('2d');
 const W = +(window.DAW_W || new URLSearchParams(location.search).get('w')) || 640,
   H = +(window.DAW_H || new URLSearchParams(location.search).get('h')) || 360, MONO = '"DejaVu Sans Mono",monospace', SANS = 'Inter,"DejaVu Sans",sans-serif';
 const AMBER = '255,176,64', CYAN = '110,220,255', GREEN = '70,230,140', RED = '255,70,70';
-cv.width = W; cv.height = H;
-document.documentElement.style.width = document.body.style.width = W + 'px';
-document.documentElement.style.height = document.body.style.height = H + 'px';
+const S = +(window.DAW_S || new URLSearchParams(location.search).get('s')) || 1;
+cv.width = W * S; cv.height = H * S;
+document.documentElement.style.width = document.body.style.width = W * S + 'px';
+document.documentElement.style.height = document.body.style.height = H * S + 'px';
+x.setTransform(S, 0, 0, S, 0, 0);
+// What never changes is drawn once, on a layer of its own that the browser composites: the
+// screens' background under the picture and their scanlines over it (FRAMED views). Each
+// frame then draws only what moves, on a clear canvas, so a sharp page costs little more
+// to draw than a plain one.
+const FRAMED = ['transport', 'arrange', 'device', 'notes', 'mixer', 'clip', 'scenes'].includes(VIEW);
+function layer(above) {
+  const c = document.createElement('canvas');
+  c.className = 'layer'; c.width = W * S; c.height = H * S;
+  above ? document.body.append(c) : document.body.insertBefore(c, cv);
+  if (!above) cv.className = 'layer';
+  const g = c.getContext('2d'); g.setTransform(S, 0, 0, S, 0, 0);
+  return g;
+}
 // The desk's lit pads go on a clear page, over their unlit pads (`isopads`, `bridgepads`).
 if (VIEW === 'iso' || VIEW === 'bridge') document.documentElement.style.background = document.body.style.background = 'transparent';
 let D = {}, dirty = true;
@@ -42,16 +59,23 @@ function rgba(hex, a) {
   const n = parseInt((hex || '#888888').slice(1, 7), 16);
   return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
 }
-function frame(title, right) {
+// A screen's background: dark, a soft glow in the middle, the amber title band.
+function screenBack(x) {
   x.fillStyle = '#050709'; x.fillRect(0, 0, W, H);
   const g = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * .6);
   g.addColorStop(0, 'rgba(20,40,60,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
   x.fillStyle = `rgba(${AMBER},.12)`; x.fillRect(0, 0, W, 34);
   x.fillStyle = `rgba(${AMBER},.8)`; x.fillRect(0, 33, W, 2);
+}
+function scanLines(x) { x.fillStyle = 'rgba(0,0,0,.18)'; for (let y = 0; y < H; y += 3) x.fillRect(0, y, W, 1); }
+let back = null;   // the FRAMED views' background and scanlines, once drawn
+function frame(title, right) {
+  if (FRAMED && !back) { back = layer(false); screenBack(back); scanLines(layer(true)); }
+  if (back) x.clearRect(0, 0, W, H); else screenBack(x);
   txt(title, 16, 24, 16, `rgba(${AMBER},.95)`, 'left', 700);
   if (right) txt(right, W - 16, 24, 13, `rgba(${CYAN},.8)`, 'right', 500);
 }
-function scan() { for (let y = 0; y < H; y += 3) { x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, y, W, 1); } }
+function scan() { if (!back) scanLines(x); }
 function dataClock() { return D.clock || { beats: 0, bar: 1, beat: 1, beatPhase: 0, playing: false, tempo: 0 }; }
 // The clock this draw shows: the data's, moved on between updates while it plays (see ahead).
 let shown = null;
@@ -112,10 +136,30 @@ function siliconePad(px, py, w, h, r, s = 1) {
 }
 // A lit pad, `lv` 0 to 1, in `col`: opaque from ROOT_GLOW up, so it hides the unlit pad
 // under it, and fading out below that.
+// Lit pads are drawn from sprites, each pad's look at a level drawn once: a lit pad's glow
+// is a blur, the dearest thing a page draws. The level is kept to LIT_STEPS steps, and the
+// sprites to the LIT_KEEP last used.
+const LIT_STEPS = 24, LIT_KEEP = 1200, lit = new Map();
 function litPad(px, py, w, h, r, col, lv, s = 1) {
+  const q = Math.max(1, Math.round(Math.min(1, lv) * LIT_STEPS)), m = Math.ceil(16 * s) + 4;
+  const key = `${w.toFixed(2)},${h.toFixed(2)},${r},${s},${col},${q}`;
+  let sp = lit.get(key);
+  if (sp) lit.delete(key);
+  else {
+    sp = document.createElement('canvas');
+    sp.width = Math.ceil((w + 2 * m) * S); sp.height = Math.ceil((h + 2 * m) * S);
+    const g = sp.getContext('2d'); g.setTransform(S, 0, 0, S, 0, 0);
+    drawLitPad(g, m, m, w, h, r, col, q / LIT_STEPS, s);
+    if (lit.size >= LIT_KEEP) lit.delete(lit.keys().next().value);
+  }
+  lit.set(key, sp);
+  x.drawImage(sp, px - m, py - m, sp.width / S, sp.height / S);
+}
+function drawLitPad(x, px, py, w, h, r, col, lv, s) {
+  const rr = (px, py, w, h, r) => { x.beginPath(); x.roundRect(px, py, w, h, r); };
   x.save();
   x.globalAlpha = Math.min(1, lv / ROOT_GLOW);
-  x.shadowColor = rgba(col, Math.min(1, .9 * lv)); x.shadowBlur = 16 * s * lv;
+  x.shadowColor = rgba(col, Math.min(1, .9 * lv)); x.shadowBlur = 16 * s * lv * S;  // a blur ignores the scale
   x.fillStyle = '#0c1016'; rr(px, py, w, h, r); x.fill();
   x.shadowBlur = 0;
   x.fillStyle = rgba(col, Math.min(1, lv)); rr(px, py, w, h, r); x.fill();
@@ -831,14 +875,35 @@ function ahead(c, before) {
   if (!d) return c;
   return Object.assign({}, c, { beats: b + d, beatPhase: (c.beatPhase || 0) + d, seconds: (c.seconds || 0) + d * 60 / c.tempo });
 }
+const MOVES = ['transport', 'arrange', 'notes'].includes(VIEW);
+// What a still view shows, as a string: an update that leaves it the same draws nothing, so
+// the page doesn't paint (an update comes with every move of the clock, which these views
+// show only as a blink). Views without one draw on every update.
+const SHOWS = {
+  device: () => [D.device],
+  scenes: () => [D.scenes, D.grid, tracks().map(t => [t.color, t.slots]), blinkOn()],
+  clip: () => { const cl = D.clip || {}; return [cl, Object.keys(steps[`${cl.track}/${cl.scene}`] || {}).length]; },
+  mixer: () => [D.meters, tracks().map(t => [t.name, t.color, t.playing, t.selected])],
+  iso: () => [D.notes, D.grid, (D['track/' + selected()] || {}).color],
+  bridge: () => [D.meters],
+};
+let showing = null;  // what the still view showed when it last drew
+function unchanged() {
+  const f = SHOWS[VIEW]; if (!f) return false;
+  const now = JSON.stringify(f());
+  if (now === showing) return true;
+  showing = now; return false;
+}
 let fresh = false;   // an update came since the last frame: it is taken once, at the frame
 function draw() {
   if (fresh) { fresh = false; take(); }
   const before = shown;
   shown = ahead(dataClock(), before);
-  const moving = SMOOTH && shown.playing;
+  // Only the views that move with the clock draw every frame; the rest change only with
+  // the data, and draw when it does.
+  const moving = SMOOTH && shown.playing && MOVES;
   if (VIEW === 'isopads' || VIEW === 'bridgepads') { if (dirty) { views[VIEW](); dirty = false; } }
-  else if (window.jstream && jstream.data) { if (dirty || fading || moving || VIEW === 'clocks') { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
+  else if (window.jstream && jstream.data) { if (fading || moving || VIEW === 'clocks' || (dirty && !unchanged())) { views[VIEW](); if (!['iso', 'bridge', 'panels', 'readouts', 'clocks'].includes(VIEW)) scan(); dirty = false; } }
   else { frame('DAW', 'NO PAGE API'); scan(); }
   requestAnimationFrame(draw);
 }
