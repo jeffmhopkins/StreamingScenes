@@ -39,9 +39,10 @@ scene's lights, so it will not look exactly like this there.
 | [`tools/make_textures.py`](tools/make_textures.py) | Builds `textures/` from the ambientCG downloads (baking the grime and scratches into the paint set, and drawing the panel set), and draws the decals, readouts and the screens' atlas. |
 | [`tools/build_cockpit.py`](tools/build_cockpit.py) | Builds the model in Blender from code and exports it. |
 | [`tools/finish_gltf.py`](tools/finish_gltf.py) | Wires the textures into the exported glTF. |
-| [`tools/live_panels.py`](tools/live_panels.py) | The console's live panels: which readouts and which button panel show a cell of the screens atlas, and where. |
+| [`tools/live_panels.py`](tools/live_panels.py) | The console's live panel: the button panel that shows a cell of the screens atlas, and where. |
 | [`tools/live_readouts.py`](tools/live_readouts.py) | Runs last: gives the side monitors smaller cells and moves every amber readout and every LED of 2 cm or less onto the `screens` material, each in a cell of its own, so a live source can drive each one. [`tools/unlive_readouts.py`](tools/unlive_readouts.py) puts the readouts and LEDs back and keeps the side cells, as the committed model has them. See [Readouts and LEDs](#readouts-and-leds). |
-| [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panels to an exported `cockpit.gltf` without Blender. |
+| [`tools/add_live_panels.py`](tools/add_live_panels.py) | Adds the live panel to an exported `cockpit.gltf` without Blender. |
+| [`tools/trim_live_panels.py`](tools/trim_live_panels.py) | Takes the readouts' retired live panels off a model built with them, by where they sit, so it also works on a copy whose screens were re-mapped. |
 | [`tools/softkeys.py`](tools/softkeys.py), [`tools/add_softkeys.py`](tools/add_softkeys.py) | The soft keys a scene can light: where they are and which atlas pixels light them, and the script that adds their lights and the hologram's keys to an exported `cockpit.gltf`. See [Soft keys](#soft-keys). |
 | [`tools/optimize_gltf.py`](tools/optimize_gltf.py) | Takes out of the finished model what costs render time and shows nothing: it makes the glass unlit and removes triangles none of several thousand sampled views can see ([`tools/visibility.c`](tools/visibility.c) finds them). See [What the model doesn't draw](#what-the-model-doesnt-draw). |
 | [`tools/render_previews.py`](tools/render_previews.py) | Renders the stills above. |
@@ -53,7 +54,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 147,301 (the optimised 147,201, then the soft keys' 100) | 2,000,000 |
+| Triangles | 147,281 (the optimised 147,201, then the soft keys' 100, less the 20 of the retired readout panels) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -134,7 +135,7 @@ cabin toward the windshield.
 | `windshield` | the canopy and the hull under it. One wide raked windshield: its base at the sill, y 0.95, z −1.70, x ±0.88; its top at the roof, y 1.85, z −0.85, x ±0.73, with a gusset across each corner. One side window each side, from the windshield back to the B-pillar at z 0.10 (x ±1.05 at the sill, ±0.82 at the roof). Thick pillars with trim and an amber marker at each foot, the roof over the pilot, and the opaque cheeks and nose below the sill. |
 | `header` | the overhead console under the roof at the top of the windshield, a wedge across the top of the windshield, x ±0.68, z −0.58 to −0.92, its face tilted at the pilot's eyes: the two overhead screens set into it, a switch panel between them and a lamp under it |
 | `dashboard` | the three monitors, upright, the centre one at z ≈ −1.42 and the outer two turned 15° inward, hinged midway in an even 5.5 cm gap, in one slim moulded case (a face with a window per screen, about 4 cm deep, with a deeper chamfered frame standing 3 cm proud round each side screen, and over it all one ledge standing 7 cm out toward the pilot that steps up one ledge-thickness (2.4 cm) into a low trapezoid crown over the centre monitor, an amber light bar along its whole front edge) mitred where the monitors meet and wrapped round each end; the sloped console below them (y 0.62 at z −0.65 up to y 0.79 at z −1.37), a strip ahead of the tray and a wing each side, x ±0.45 to ±0.84; the tray, z −0.76 to −1.12 at y ≈ 0.59 to 0.67, on two arms, with an arm rest each side |
-| `live_panels` | eleven quads on the `screens` material over the centre console's, the wings' and the overhead switch panel's readouts and the button panel right of the centre console's readouts (see [Screens](#screens)) |
+| `live_panels` | one quad on the `screens` material over the button panel right of the centre console's readouts (see [Screens](#screens)) |
 | `side_consoles` | either side, x ±0.78 to ±1.03, z −0.65 to 0.70; the throttle's base and slot on the left (with no lever), side stick on the right; a ledge under each side window |
 | `conduits` | behind the pilot: cable looms along the roof edges, roof conduits, greebled roof and lower-wall panels |
 | `rear_bulkhead` | the back wall, with a hatch |
@@ -171,15 +172,14 @@ the left 960 × 360 of the bottom row. Its placeholder is a dark 24 × 8 grid of
 instrument reads as switched off; draw the same dark grid in that cell when the live
 instrument camera is off.
 
-The bottom row's middle 320 × 360 px (960 to 1280) feeds the **live panels**: eleven small
-displays on the consoles, in one node, `live_panels`, also on `screens`. Ten sit just in
-front of the amber readouts they replace, and one covers the 7 × 7 button panel right of
-the centre console's readouts. Each maps one cell of that strip, as
-[`tools/live_panels.py`](tools/live_panels.py) lists them (`PANELS`): the launcher panel
-160 × 160 px, six readouts 160 × 80 and four 80 × 40, all 2:1 like the readouts. The
-placeholder atlas holds each readout's old picture there, so the model looks as it did
-until a live source fills the strip; the DAW scene draws them from its `panels` page
-([daw/README.md](daw/README.md)).
+The bottom row's middle 320 × 360 px (960 to 1280) feeds the **live panel**: one small
+display, node `live_panels`, also on `screens`, over the 7 × 7 button panel right of the
+centre console's readouts. It maps the strip's top-left 160 × 160 px, as
+[`tools/live_panels.py`](tools/live_panels.py) gives it (`PANELS`); the placeholder atlas
+holds an unlit 8 × 8 pad grid there, and the DAW scene draws a clip launcher on it from
+its `panels` page ([daw/README.md](daw/README.md)). The rest of the strip is unused: the
+readouts were live panels too, and are the model's own amber readouts again
+(`READOUTS_RETIRED`; `tools/trim_live_panels.py` takes their quads off an older build).
 
 The side monitors are a third as wide as the big ones, so their cells are a quarter as big
 (320 × 180, still more pixels a millimetre than the big monitors get). The 640 × 540 they
@@ -188,7 +188,8 @@ leave, 1280, 540 to 1920, 1080, is free.
 ### Readouts and LEDs
 
 The amber readouts and the LEDs show their own pictures and glow, as `build_cockpit.py`
-made them (the DAW scene drives the LEDs' glow from the band). `tools/live_readouts.py`
+made them (the DAW scene drives each colour of LED from a channel of its own, its desk
+lights). `tools/live_readouts.py`
 can move each onto `screens`, in a cell of its own in the 640 × 540 the side monitors left
 (1280, 540 to 1920, 1080), for a page to draw; the committed model doesn't, since that left
 too many of them dark without their page. `tools/unlive_readouts.py` undoes it and keeps
@@ -319,7 +320,7 @@ python tools/render_previews.py cockpit.blend media 48 1280
 ```
 
 `build_cockpit.py` is plain code: boxes, extruded profiles and cylinders, bevelled, then
-joined into one node per part. It makes the live panels itself; to add them to a
+joined into one node per part. It makes the live panel itself; to add it to a
 model exported before they existed, without Blender, run
 `python tools/add_live_panels.py model/cockpit.gltf` (it does nothing if they are there). Change a dimension there and rebuild; the screen table
 above comes from the `SCREENS` table at its top.

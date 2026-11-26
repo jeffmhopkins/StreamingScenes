@@ -1,6 +1,6 @@
 {
   "schema_version": 23,
-  "rev": 585,
+  "rev": 565,
   "canvas": {
     "width": 1920,
     "height": 1080
@@ -14657,7 +14657,7 @@
           ]
         },
         {
-          "id": "key_left_transport",
+          "id": "key_left_notes",
           "source_id": "key_lit",
           "geometry": {
             "center": {
@@ -14686,7 +14686,7 @@
               "modifier_id": "source",
               "property": "opacity",
               "kind": "channel",
-              "channel_id": "src_left_transport",
+              "channel_id": "src_left_notes",
               "smoothing_ms": 0,
               "curve": "linear",
               "from": -1.0,
@@ -16033,6 +16033,530 @@
       ],
       "timelines": [
         {
+          "timeline_id": "desk_steady",
+          "name": "Desk lights steady",
+          "duration_ms": 400,
+          "loop": "once",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "desk_lights_1"
+              },
+              "points": [
+                {
+                  "at_ms": 400,
+                  "value": 1.0,
+                  "curve": "ease_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_2"
+              },
+              "points": [
+                {
+                  "at_ms": 400,
+                  "value": 1.0,
+                  "curve": "ease_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_3"
+              },
+              "points": [
+                {
+                  "at_ms": 400,
+                  "value": 1.0,
+                  "curve": "ease_out"
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_4"
+              },
+              "points": [
+                {
+                  "at_ms": 400,
+                  "value": 1.0,
+                  "curve": "ease_out"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "timeline_id": "desk_twinkle",
+          "name": "Desk lights twinkle",
+          "duration_ms": 12000,
+          "loop": "loop",
+          "cues": [],
+          "lanes": [
+            {
+              "target": {
+                "channel": "desk_lights_1"
+              },
+              "points": [
+                {
+                  "at_ms": 451,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 975,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 1144,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 1812,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 2306,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2485,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2824,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 3032,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 3580,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 3946,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 4630,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 4810,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 5509,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 5857,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 6619,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 6802,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 7521,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 7691,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 7858,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 8114,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 8663,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 9336,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 10040,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 10733,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 11551,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 11776,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 12000,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_2"
+              },
+              "points": [
+                {
+                  "at_ms": 774,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 1275,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 1955,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2139,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2320,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2650,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 3466,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 4023,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 4464,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 5183,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 5673,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 6047,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 6351,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 6720,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 7428,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 8085,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 8556,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 9135,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 9878,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 10118,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 10666,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 11561,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 12000,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_3"
+              },
+              "points": [
+                {
+                  "at_ms": 620,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 780,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 979,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 1670,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 2111,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 2942,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 3670,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 4383,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 4970,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 5185,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 5790,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 6590,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 6772,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 7610,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 8392,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 9209,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 9785,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 10638,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 11442,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 11585,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 12000,
+                  "value": 1.0
+                }
+              ]
+            },
+            {
+              "target": {
+                "channel": "desk_lights_4"
+              },
+              "points": [
+                {
+                  "at_ms": 292,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 531,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 711,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 1125,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 2001,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 2528,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 3156,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 3446,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 3977,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 4381,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 4941,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 5624,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 6467,
+                  "value": 0.6
+                },
+                {
+                  "at_ms": 6954,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 7463,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 7737,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 8037,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 8394,
+                  "value": 0.1,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 8752,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 9368,
+                  "value": 0.0,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 10091,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 10480,
+                  "value": 0.85
+                },
+                {
+                  "at_ms": 10604,
+                  "value": 1.0
+                },
+                {
+                  "at_ms": 11153,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 11651,
+                  "value": 0.35,
+                  "curve": "ease_out"
+                },
+                {
+                  "at_ms": 12000,
+                  "value": 1.0
+                }
+              ]
+            }
+          ],
+          "stops": [
+            {
+              "type": "timeline",
+              "timeline_id": "desk_steady",
+              "edge": "starts"
+            }
+          ]
+        },
+        {
           "timeline_id": "drift",
           "name": "Drift",
           "duration_ms": 150000,
@@ -17074,83 +17598,78 @@
           "visible": true,
           "motion": [
             {
-              "modifier_id": "m_led_red",
+              "modifier_id": "m_desk_lights_1",
               "property": "source",
               "source": {
                 "param": "emissive_strength",
                 "material": "led_red"
               },
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.0.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 146,
+              "kind": "channel",
+              "channel_id": "desk_lights_1",
+              "smoothing_ms": 60,
               "curve": "linear",
-              "from": -0.85,
-              "to": 1.6,
+              "from": -1.0,
+              "to": 0.0,
               "clock": "engine"
             },
             {
-              "modifier_id": "m_led_green",
+              "modifier_id": "m_desk_lights_2",
               "property": "source",
               "source": {
                 "param": "emissive_strength",
                 "material": "led_green"
               },
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.2.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 146,
+              "kind": "channel",
+              "channel_id": "desk_lights_2",
+              "smoothing_ms": 60,
               "curve": "linear",
-              "from": -0.85,
-              "to": 1.6,
+              "from": -1.0,
+              "to": 0.0,
               "clock": "engine"
             },
             {
-              "modifier_id": "m_led_blue",
+              "modifier_id": "m_desk_lights_3",
               "property": "source",
               "source": {
                 "param": "emissive_strength",
                 "material": "led_blue"
               },
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.3.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 146,
+              "kind": "channel",
+              "channel_id": "desk_lights_3",
+              "smoothing_ms": 60,
               "curve": "linear",
-              "from": -0.85,
-              "to": 1.6,
+              "from": -1.0,
+              "to": 0.0,
               "clock": "engine"
             },
             {
-              "modifier_id": "m_led_amber",
+              "modifier_id": "m_desk_lights_4",
               "property": "source",
               "source": {
                 "param": "emissive_strength",
                 "material": "led_amber"
               },
-              "kind": "data",
-              "key": "meters",
-              "field": "master.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 146,
+              "kind": "channel",
+              "channel_id": "desk_lights_4",
+              "smoothing_ms": 60,
               "curve": "linear",
-              "from": -0.8,
+              "from": -1.0,
               "to": -0.45,
+              "clock": "engine"
+            },
+            {
+              "modifier_id": "m_light_strip",
+              "property": "source",
+              "source": {
+                "param": "emissive_strength",
+                "material": "light_strip"
+              },
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 0,
+              "curve": "linear",
+              "from": -1.0,
+              "to": -0.65,
               "clock": "engine"
             },
             {
@@ -17160,37 +17679,12 @@
                 "param": "emissive_strength",
                 "material": "glow_amber"
               },
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.4.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 146,
+              "kind": "channel",
+              "channel_id": "power_glow",
+              "smoothing_ms": 0,
               "curve": "linear",
-              "from": -0.7,
-              "to": -0.1,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "m_strip",
-              "property": "source",
-              "source": {
-                "param": "emissive_strength",
-                "material": "light_strip"
-              },
-              "kind": "data",
-              "key": "clock",
-              "field": "beatPhase",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 120,
-              "curve": "linear",
-              "from": -0.55,
-              "to": -0.75,
+              "from": -1.0,
+              "to": -0.4,
               "clock": "engine"
             },
             {
@@ -17452,352 +17946,6 @@
               "property": "opacity",
               "kind": "channel",
               "channel_id": "warp",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "l_pad0",
-          "source_id": "l_pad0",
-          "geometry": {
-            "center": {
-              "x": 628.125,
-              "y": 639.7912
-            },
-            "size": {
-              "width": 40.0,
-              "height": 40.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": -602.2838
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "level",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.0.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.45,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "l_pad1",
-          "source_id": "l_pad1",
-          "geometry": {
-            "center": {
-              "x": 684.375,
-              "y": 639.7912
-            },
-            "size": {
-              "width": 40.0,
-              "height": 40.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": -602.2838
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "level",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.1.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.45,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "l_pad2",
-          "source_id": "l_pad2",
-          "geometry": {
-            "center": {
-              "x": 740.625,
-              "y": 639.7912
-            },
-            "size": {
-              "width": 40.0,
-              "height": 40.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": -602.2838
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "level",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.2.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.45,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "l_pad3",
-          "source_id": "l_pad3",
-          "geometry": {
-            "center": {
-              "x": 796.875,
-              "y": 639.7912
-            },
-            "size": {
-              "width": 40.0,
-              "height": 40.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": -602.2838
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "level",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.3.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.45,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "l_pad4",
-          "source_id": "l_pad4",
-          "geometry": {
-            "center": {
-              "x": 881.25,
-              "y": 639.7912
-            },
-            "size": {
-              "width": 40.0,
-              "height": 40.0
-            },
-            "fit_mode": "fit",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": -602.2838
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "level4",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.4.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.225,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "level5",
-              "property": "opacity",
-              "kind": "data",
-              "key": "meters",
-              "field": "tracks.5.0",
-              "range": [
-                0.0,
-                1.0
-              ],
-              "smoothing_ms": 220,
-              "curve": "linear",
-              "from": -0.225,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
               "smoothing_ms": 30,
               "curve": "linear",
               "from": -1.0,
@@ -19195,7 +19343,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19236,7 +19384,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19300,7 +19448,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19341,7 +19489,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19405,7 +19553,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19446,7 +19594,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19510,7 +19658,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.hide"
               }
@@ -19551,7 +19699,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19607,15 +19755,15 @@
           ]
         },
         {
-          "timeline_id": "left_transport",
-          "name": "Left monitor: Transport",
+          "timeline_id": "left_notes",
+          "name": "Left monitor: Notes",
           "duration_ms": 150,
           "loop": "once",
           "cues": [
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_left_transport",
+                "item_id": "src_left_notes",
                 "scene_id": "src_left",
                 "type": "item.show"
               }
@@ -19656,7 +19804,7 @@
           "lanes": [
             {
               "target": {
-                "channel": "src_left_transport"
+                "channel": "src_left_notes"
               },
               "points": [
                 {
@@ -19714,8 +19862,8 @@
       ],
       "items": [
         {
-          "id": "src_left_transport",
-          "source_id": "p_transport",
+          "id": "src_left_notes",
+          "source_id": "p_notes",
           "geometry": {
             "center": {
               "x": 960.0,
@@ -21851,31 +21999,7 @@
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_desk_grid_launcher_unlit",
-                "scene_id": "src_desk",
-                "type": "item.hide"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_bridge_unlit",
-                "scene_id": "src_desk",
-                "type": "item.hide"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_launcher",
-                "scene_id": "src_desk",
-                "type": "item.hide"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_bridge",
+                "item_id": "src_desk_grid_desk_pads_off",
                 "scene_id": "src_desk",
                 "type": "item.hide"
               }
@@ -21916,38 +22040,14 @@
         },
         {
           "timeline_id": "desk_grid",
-          "name": "Desk: Pads and meters",
+          "name": "Desk: Pads",
           "duration_ms": 150,
           "loop": "once",
           "cues": [
             {
               "at_ms": 0,
               "action": {
-                "item_id": "src_desk_grid_launcher_unlit",
-                "scene_id": "src_desk",
-                "type": "item.show"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_bridge_unlit",
-                "scene_id": "src_desk",
-                "type": "item.show"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_launcher",
-                "scene_id": "src_desk",
-                "type": "item.show"
-              }
-            },
-            {
-              "at_ms": 0,
-              "action": {
-                "item_id": "src_desk_grid_bridge",
+                "item_id": "src_desk_grid_desk_pads_off",
                 "scene_id": "src_desk",
                 "type": "item.show"
               }
@@ -21989,15 +22089,15 @@
       ],
       "items": [
         {
-          "id": "src_desk_grid_launcher_unlit",
-          "source_id": "launcher_unlit",
+          "id": "src_desk_grid_desk_pads_off",
+          "source_id": "desk_pads_off",
           "geometry": {
             "center": {
-              "x": 600.0,
+              "x": 960.0,
               "y": 540.0
             },
             "size": {
-              "width": 1200.0,
+              "width": 1920.0,
               "height": 720.0
             },
             "fit_mode": "stretch",
@@ -22048,119 +22148,6 @@
               "clock": "engine"
             }
           ]
-        },
-        {
-          "id": "src_desk_grid_bridge_unlit",
-          "source_id": "bridge_unlit",
-          "geometry": {
-            "center": {
-              "x": 1572.0,
-              "y": 540.0
-            },
-            "size": {
-              "width": 696.0,
-              "height": 720.0
-            },
-            "fit_mode": "stretch",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true,
-          "motion": [
-            {
-              "modifier_id": "switch_cabin",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_cabin",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -0.5,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_desk",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_desk",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            },
-            {
-              "modifier_id": "switch_master",
-              "property": "opacity",
-              "kind": "channel",
-              "channel_id": "power_master",
-              "smoothing_ms": 30,
-              "curve": "linear",
-              "from": -1.0,
-              "to": 0.0,
-              "clock": "engine"
-            }
-          ]
-        },
-        {
-          "id": "src_desk_grid_launcher",
-          "source_id": "launcher",
-          "geometry": {
-            "center": {
-              "x": 600.0,
-              "y": 540.0
-            },
-            "size": {
-              "width": 1200.0,
-              "height": 720.0
-            },
-            "fit_mode": "stretch",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true
-        },
-        {
-          "id": "src_desk_grid_bridge",
-          "source_id": "bridge",
-          "geometry": {
-            "center": {
-              "x": 1572.0,
-              "y": 540.0
-            },
-            "size": {
-              "width": 696.0,
-              "height": 720.0
-            },
-            "fit_mode": "stretch",
-            "rotation_deg": 0.0,
-            "tilt_deg": 0.0,
-            "turn_deg": 0.0,
-            "depth_px": 0.0
-          },
-          "crop": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-          },
-          "visible": true
         },
         {
           "id": "src_desk_feed",
@@ -24824,7 +24811,8 @@
           "source_id": "atlas_src",
           "type": "source"
         },
-        "texture_material": "screens"
+        "texture_material": "screens",
+        "texture_size": "full"
       }
     },
     {
@@ -24850,6 +24838,22 @@
       "settings": {
         "file": {
           "path": "starship-cockpit/pages/caller.png",
+          "root": "collection",
+          "type": "asset"
+        }
+      }
+    },
+    {
+      "id": "desk_pads_off",
+      "name": "Desk pads, switched off",
+      "kind": {
+        "type": "builtin",
+        "kind": "image"
+      },
+      "kind_version": 1,
+      "settings": {
+        "file": {
+          "path": "cockpit-3d/daw/desk/pads-off.png",
           "root": "collection",
           "type": "asset"
         }
@@ -26362,196 +26366,6 @@
         "warp_aim": "ahead",
         "warp_look_deg": 10.0,
         "warp_ramp_s": 0.0
-      }
-    },
-    {
-      "id": "l_pad0",
-      "name": "Pad light 1",
-      "kind": {
-        "type": "builtin",
-        "kind": "light"
-      },
-      "kind_version": 1,
-      "settings": {
-        "backdrop": false,
-        "color": "#ff7a1a",
-        "cone_deg": 45.0,
-        "galaxy": 0.0,
-        "ground_color": "#3a3a3a",
-        "horizon_color": "#ffffff",
-        "image": null,
-        "intensity": 2.2,
-        "nebula": 0.0,
-        "nebula_color": "#8c2e9e",
-        "nebula_color_2": "#2471a8",
-        "range_px": 1200.0,
-        "shadow_softness": 0.3,
-        "shadows": false,
-        "sky_color": "#9cc2e8",
-        "sky_picture_deg": 30.0,
-        "sky_picture_light": 1.0,
-        "sky_pictures": null,
-        "sky_seed": 0,
-        "softness": 0.2,
-        "star_brightness": 1.0,
-        "stars": 0.0,
-        "type": "point",
-        "warp": 0.0,
-        "warp_aim": "sky",
-        "warp_look_deg": 10.0,
-        "warp_ramp_s": 1.5
-      }
-    },
-    {
-      "id": "l_pad1",
-      "name": "Pad light 2",
-      "kind": {
-        "type": "builtin",
-        "kind": "light"
-      },
-      "kind_version": 1,
-      "settings": {
-        "backdrop": false,
-        "color": "#ffc23d",
-        "cone_deg": 45.0,
-        "galaxy": 0.0,
-        "ground_color": "#3a3a3a",
-        "horizon_color": "#ffffff",
-        "image": null,
-        "intensity": 2.2,
-        "nebula": 0.0,
-        "nebula_color": "#8c2e9e",
-        "nebula_color_2": "#2471a8",
-        "range_px": 1200.0,
-        "shadow_softness": 0.3,
-        "shadows": false,
-        "sky_color": "#9cc2e8",
-        "sky_picture_deg": 30.0,
-        "sky_picture_light": 1.0,
-        "sky_pictures": null,
-        "sky_seed": 0,
-        "softness": 0.2,
-        "star_brightness": 1.0,
-        "stars": 0.0,
-        "type": "point",
-        "warp": 0.0,
-        "warp_aim": "sky",
-        "warp_look_deg": 10.0,
-        "warp_ramp_s": 1.5
-      }
-    },
-    {
-      "id": "l_pad2",
-      "name": "Pad light 3",
-      "kind": {
-        "type": "builtin",
-        "kind": "light"
-      },
-      "kind_version": 1,
-      "settings": {
-        "backdrop": false,
-        "color": "#2fd27a",
-        "cone_deg": 45.0,
-        "galaxy": 0.0,
-        "ground_color": "#3a3a3a",
-        "horizon_color": "#ffffff",
-        "image": null,
-        "intensity": 2.2,
-        "nebula": 0.0,
-        "nebula_color": "#8c2e9e",
-        "nebula_color_2": "#2471a8",
-        "range_px": 1200.0,
-        "shadow_softness": 0.3,
-        "shadows": false,
-        "sky_color": "#9cc2e8",
-        "sky_picture_deg": 30.0,
-        "sky_picture_light": 1.0,
-        "sky_pictures": null,
-        "sky_seed": 0,
-        "softness": 0.2,
-        "star_brightness": 1.0,
-        "stars": 0.0,
-        "type": "point",
-        "warp": 0.0,
-        "warp_aim": "sky",
-        "warp_look_deg": 10.0,
-        "warp_ramp_s": 1.5
-      }
-    },
-    {
-      "id": "l_pad3",
-      "name": "Pad light 4",
-      "kind": {
-        "type": "builtin",
-        "kind": "light"
-      },
-      "kind_version": 1,
-      "settings": {
-        "backdrop": false,
-        "color": "#3aa0ff",
-        "cone_deg": 45.0,
-        "galaxy": 0.0,
-        "ground_color": "#3a3a3a",
-        "horizon_color": "#ffffff",
-        "image": null,
-        "intensity": 2.2,
-        "nebula": 0.0,
-        "nebula_color": "#8c2e9e",
-        "nebula_color_2": "#2471a8",
-        "range_px": 1200.0,
-        "shadow_softness": 0.3,
-        "shadows": false,
-        "sky_color": "#9cc2e8",
-        "sky_picture_deg": 30.0,
-        "sky_picture_light": 1.0,
-        "sky_pictures": null,
-        "sky_seed": 0,
-        "softness": 0.2,
-        "star_brightness": 1.0,
-        "stars": 0.0,
-        "type": "point",
-        "warp": 0.0,
-        "warp_aim": "sky",
-        "warp_look_deg": 10.0,
-        "warp_ramp_s": 1.5
-      }
-    },
-    {
-      "id": "l_pad4",
-      "name": "Pad light 5",
-      "kind": {
-        "type": "builtin",
-        "kind": "light"
-      },
-      "kind_version": 1,
-      "settings": {
-        "backdrop": false,
-        "color": "#e05ccd",
-        "cone_deg": 45.0,
-        "galaxy": 0.0,
-        "ground_color": "#3a3a3a",
-        "horizon_color": "#ffffff",
-        "image": null,
-        "intensity": 2.2,
-        "nebula": 0.0,
-        "nebula_color": "#8c2e9e",
-        "nebula_color_2": "#2471a8",
-        "range_px": 1200.0,
-        "shadow_softness": 0.3,
-        "shadows": false,
-        "sky_color": "#9cc2e8",
-        "sky_picture_deg": 30.0,
-        "sky_picture_light": 1.0,
-        "sky_pictures": null,
-        "sky_seed": 0,
-        "softness": 0.2,
-        "star_brightness": 1.0,
-        "stars": 0.0,
-        "type": "point",
-        "warp": 0.0,
-        "warp_aim": "sky",
-        "warp_look_deg": 10.0,
-        "warp_ramp_s": 1.5
       }
     },
     {
@@ -32237,6 +32051,13 @@
       }
     },
     {
+      "chord": "Ctrl+Alt+KeyG",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_twinkle"
+      }
+    },
+    {
       "chord": "Ctrl+Alt+KeyH",
       "action": {
         "type": "channel.set_value",
@@ -32323,7 +32144,7 @@
       "chord": "Ctrl+Alt+Shift+Digit1",
       "action": {
         "type": "timeline.play",
-        "timeline_id": "left_transport"
+        "timeline_id": "left_notes"
       }
     },
     {
@@ -32401,6 +32222,13 @@
       "action": {
         "type": "timeline.play",
         "timeline_id": "drift_settle"
+      }
+    },
+    {
+      "chord": "Ctrl+Alt+Shift+KeyG",
+      "action": {
+        "type": "timeline.play",
+        "timeline_id": "desk_steady"
       }
     },
     {
@@ -32921,7 +32749,7 @@
       },
       "action": {
         "type": "timeline.play",
-        "timeline_id": "left_transport"
+        "timeline_id": "left_notes"
       }
     },
     {
@@ -33179,6 +33007,110 @@
     }
   ],
   "channels": [
+    {
+      "channel_id": "desk_lights_1",
+      "name": "Desk lights 1",
+      "default": 1.0,
+      "inputs": [
+        {
+          "kind": "data",
+          "key": "params",
+          "field": "values.20",
+          "range": [
+            0.0,
+            1.0
+          ],
+          "smoothing_ms": 30,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 1.0
+        }
+      ],
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "desk_lights_2",
+      "name": "Desk lights 2",
+      "default": 1.0,
+      "inputs": [
+        {
+          "kind": "data",
+          "key": "params",
+          "field": "values.21",
+          "range": [
+            0.0,
+            1.0
+          ],
+          "smoothing_ms": 30,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 1.0
+        }
+      ],
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "desk_lights_3",
+      "name": "Desk lights 3",
+      "default": 1.0,
+      "inputs": [
+        {
+          "kind": "data",
+          "key": "params",
+          "field": "values.22",
+          "range": [
+            0.0,
+            1.0
+          ],
+          "smoothing_ms": 30,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 1.0
+        }
+      ],
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
+    {
+      "channel_id": "desk_lights_4",
+      "name": "Desk lights 4",
+      "default": 1.0,
+      "inputs": [
+        {
+          "kind": "data",
+          "key": "params",
+          "field": "values.23",
+          "range": [
+            0.0,
+            1.0
+          ],
+          "smoothing_ms": 30,
+          "curve": "linear",
+          "from": 0.0,
+          "to": 1.0
+        }
+      ],
+      "combine": "latest",
+      "average_ms": 0,
+      "rise_ms": 0,
+      "fall_ms": 0,
+      "curve": "linear",
+      "off_value": 0.0
+    },
     {
       "channel_id": "drift_pitch",
       "name": "Drift pitch",
@@ -33933,7 +33865,7 @@
     },
     {
       "channel_id": "src_desk_grid",
-      "name": "Desk: Pads and meters",
+      "name": "Desk: Pads",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34042,8 +33974,8 @@
       "off_value": 0.0
     },
     {
-      "channel_id": "src_left_transport",
-      "name": "Left monitor: Transport",
+      "channel_id": "src_left_notes",
+      "name": "Left monitor: Notes",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -35062,13 +34994,13 @@
           "bookmark_id": "desk",
           "name": "The desk",
           "at_ms": 44000,
-          "note": "The desk is the musician's view. The pad grid is an isomorphic note layout for the track selected in Bitwig: the notes it's playing light up in that track's colour.\n\nThe bars beside it are the meter bridge, every track and the master. And the lights over the desk swell with each track's level, in its colour."
+          "note": "The desk is the musician's view. The grid controller on the tray is switched off here; point the desk at a camera and it shows a real controller. Up on the console, the small button panel is a clip launcher for the Bitwig session.\n\nThe little LEDs all over the cockpit are four groups, Desk lights 1 to 4, each driven by a JTunnel Mod from Bitwig."
         },
         {
           "bookmark_id": "monitors",
           "name": "The monitors",
           "at_ms": 62000,
-          "note": "The centre monitor is the arrangement, with the play head and the song's sections.\n\nOn the left, the transport: tempo, bar and beat, and the section we're in. On the right, the device on the selected track and its parameters.\n\nThese are web pages drawn from JStream's page API. JStream hands them Bitwig's state, and they draw it."
+          "note": "The centre monitor is the arrangement, with the play head and the song's sections.\n\nOn the left, the notes playing, scrolling past as Bitwig plays them. On the right, the device on the selected track and its parameters.\n\nThese are web pages drawn from JStream's page API. JStream hands them Bitwig's state, and they draw it."
         },
         {
           "bookmark_id": "consoles",
