@@ -30,7 +30,7 @@ WARP_IN_MS, WARP_OUT_MS = 4000, 2500
 # ended, stays in the windshield. One pass is DRIFT_MS, and it loops seamlessly.
 DRIFT_DEG = {"yaw": 8.0, "pitch": 5.0, "roll": 6.0}
 DRIFT_REACH = 0.9
-DRIFT_MS = 150_000
+DRIFT_MS = 450_000
 DRIFT_SETTLE_MS = 6000
 # Each angle is a sum of slow waves, a whole number of them a pass so the loop has no
 # seam: (waves a pass, weight). Their phases are random, from a fixed seed per angle, so
@@ -148,3 +148,18 @@ CONTROLS = [
     ("Drift", "KeyD", play("drift")),
     ("Hold steady", "Shift+KeyD", play("drift_settle")),
 ]
+
+
+if __name__ == "__main__":
+    # Updates the sequences of a cockpit already in a running JStream (JS_TOKEN and JS_MCP
+    # as for ../jstream/mcp.py), as after changing a timing here: `python3 ship_sequences.py`
+    # sets every one again, or name some, as in `python3 ship_sequences.py drift`.
+    import os
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "jstream"))
+    from mcp import batch, init
+    want = set(sys.argv[1:])
+    init()
+    _, ok = batch([{"type": "timeline.set", "scene_id": "cockpit", "timeline": t} for t in timelines()
+                   if not want or t["timeline_id"] in want], "ship sequences")
+    print("done" if ok else "FAILED")

@@ -321,7 +321,7 @@ ADR-0187 it travels where the ship points (see [What follows the data](#what-fol
 
 ### The drift
 
-`drift` is a loop of 2.5 minutes (`DRIFT_MS`) that turns the ship a little on its own, so
+`drift` is a loop of 7.5 minutes (`DRIFT_MS`; after a change, `python3 ship_sequences.py drift` sets it again in a running cockpit) that turns the ship a little on its own, so
 the view out of the windshield wanders as if the ship were adrift. It moves three channels
 of its own, `drift_yaw`, `drift_pitch` and `drift_roll`, which `build_daw.py` adds on top
 of the heading, pitch and roll on the same three groups of the rig: each turns the ship
