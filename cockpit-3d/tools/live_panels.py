@@ -45,16 +45,19 @@ ATLAS_W, ATLAS_H = 1920, 1080
 
 # The seven-segment displays (add_transport.py): each a quad over a readout, mapping a
 # cell of the atlas's free area right of the side monitors' cells, where the DAW `clocks`
-# page draws them: the transport's position and tempo under the left monitor, and the
-# stopwatch under the right one. leaf -> (name, (x, y, w, h) on the atlas, module): with
+# page draws them: the transport's position and tempo under the left monitor, the
+# stopwatch under the right one, and the local time up top between the overhead monitors. leaf -> (name, (x, y, w, h) on the atlas, module): with
 # no module the display is the readout's own size; a module (dx, dz, w, h) is a raised
 # box that size, moved dx across the leaf and dz toward the monitor, with the display on top, for a readout too small.
-CLOCKS_AT = (1280, 540, 640, 160)
+CLOCKS_AT = (1280, 540, 640, 320)
 CLOCKS = {
     "console_wing_L_fwdb": ("transport", (1280, 540, 320, 160), None),
     # The right wing's readout is 7 cm wide: the stopwatch gets a 13 cm module over it,
     # nearer the seat so it clears the right monitor's bezel.
     "console_wing_R_fwdbbb": ("stopwatch", (1600, 540, 320, 160), (-0.025, -0.012, 0.13, 0.065)),
+    # Up top between the overhead monitors, the local time on a module over the overhead
+    # console's 9 cm readout.
+    "overhead_midbab": ("time", (1280, 700, 320, 160), (0.0, 0.0, 0.13, 0.065)),
 }
 TRANSPORT_LEAF = "console_wing_L_fwdb"
 

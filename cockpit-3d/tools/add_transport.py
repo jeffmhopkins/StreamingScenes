@@ -1,11 +1,12 @@
-"""Adds the transport lights and two seven-segment displays to a cockpit glTF, without
+"""Adds the transport lights and three seven-segment displays to a cockpit glTF, without
 Blender:
 
-- `transport_panel`: two quads on the `screens` material, each over an amber readout
+- `transport_panel`: three quads on the `screens` material, each over an amber readout
   (live_panels.CLOCKS), mapping a cell of the atlas where the DAW `clocks` page draws
   it: the transport's position and tempo on the left wing in front of the left monitor
   (leaf `console_wing_L_fwdb`), and a stopwatch on the right wing under the right
-  monitor (`console_wing_R_fwdbbb`);
+  monitor (`console_wing_R_fwdbbb`), and the local time up top between the overhead
+  monitors (`overhead_midbab`), the last two on raised modules bigger than their readouts;
 - `transport_leds`: a row of five LEDs along the readout's far edge, toward the monitor:
   four beat lights, each its own material (`led_beat_1` to `led_beat_4`, amber), and a
   play light, a two-colour LED whose face is stripes of `led_play` (green) and
@@ -126,8 +127,8 @@ def add(path):
             box_sides(meshes["plastic"], t, 0, 0, bw, bd, MODULE_LIFT)
             face(meshes["plastic"], t, -bw / 2, bw / 2, -bd / 2, bd / 2, -MODULE_LIFT)
             y = -MODULE_LIFT - 0.0005
-        # glTF v down: the picture's top edge is the readout's far side (+z, toward the
-        # monitor). Counter-clockwise seen from outside, as add_live_panels.py winds them.
+        # glTF v down: the picture's top edge is the readout's +z side (toward the monitor
+        # on the console, up on the overhead). Counter-clockwise seen from outside, as add_live_panels.py winds them.
         panel.quad([to_g(t, -pw / 2, y, -ph / 2), to_g(t, pw / 2, y, -ph / 2),
                     to_g(t, pw / 2, y, ph / 2), to_g(t, -pw / 2, y, ph / 2)],
                    B2G @ (t[:3, :3] @ np.array([0, -1.0, 0])), [(u0, v1), (u1, v1), (u1, v0), (u0, v0)])
@@ -164,7 +165,7 @@ def add(path):
     with open(path, "w") as f:
         json.dump(g, f, separators=(",", ":"))
     tris = sum(len(m.idx) for m in meshes.values()) // 3 + 2 * len(CLOCKS)
-    print(f"{path}: added the transport lights and the two displays ({tris} triangles, 6 new materials)")
+    print(f"{path}: added the transport lights and the three displays ({tris} triangles, 6 new materials)")
 
 
 if __name__ == "__main__":

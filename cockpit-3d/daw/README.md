@@ -22,7 +22,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `desk_lights.py`, `desk/` | The desk switched off (`desk/pads-off.png`, the model's own dark pads), and the cockpit's small LEDs in four groups, the channels `Desk lights 1` to `4` on JTunnel Mods 21 to 24, with a twinkle to try them. Run on its own, it changes a cockpit already in a running JStream. See [Desk lights](#desk-lights). |
-| `transport_lights.py` | The transport's four beat lights and play light in front of the left monitor, its position and tempo on a seven-segment display there, and a stopwatch under the right monitor, with its reset (Ctrl+Alt+R, or Mod 25). Run on its own, it adds them to a cockpit already in a running JStream. See [Transport lights and stopwatch](#transport-lights-and-stopwatch). |
+| `transport_lights.py` | The transport's four beat lights and play light in front of the left monitor, its position and tempo on a seven-segment display there, a stopwatch under the right monitor, with its reset (Ctrl+Alt+R, or Mod 25), and the local time up top between the overhead monitors. Run on its own, it adds them to a cockpit already in a running JStream. See [Transport lights and stopwatch](#transport-lights-and-stopwatch). |
 | `sources.py` | What the three main monitors, the hologram and the desk show: a subscene each, with sources to switch between and, on the monitors and the hologram, the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
@@ -98,7 +98,12 @@ reset as HH:MM:SS (from the engine's clock, so it starts at the app's start). Th
 `Stopwatch reset` (Ctrl+Alt+R) resets it, by setting the shared value `stopwatch.reset`
 true for a moment, and so does JTunnel Mod 25 crossing its middle either way, so a toggle
 in Bitwig resets it at each flip. The channel `stopwatch_reset` only names Mod 25 in
-Bitwig. The Screens and Master switches black both displays (the `screen_clocks` channel).
+Bitwig.
+
+Up top, between the overhead monitors, a third display on a module over the overhead
+console's readout shows the local time, 24-hour, as HH:MM:SS, from the clock of the machine
+JStream runs on (the page's bottom left). The Screens and Master switches black all three
+displays (the `screen_clocks` channel).
 
 To add them to a cockpit already in a running JStream, run
 `python3 ../tools/add_transport.py` on each copy of the model the project uses, then
