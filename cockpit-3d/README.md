@@ -189,15 +189,16 @@ they leave, 1280, 540 to 1920, 1080, the top 640 × 320 holds the transport's di
 
 ### Transport lights and displays
 
-`tools/add_transport.py` adds, over two of the amber readouts (`CLOCKS` in
+`tools/add_transport.py` adds, over three of the amber readouts (`CLOCKS` in
 [`tools/live_panels.py`](tools/live_panels.py)), a display each on `screens`: the left
 wing's readout in front of the left monitor (`console_wing_L_fwdb`, 16 × 8 cm) maps
 1280, 540 to 1600, 700 for the transport's position and tempo, and the right wing's under
 the right monitor (`console_wing_R_fwdbbb`, only 7 × 3 cm) gets a raised plastic module
-over it, its display 13 × 6.5 cm, mapping 1600, 540 to 1920, 700 for a stopwatch (node
-`transport_panel`). Up top, the overhead console's readout between the overhead monitors
-(`overhead_midbab`) gets the same module, mapping 1280, 700 to 1600, 860 for the local
-time. Along the left readout's far edge, toward the monitor,
+over it, its display 13 × 6.5 cm, mapping 1600, 540 to 1920, 700 for a stopwatch. Up top, the overhead console's readout
+between the overhead monitors (`overhead_midbab`) gets the same module, mapping 1280, 700
+to 1600, 860 for the local time. Each display is a node `clock_<name>` (the first
+version put the transport's and the stopwatch's in one, `transport_panel`); the script
+adds only those a model lacks. Along the left readout's far edge, toward the monitor,
 it adds a row of LEDs (node `transport_leds`): four beat lights, each its own material
 (`led_beat_1` to `led_beat_4`, amber), and a play light whose face is stripes of
 `led_play` (green) and `led_stop` (red), so it shows whichever is lit. The DAW scene drives

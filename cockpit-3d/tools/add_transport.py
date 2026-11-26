@@ -1,7 +1,7 @@
 """Adds the transport lights and three seven-segment displays to a cockpit glTF, without
 Blender:
 
-- `transport_panel`: three quads on the `screens` material, each over an amber readout
+- `clock_<name>`: a quad on the `screens` material over an amber readout, one for each
   (live_panels.CLOCKS), mapping a cell of the atlas where the DAW `clocks` page draws
   it: the transport's position and tempo on the left wing in front of the left monitor
   (leaf `console_wing_L_fwdb`), and a stopwatch on the right wing under the right
@@ -14,7 +14,9 @@ Blender:
 
     python tools/add_transport.py model/cockpit.gltf [more.gltf ...]
 
-It does nothing to a file that already has `transport_leds`. It places by the console's
+It adds only what a file lacks: the LEDs (`transport_leds`) and each display
+(`clock_<name>`) it doesn't have yet, so a model from the first version, with the
+transport's and the stopwatch's displays in one node, `transport_panel`, gains the time. It places by the console's
 layout (live_panels.placements), not by texture coordinates, so it also works on a copy
 whose screens were re-mapped.
 """
@@ -93,12 +95,21 @@ def face(mesh, top, x0, x1, z0, z1, y=-LED_H):
 
 def add(path):
     g = json.load(open(path))
-    if any(n.get("name") == "transport_leds" for n in g["nodes"]):
-        print(f"{path}: transport display already there")
+    nodes = {n.get("name") for n in g["nodes"]}
+    # The displays a file has: a node `clock_<name>` each, or, as the first version made
+    # them, the transport's and the stopwatch's in one node, `transport_panel`.
+    have = {n[6:] for n in nodes if n and n.startswith("clock_")}
+    if "transport_panel" in nodes:
+        have |= {"transport", "stopwatch"}
+    todo = {leaf: c for leaf, c in CLOCKS.items() if c[0] not in have}
+    leds = "transport_leds" not in nodes
+    if not leds and not todo:
+        print(f"{path}: transport lights and displays already there")
         return
     top, (w, h), _ = placements({TRANSPORT_LEAF: 1})[TRANSPORT_LEAF]
     mats = materials(g)
     meshes = {k: Mesh() for k in mats}  # the LEDs, and `plastic` for the modules
+    plastic = mats.pop("plastic")
     cz = h / 2 + EDGE
     x = -w / 2 + LED_W / 2 + 0.004
     for n in range(1, 5):
@@ -112,10 +123,11 @@ def add(path):
     for i in range(STRIPES):
         x0 = x - LED_W / 2 + i * sw
         face(meshes["led_play" if i % 2 == 0 else "led_stop"], top, x0, x0 + sw, cz - LED_D / 2, cz + LED_D / 2)
-    # The displays over their readouts, on `screens`.
+    # The displays over their readouts, on `screens`, each with its module, if it has one.
     screens = next(i for i, m in enumerate(g["materials"]) if m["name"] == "screens")
-    panel = Mesh()
-    for leaf, (_, (ax, ay, aw, ah), module) in CLOCKS.items():
+    displays = {}
+    for leaf, (name, (ax, ay, aw, ah), module) in todo.items():
+        panel, box = displays.setdefault(name, (Mesh(), Mesh()))
         t, (pw, ph), _ = placements({leaf: 1})[leaf]
         u0, u1, v0, v1 = ax / ATLAS_W, (ax + aw) / ATLAS_W, ay / ATLAS_H, (ay + ah) / ATLAS_H
         y = -READOUT_DEPTH
@@ -124,8 +136,8 @@ def add(path):
             dx, dz, pw, ph = module
             t = t @ np.array([[1, 0, 0, dx], [0, 1, 0, 0], [0, 0, 1, dz], [0, 0, 0, 1.0]])
             bw, bd = pw + 2 * MODULE_RIM, ph + 2 * MODULE_RIM
-            box_sides(meshes["plastic"], t, 0, 0, bw, bd, MODULE_LIFT)
-            face(meshes["plastic"], t, -bw / 2, bw / 2, -bd / 2, bd / 2, -MODULE_LIFT)
+            box_sides(box, t, 0, 0, bw, bd, MODULE_LIFT)
+            face(box, t, -bw / 2, bw / 2, -bd / 2, bd / 2, -MODULE_LIFT)
             y = -MODULE_LIFT - 0.0005
         # glTF v down: the picture's top edge is the readout's +z side (toward the monitor
         # on the console, up on the overhead). Counter-clockwise seen from outside, as add_live_panels.py winds them.
@@ -155,8 +167,10 @@ def add(path):
                                "TEXCOORD_0": acc(mesh.tex, 5126, "VEC2", "<2f", 34962)},
                 "indices": acc(mesh.idx, 5123, "SCALAR", "<H", 34963), "material": material}
 
-    for name, prims in [("transport_leds", [prim(meshes[k], mats[k]) for k in mats]),
-                        ("transport_panel", [prim(panel, screens)])]:
+    new = [("transport_leds", [prim(meshes[k], mats[k]) for k in mats])] if leds else []
+    new += [(f"clock_{name}", [prim(panel, screens)] + ([prim(box, plastic)] if box.idx else []))
+            for name, (panel, box) in displays.items()]
+    for name, prims in new:
         g["meshes"].append({"name": name, "primitives": prims})
         g["nodes"].append({"name": name, "mesh": len(g["meshes"]) - 1})
         g["scenes"][0]["nodes"].append(len(g["nodes"]) - 1)
@@ -164,8 +178,9 @@ def add(path):
     open(binpath, "wb").write(blob)
     with open(path, "w") as f:
         json.dump(g, f, separators=(",", ":"))
-    tris = sum(len(m.idx) for m in meshes.values()) // 3 + 2 * len(CLOCKS)
-    print(f"{path}: added the transport lights and the three displays ({tris} triangles, 6 new materials)")
+    tris = sum(len(p.idx) + len(b.idx) for p, b in displays.values()) // 3
+    tris += sum(len(m.idx) for m in meshes.values()) // 3 if leds else 0
+    print(f"{path}: added {', '.join(n for n, _ in new)} ({tris} triangles)")
 
 
 if __name__ == "__main__":
