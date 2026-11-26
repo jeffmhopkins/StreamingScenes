@@ -11,7 +11,9 @@ stopwatch under the right monitor (the model's parts from ../tools/add_transport
 - a seven-segment stopwatch on the right wing's readout, under the right monitor: the
   time since its last reset as HH:MM:SS (the same page, right half). The sequence
   `Stopwatch reset` (Ctrl+Alt+R) resets it, and so does JTunnel Mod 25 ("Stopwatch
-  reset") moving across its middle either way, so a toggle in Bitwig resets it each flip.
+  reset") moving across its middle either way, so a toggle in Bitwig resets it each flip;
+- up top between the overhead monitors, the local time, 24-hour, as HH:MM:SS (the
+  page's bottom left), from the clock of the machine JStream runs on.
 
 The Glow and Master switches put the lights out as they do every LED, and the Screens and
 Master switches black the displays as they do every screen.
@@ -96,7 +98,7 @@ def model_motion():
 def clocks_source(page, src=None):
     """The `clocks` page's browser source, with the stopwatch's shared value granted."""
     _, _, w, h = CLOCKS_AT
-    return {"type": "source.create", "source_id": "clocks", "name": "Transport and stopwatch",
+    return {"type": "source.create", "source_id": "clocks", "name": "Transport, stopwatch and clock",
             "kind": {"type": "builtin", "kind": "browser"},
             "settings": {**page("clocks", w, h), "width": w, "height": h, "fps": 30,
                          "page_api": True, "page_api_data": True,

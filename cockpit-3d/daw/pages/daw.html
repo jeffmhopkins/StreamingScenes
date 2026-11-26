@@ -710,12 +710,13 @@ const views = {
       panel[name](w, h); x.restore();
     }
   },
-  // The two seven-segment displays (cockpit-3d/tools/live_panels.py, CLOCKS), 640 x 160:
-  // left, the transport's bar.beat.sixteenth over its tempo; right, the stopwatch.
+  // The seven-segment displays (cockpit-3d/tools/live_panels.py, CLOCKS), 640 x 320: top
+  // left, the transport's bar.beat.sixteenth over its tempo; top right, the stopwatch;
+  // bottom left, the local time (24-hour).
   clocks() {
     swMods();
     x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
-    for (const px of [0, 320]) { x.fillStyle = 'rgb(10,6,3)'; x.fillRect(px + 2, 2, 316, H - 4); }
+    for (const [px, py] of [[0, 0], [320, 0], [0, 160]]) { x.fillStyle = 'rgb(10,6,3)'; x.fillRect(px + 2, py + 2, 316, 156); }
     const c = clock(), six = Math.min(4, Math.floor((c.beatPhase || 0) * 4) + 1);
     segLine(`${String((c.bar || 1) % 1000).padStart(3)}.${c.beat || 1}.${six}`, 14, 14, 58, 84);
     const t = c.tempo || 0;
@@ -725,6 +726,9 @@ const views = {
     const mm = Math.floor(s / 60) % 60, ss = s % 60, p2 = n => String(n).padStart(2, '0');
     segLine(`${p2(hh)}:${p2(mm)}:${p2(ss)}`, 334, 30, 48, 80);
     txt('ELAPSED', 334, 140, 14, `rgba(${AMBER},.7)`, 'left', 700);
+    const d = new Date();
+    segLine(`${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`, 14, 190, 48, 80);
+    txt('LOCAL TIME', 14, 300, 14, `rgba(${AMBER},.7)`, 'left', 700);
   },
   // The consoles' amber readouts and small LEDs, live (see drawReadouts).
   readouts() { drawReadouts(); },
