@@ -85,10 +85,15 @@ display show the transport (`transport_lights.py`; the model's parts come from
 | The play light (`led_play`, `led_stop`) | `transport_playing`, "Transport playing" | green while the transport plays, red while it is stopped |
 
 The channels read JTunnel's `clock` key (`beat`, `playing`), and the Glow and Master
-switches put the lights out as they do every LED. The display is the left half of the
+switches put the lights out as they do every LED. A channel counts an input only once it
+has moved, and `playing` moves only when the transport starts or stops, so the play light
+also reads the beat's phase moving: it is green while the transport runs even when it was
+already running as JStream started. Moving the play head while stopped turns it green
+until the next start or stop. The display is the left half of the
 `clocks` page: the position as bar.beat.sixteenth over the tempo in BPM.
 
-Under the right monitor, the page's right half is a stopwatch: the time since its last
+Under the right monitor, on a 13 × 6.5 cm module over the right wing's small readout, the
+page's right half is a stopwatch: the time since its last
 reset as HH:MM:SS (from the engine's clock, so it starts at the app's start). The sequence
 `Stopwatch reset` (Ctrl+Alt+R) resets it, by setting the shared value `stopwatch.reset`
 true for a moment, and so does JTunnel Mod 25 crossing its middle either way, so a toggle
@@ -99,6 +104,7 @@ To add them to a cockpit already in a running JStream, run
 `python3 ../tools/add_transport.py` on each copy of the model the project uses, then
 `python3 transport_lights.py` (JS_TOKEN and JS_MCP as for `../jstream/mcp.py`; `MODEL_ITEM`
 names the model's item if it isn't `model`; `PAGES` and `DAW_INPUT` as for `build_daw.py`).
+Run again, it replaces what it added before.
 
 ## Light switches
 

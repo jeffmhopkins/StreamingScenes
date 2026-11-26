@@ -55,7 +55,7 @@ real image decoders:
 
 | | This model | JStream's cap |
 |---|---|---|
-| Triangles | 147,345 (the optimised 147,201, then the soft keys' 100, less the 20 of the retired readout panels, then the transport lights' and displays' 64) | 2,000,000 |
+| Triangles | 147,355 (the optimised 147,201, then the soft keys' 100, less the 20 of the retired readout panels, then the transport lights', displays' and stopwatch module's 74) | 2,000,000 |
 | Textures | 21, all 2048 px or smaller | 64, 4096 px a side |
 | Memory | 437 MiB of textures with mips, about 12 MiB of mesh: about 449 MiB | 512 MiB |
 | Extensions | `KHR_materials_unlit`, `KHR_materials_emissive_strength` | both read |
@@ -193,8 +193,9 @@ they leave, 1280, 540 to 1920, 1080, the top 640 × 160 holds the transport's di
 [`tools/live_panels.py`](tools/live_panels.py)), a display each on `screens`: the left
 wing's readout in front of the left monitor (`console_wing_L_fwdb`, 16 × 8 cm) maps
 1280, 540 to 1600, 700 for the transport's position and tempo, and the right wing's under
-the right monitor (`console_wing_R_fwdbbb`, 7 × 3 cm) maps 1600, 540 to 1920, 700 for a
-stopwatch (node `transport_panel`). Along the left readout's far edge, toward the monitor,
+the right monitor (`console_wing_R_fwdbbb`, only 7 × 3 cm) gets a raised plastic module
+over it, its display 13 × 6.5 cm, mapping 1600, 540 to 1920, 700 for a stopwatch (node
+`transport_panel`). Along the left readout's far edge, toward the monitor,
 it adds a row of LEDs (node `transport_leds`): four beat lights, each its own material
 (`led_beat_1` to `led_beat_4`, amber), and a play light whose face is stripes of
 `led_play` (green) and `led_stop` (red), so it shows whichever is lit. The DAW scene drives

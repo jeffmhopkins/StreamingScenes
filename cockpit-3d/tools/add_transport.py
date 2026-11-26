@@ -34,6 +34,8 @@ PITCH = 0.016                               # between the beat lights
 GAP = 0.010                                 # more before the play light
 EDGE = 0.009                                # the row's centre past the readout's far edge
 STRIPES = 6                                 # across the play light's face
+MODULE_LIFT = 0.012                         # a display module's height off the leaf
+MODULE_RIM = 0.006                          # its plastic rim around the display
 
 
 def materials(g):
@@ -51,6 +53,7 @@ def materials(g):
     out = {f"led_beat_{n}": like("led_amber", f"led_beat_{n}") for n in range(1, 5)}
     out["led_play"] = like("led_green", "led_play")
     out["led_stop"] = like("led_red", "led_stop")
+    out["plastic"] = names.index("plastic")
     return out
 
 
@@ -70,19 +73,19 @@ def to_g(top, lx, ly, lz):
     return B2G @ (top @ np.array([lx, ly, lz, 1.0]))[:3]
 
 
-def box_sides(mesh, top, cx, cz):
-    """The four sides of an LED at (cx, cz) on the leaf's face."""
+def box_sides(mesh, top, cx, cz, w=LED_W, d=LED_D, hgt=LED_H):
+    """The four sides of a box w x d, hgt tall, at (cx, cz) on the leaf's face (an LED by
+    default)."""
     rot = top[:3, :3]
-    x0, x1, z0, z1, y1 = cx - LED_W / 2, cx + LED_W / 2, cz - LED_D / 2, cz + LED_D / 2, -LED_H
+    x0, x1, z0, z1, y1 = cx - w / 2, cx + w / 2, cz - d / 2, cz + d / 2, -hgt
     for (a, b, n) in [((x0, z0), (x1, z0), (0, 0, -1)), ((x1, z0), (x1, z1), (1, 0, 0)),
                       ((x1, z1), (x0, z1), (0, 0, 1)), ((x0, z1), (x0, z0), (-1, 0, 0))]:
         mesh.quad([to_g(top, a[0], 0, a[1]), to_g(top, b[0], 0, b[1]),
                    to_g(top, b[0], y1, b[1]), to_g(top, a[0], y1, a[1])], B2G @ (rot @ np.array(n, float)))
 
 
-def face(mesh, top, x0, x1, z0, z1):
+def face(mesh, top, x0, x1, z0, z1, y=-LED_H):
     up = B2G @ (top[:3, :3] @ np.array([0, -1.0, 0]))
-    y = -LED_H
     # Counter-clockwise seen from outside (the leaf's -y), or the renderer culls it.
     mesh.quad([to_g(top, x0, y, z0), to_g(top, x1, y, z0), to_g(top, x1, y, z1), to_g(top, x0, y, z1)], up)
 
@@ -94,7 +97,7 @@ def add(path):
         return
     top, (w, h), _ = placements({TRANSPORT_LEAF: 1})[TRANSPORT_LEAF]
     mats = materials(g)
-    meshes = {k: Mesh() for k in mats}
+    meshes = {k: Mesh() for k in mats}  # the LEDs, and `plastic` for the modules
     cz = h / 2 + EDGE
     x = -w / 2 + LED_W / 2 + 0.004
     for n in range(1, 5):
@@ -111,10 +114,18 @@ def add(path):
     # The displays over their readouts, on `screens`.
     screens = next(i for i, m in enumerate(g["materials"]) if m["name"] == "screens")
     panel = Mesh()
-    for leaf, (_, (ax, ay, aw, ah)) in CLOCKS.items():
+    for leaf, (_, (ax, ay, aw, ah), module) in CLOCKS.items():
         t, (pw, ph), _ = placements({leaf: 1})[leaf]
         u0, u1, v0, v1 = ax / ATLAS_W, (ax + aw) / ATLAS_W, ay / ATLAS_H, (ay + ah) / ATLAS_H
         y = -READOUT_DEPTH
+        if module:
+            # A plastic box over the readout, the display on its top.
+            dx, dz, pw, ph = module
+            t = t @ np.array([[1, 0, 0, dx], [0, 1, 0, 0], [0, 0, 1, dz], [0, 0, 0, 1.0]])
+            bw, bd = pw + 2 * MODULE_RIM, ph + 2 * MODULE_RIM
+            box_sides(meshes["plastic"], t, 0, 0, bw, bd, MODULE_LIFT)
+            face(meshes["plastic"], t, -bw / 2, bw / 2, -bd / 2, bd / 2, -MODULE_LIFT)
+            y = -MODULE_LIFT - 0.0005
         # glTF v down: the picture's top edge is the readout's far side (+z, toward the
         # monitor). Counter-clockwise seen from outside, as add_live_panels.py winds them.
         panel.quad([to_g(t, -pw / 2, y, -ph / 2), to_g(t, pw / 2, y, -ph / 2),
@@ -153,7 +164,7 @@ def add(path):
     with open(path, "w") as f:
         json.dump(g, f, separators=(",", ":"))
     tris = sum(len(m.idx) for m in meshes.values()) // 3 + 2 * len(CLOCKS)
-    print(f"{path}: added the transport lights and the two displays ({tris} triangles, 6 materials)")
+    print(f"{path}: added the transport lights and the two displays ({tris} triangles, 6 new materials)")
 
 
 if __name__ == "__main__":

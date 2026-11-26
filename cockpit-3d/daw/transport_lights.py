@@ -23,7 +23,12 @@ a running JStream (a project imported before this), first run
     python3 transport_lights.py
 
 MODEL_ITEM (default `model`) names the cockpit's model item; PAGES and DAW_INPUT are as for
-build_daw.py.
+build_daw.py. Run again, it replaces what it added before.
+
+A channel only counts an input once it has moved since the engine began following it
+(ADR-0183), and `playing` doesn't move until the transport starts or stops, so the play
+light also reads the beat's phase moving: green while the transport runs, red once it
+stops. Moving the play head while stopped turns it green until the next start or stop.
 """
 import os
 import sys
@@ -59,9 +64,13 @@ def channels(src=None, mod_inputs=lambda n: []):
             "channel_id": f"beat_{n}", "name": f"Beat {n}", "default": 0.0, "combine": "product",
             "inputs": [clock("beat", (n - 0.5, n), 0.0, 1.0), clock("beat", (n, n + 0.5), 1.0, 0.0),
                        dict(playing)]}})
+    # The play light: `playing`, and the beat's phase moving, which reads 1 (above its
+    # first thousandth), so the light is green while the transport runs even if it was
+    # already running when the channel began, before `playing` first moved. Whichever
+    # changed last wins, and a stop moves `playing` to 0.
     out.append({"type": "channel.set", "channel": {
         "channel_id": "transport_playing", "name": "Transport playing", "default": 0.0,
-        "inputs": [playing]}})
+        "inputs": [playing, clock("beatPhase", (0.0, 0.001), 0.0, 1.0)]}})
     out.append({"type": "channel.set", "channel": {
         "channel_id": "stopwatch_reset", "name": "Stopwatch reset", "default": 0.0,
         "inputs": mod_inputs(STOPWATCH_MOD)}})
@@ -138,6 +147,13 @@ def _main():
         return ok
 
     init()
+    # A re-run replaces what an earlier run added: each removal on its own, since one
+    # that finds nothing fails. Deleting the sequence removes its hotkey.
+    for e in [{"type": "timeline.delete", "timeline_id": "stopwatch_reset"},
+              {"type": "item.remove", "item_id": "off_clocks"},
+              {"type": "item.remove", "item_id": "a_clocks"},
+              {"type": "source.delete", "source_id": "clocks"}]:
+        batch([e], "remove an earlier run's " + (e.get("item_id") or e.get("timeline_id") or e["source_id"]))
     model = os.environ.get("MODEL_ITEM", "model")
     x, y, w, h = CLOCKS_AT
     geo = {"center": {"x": x + w / 2, "y": y + h / 2}, "size": {"width": w, "height": h}, "fit_mode": "stretch"}
