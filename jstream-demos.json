@@ -34540,11 +34540,11 @@
           "field": "beatPhase",
           "range": [
             0.0,
-            0.001
+            1.0
           ],
           "smoothing_ms": 0,
           "curve": "linear",
-          "from": 0.0,
+          "from": 1.0,
           "to": 1.0
         }
       ],

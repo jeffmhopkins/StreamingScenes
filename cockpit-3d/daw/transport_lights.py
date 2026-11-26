@@ -64,13 +64,15 @@ def channels(src=None, mod_inputs=lambda n: []):
             "channel_id": f"beat_{n}", "name": f"Beat {n}", "default": 0.0, "combine": "product",
             "inputs": [clock("beat", (n - 0.5, n), 0.0, 1.0), clock("beat", (n, n + 0.5), 1.0, 0.0),
                        dict(playing)]}})
-    # The play light: `playing`, and the beat's phase moving, which reads 1 (above its
-    # first thousandth), so the light is green while the transport runs even if it was
-    # already running when the channel began, before `playing` first moved. Whichever
-    # changed last wins, and a stop moves `playing` to 0.
+    # The play light: `playing`, and the beat's phase moving. An input takes part once its
+    # reading (through its range, before from and to) leaves where it rested, and `latest`
+    # follows the one whose reading changed last: so the phase reads through its whole
+    # range, to change while the transport runs, and maps every reading to 1. The light is
+    # green while the transport runs even if it was already running when the channel
+    # began, before `playing` first moved; a stop moves `playing` to 0, and it wins.
     out.append({"type": "channel.set", "channel": {
         "channel_id": "transport_playing", "name": "Transport playing", "default": 0.0,
-        "inputs": [playing, clock("beatPhase", (0.0, 0.001), 0.0, 1.0)]}})
+        "inputs": [playing, clock("beatPhase", (0.0, 1.0), 1.0, 1.0)]}})
     out.append({"type": "channel.set", "channel": {
         "channel_id": "stopwatch_reset", "name": "Stopwatch reset", "default": 0.0,
         "inputs": mod_inputs(STOPWATCH_MOD)}})
