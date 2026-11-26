@@ -32,11 +32,12 @@ sys.path.insert(0, os.path.join(HERE, "..", "jstream"))
 from mcp import asset, batch, init, op  # noqa: E402
 from shots import BACK, BOUNDS_MAX, BOUNDS_MIN, CX, CY, MODEL, S, SHOTS, p  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
-from live_panels import PANELS_AT  # noqa: E402
+from live_panels import CLOCKS_AT, PANELS_AT  # noqa: E402
 from live_readouts import SIDE_AT  # noqa: E402
 from ship_sequences import DRIFT_DEG  # noqa: E402
 sys.path.insert(0, HERE)
 import desk_lights  # noqa: E402
+import transport_lights  # noqa: E402
 
 PAGES = os.environ.get("PAGES", "")
 DAW_HTML = open(os.path.join(HERE, "pages", "daw.html"), encoding="utf-8").read()
@@ -95,6 +96,7 @@ MOD = {  # channel: its Mod number. 1 on and 0 off for the switches, 1 full for 
     "screen_ovr": 15, "screen_side_l": 16, "screen_side_r": 17, "screen_desk": 18,
     "screen_panels": 19, "title": 20,
     "desk_lights_1": 21, "desk_lights_2": 22, "desk_lights_3": 23, "desk_lights_4": 24,
+    "stopwatch_reset": transport_lights.STOPWATCH_MOD,
 }
 SWITCHES = os.environ.get("SWITCHES", "1") == "1"
 SWITCH_FIRST = int(os.environ.get("SWITCH_FIRST", "40"))
@@ -291,6 +293,11 @@ ed += [src("panels", "Console panels", "browser", {
         **page("panels", PW), "width": PW, "height": PH, "fps": 30,
         "page_api": True, "page_api_data": True, "page_api_data_input": INPUT}),
        add("atlas", "a_panels", "panels", geo(PX + PW / 2, PY + PH / 2, PW, PH, fit_mode="stretch"))]
+# The transport's and the stopwatch's seven-segment displays: one page, `clocks`, below the
+# panels' strip, its halves on the two wings' readouts (transport_lights.py).
+CX_, CY_, CW_, CH_ = CLOCKS_AT
+ed += [transport_lights.clocks_source(page, INPUT),
+       add("atlas", "a_clocks", "clocks", geo(CX_ + CW_ / 2, CY_ + CH_ / 2, CW_, CH_, fit_mode="stretch"))]
 # The meter bridge, for the 2D desk: the tracks' meters and the master's, as one page of
 # lit segments over a page of unlit ones.
 ed += [src("bridge", "Meter bridge", "browser", {
@@ -310,7 +317,7 @@ ed += [src("bridge", "Meter bridge", "browser", {
 # Either way the master switch has a cover of its own over the whole atlas, since one
 # cover's modifiers can only multiply, and either switch alone must black the screens.
 SCREEN_CELLS = [(item[2:], x, y, w, h) for item, _, x, y, w, h in PAGES_AT]
-SCREEN_CELLS += [("desk", 0, 720, 960, 360), ("panels", PX, PY, PW, PH)]
+SCREEN_CELLS += [("desk", 0, 720, 960, 360), ("panels", PX, PY, PW, PH), ("clocks", *CLOCKS_AT)]
 if CHANNELS or SWITCHES:
     ed += [src("atlas_off", "Screens off", "color", {"color": "#000000ff", "width": 64, "height": 64})]
     cover = lambda iid, x, y, w, h: add("atlas", iid, "atlas_off", geo(x + w / 2, y + h / 2, w, h, fit_mode="stretch"))
@@ -589,6 +596,10 @@ if not CHANNELS:
 if CHANNELS:
     must(batch(desk_lights.channels(lambda n: mod_inputs(f"desk_lights_{n - 20}")), "desk lights"),
          "desk lights")
+    # The beat lights and the play light in front of the left monitor follow JTunnel's
+    # clock (transport_lights.py); `Stopwatch reset` names Mod 25.
+    must(batch(transport_lights.channels(INPUT or None, lambda n: mod_inputs("stopwatch_reset", 0)),
+               "transport lights"), "transport lights")
 # ---- the light switches: each light's group, and the master on all of them ----
 # A light's strength is its intensity times its opacity, so each switch adds -1 to its
 # lights' opacities as it fades off. The glow group's LEDs and strips are the model's
@@ -605,7 +616,8 @@ for lid, group in LIGHT_GROUP.items():
 # The glow's strength multiplies the file's by 1 plus its drives, which are at most 0 here,
 # so a switch adding -3 takes it to nothing whatever the desk lights read.
 glow_gates = gates("glow", "source", off=-3.0, source={"param": "emissive_strength"})
-motion["model"] = desk_lights.model_motion(glow_gates) if CHANNELS else glow_gates
+motion["model"] = (transport_lights.model_motion() + desk_lights.model_motion(glow_gates)
+                   if CHANNELS else glow_gates)
 for lid, mods in motion.items():
     scene = {"l_env": SHIP, "l_sun": SHIP, "ship_pitch": "ship_roll", "ship_yaw": "ship_pitch"}.get(lid, "cockpit")
     must(op({"type": "item.set_motion", "scene_id": scene, "item_id": lid, "motion": mods}), f"motion {lid}")

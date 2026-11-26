@@ -22,6 +22,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
 | `desk_lights.py`, `desk/` | The desk switched off (`desk/pads-off.png`, the model's own dark pads), and the cockpit's small LEDs in four groups, the channels `Desk lights 1` to `4` on JTunnel Mods 21 to 24, with a twinkle to try them. Run on its own, it changes a cockpit already in a running JStream. See [Desk lights](#desk-lights). |
+| `transport_lights.py` | The transport's four beat lights and play light in front of the left monitor, its position and tempo on a seven-segment display there, and a stopwatch under the right monitor, with its reset (Ctrl+Alt+R, or Mod 25). Run on its own, it adds them to a cockpit already in a running JStream. See [Transport lights and stopwatch](#transport-lights-and-stopwatch). |
 | `sources.py` | What the three main monitors, the hologram and the desk show: a subscene each, with sources to switch between and, on the monitors and the hologram, the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
@@ -71,6 +72,39 @@ To change a cockpit already in a running JStream, imported before the desk light
 `python3 desk_lights.py` (JS_TOKEN and JS_MCP as for `../jstream/mcp.py`; `MODEL_ITEM`
 names the model's item if it isn't `model`), and `python3 ../tools/trim_live_panels.py`
 on each copy of the model the project uses.
+
+## Transport lights and stopwatch
+
+In front of the left monitor, in the desk lights' style, a row of LEDs and a seven-segment
+display show the transport (`transport_lights.py`; the model's parts come from
+`../tools/add_transport.py`):
+
+| Light | Channel | Lit |
+|---|---|---|
+| Four amber beat lights (`led_beat_1` to `4`) | `beat_1` to `beat_4`, "Beat 1" to "Beat 4" | the bar's current beat, while the transport plays; all dark while it is stopped |
+| The play light (`led_play`, `led_stop`) | `transport_playing`, "Transport playing" | green while the transport plays, red while it is stopped |
+
+The channels read JTunnel's `clock` key (`beat`, `playing`), and the Glow and Master
+switches put the lights out as they do every LED. A channel counts an input only once it
+has moved, and `playing` moves only when the transport starts or stops, so the play light
+also reads the beat's phase moving: it is green while the transport runs even when it was
+already running as JStream started. Moving the play head while stopped turns it green
+until the next start or stop. The display is the left half of the
+`clocks` page: the position as bar.beat.sixteenth over the tempo in BPM.
+
+Under the right monitor, on a 13 × 6.5 cm module over the right wing's small readout, the
+page's right half is a stopwatch: the time since its last
+reset as HH:MM:SS (from the engine's clock, so it starts at the app's start). The sequence
+`Stopwatch reset` (Ctrl+Alt+R) resets it, by setting the shared value `stopwatch.reset`
+true for a moment, and so does JTunnel Mod 25 crossing its middle either way, so a toggle
+in Bitwig resets it at each flip. The channel `stopwatch_reset` only names Mod 25 in
+Bitwig. The Screens and Master switches black both displays (the `screen_clocks` channel).
+
+To add them to a cockpit already in a running JStream, run
+`python3 ../tools/add_transport.py` on each copy of the model the project uses, then
+`python3 transport_lights.py` (JS_TOKEN and JS_MCP as for `../jstream/mcp.py`; `MODEL_ITEM`
+names the model's item if it isn't `model`; `PAGES` and `DAW_INPUT` as for `build_daw.py`).
+Run again, it replaces what it added before.
 
 ## Light switches
 
@@ -144,10 +178,11 @@ sequences keep working beside it.
 | 11 to 19 | `screen_center`, `screen_left`, `screen_right`, `screen_ovl`, `screen_ovr`, `screen_side_l`, `screen_side_r`, `screen_desk`, `screen_panels` | that monitor off | on |
 | 20 | `title` | the Sound Journal title off | on |
 | 21 to 24 | `desk_lights_1` to `desk_lights_4` | that [group of LEDs](#desk-lights) dark | lit |
+| 25 | `stopwatch_reset` | crossing one half either way resets the [stopwatch](#transport-lights-and-stopwatch) | |
 
 The switches fade over `SWITCH_FADE_MS` and the ship over `SHIP_CC_SMOOTHING_MS`, as their
 CCs do. The hologram's `holo_beam` and `holo_panel` belong to its sequences and have no
-Mod. Mods 25 to 32 stay free.
+Mod. Mods 26 to 32 stay free.
 
 A model is lit by at most 8 lights besides the ambient and the environment, so with the
 glow (the default) those are the sun, the cabin and the warp's glow, and the hologram's

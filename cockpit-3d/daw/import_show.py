@@ -252,6 +252,9 @@ if SHIP:
     # The desk lights' twinkle and steady (desk_lights.py): Ctrl+Alt+G, Ctrl+Alt+Shift+G.
     import desk_lights  # noqa: E402
     seq += desk_lights.sequences()
+    # The stopwatch's reset (transport_lights.py): Ctrl+Alt+R.
+    import transport_lights  # noqa: E402
+    seq += transport_lights.reset_sequence()
     must(batch(seq, "ship sequences"), "ship sequences")
 
 # ---- the Sound Journal title (title.py): an overlay darkening program under the JMH

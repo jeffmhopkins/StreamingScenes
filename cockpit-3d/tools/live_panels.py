@@ -43,6 +43,21 @@ READOUTS_RETIRED = {
 }
 ATLAS_W, ATLAS_H = 1920, 1080
 
+# The seven-segment displays (add_transport.py): each a quad over a readout, mapping a
+# cell of the atlas's free area right of the side monitors' cells, where the DAW `clocks`
+# page draws them: the transport's position and tempo under the left monitor, and the
+# stopwatch under the right one. leaf -> (name, (x, y, w, h) on the atlas, module): with
+# no module the display is the readout's own size; a module (dx, dz, w, h) is a raised
+# box that size, moved dx across the leaf and dz toward the monitor, with the display on top, for a readout too small.
+CLOCKS_AT = (1280, 540, 640, 160)
+CLOCKS = {
+    "console_wing_L_fwdb": ("transport", (1280, 540, 320, 160), None),
+    # The right wing's readout is 7 cm wide: the stopwatch gets a 13 cm module over it,
+    # nearer the seat so it clears the right monitor's bezel.
+    "console_wing_R_fwdbbb": ("stopwatch", (1600, 540, 320, 160), (-0.025, -0.012, 0.13, 0.065)),
+}
+TRANSPORT_LEAF = "console_wing_L_fwdb"
+
 
 def uv(leaf):
     """The quad's (u0, v0, u1, v1) on the atlas, v up as Blender has it."""
@@ -75,17 +90,17 @@ def _frame(loc, rot):
     return m
 
 
-def _greeble(name, m, w, h, rnd, out, depth=0):
+def _greeble(name, m, w, h, rnd, out, depth=0, want=PANELS):
     if depth < 3 and max(w, h) > 0.16 and (depth < 1 or rnd.random() < 0.8):
         t = rnd.uniform(0.35, 0.65)
         if w >= h:
             wa, wb = w * t, w * (1 - t)
-            _greeble(name + "a", m @ _t((-w / 2 + wa / 2, 0, 0)), wa, h, rnd, out, depth + 1)
-            _greeble(name + "b", m @ _t((w / 2 - wb / 2, 0, 0)), wb, h, rnd, out, depth + 1)
+            _greeble(name + "a", m @ _t((-w / 2 + wa / 2, 0, 0)), wa, h, rnd, out, depth + 1, want)
+            _greeble(name + "b", m @ _t((w / 2 - wb / 2, 0, 0)), wb, h, rnd, out, depth + 1, want)
         else:
             ha, hb = h * t, h * (1 - t)
-            _greeble(name + "a", m @ _t((0, 0, -h / 2 + ha / 2)), w, ha, rnd, out, depth + 1)
-            _greeble(name + "b", m @ _t((0, 0, h / 2 - hb / 2)), w, hb, rnd, out, depth + 1)
+            _greeble(name + "a", m @ _t((0, 0, -h / 2 + ha / 2)), w, ha, rnd, out, depth + 1, want)
+            _greeble(name + "b", m @ _t((0, 0, h / 2 - hb / 2)), w, hb, rnd, out, depth + 1, want)
         return
     pw, ph = w - 0.008, h - 0.008
     lift = rnd.choice([0.004, 0.008, 0.012])
@@ -107,13 +122,14 @@ def _greeble(name, m, w, h, rnd, out, depth=0):
         size = button_size(nx, ny, pitch)
     elif kind < 0.78:
         rnd.randrange(10 ** 6)
-    if name in PANELS and size:
+    if name in want and size:
         out[name] = (top, size, cell)
 
 
-def placements():
+def placements(want=None):
     """leaf -> (its face's 4 x 4 Blender matrix, (w, h) of its live panel, its readout
-    atlas cell, or None for buttons)."""
+    atlas cell, or None for buttons), for the leaves in `want` (default PANELS)."""
+    want = PANELS if want is None else want
     out = {}
     slope_a, slope_b = (0.65, 0.62), (1.37, 0.79)
     slope_z = lambda y: slope_a[1] + (y - slope_a[0]) * (slope_b[1] - slope_a[1]) / (slope_b[0] - slope_a[0])
@@ -121,14 +137,14 @@ def placements():
     slope = lambda x, y: _frame((x, y, slope_z(y) + 0.002), (-90 + ang, 0, 0))
     rnd = random.Random(12)  # build_console()
     y_c = 1.10
-    _greeble("console_centre", slope(0, (y_c + slope_b[0]) / 2 - 0.02), 0.86, 0.2, rnd, out)
+    _greeble("console_centre", slope(0, (y_c + slope_b[0]) / 2 - 0.02), 0.86, 0.2, rnd, out, want=want)
     for side in (-1, 1):
         s = "L" if side < 0 else "R"
-        _greeble(f"console_wing_{s}_fwd", slope(side * 0.645, 1.17), 0.36, 0.3, rnd, out)
-        _greeble(f"console_wing_{s}_aft", slope(side * 0.645, 0.85), 0.36, 0.3, rnd, out)
+        _greeble(f"console_wing_{s}_fwd", slope(side * 0.645, 1.17), 0.36, 0.3, rnd, out, want=want)
+        _greeble(f"console_wing_{s}_aft", slope(side * 0.645, 0.85), 0.36, 0.3, rnd, out, want=want)
     rnd = random.Random(31)  # build_header()
-    _greeble("overhead_mid", _frame((0, 0.645, 1.72), (31, 0, 0)), 0.34, 0.2, rnd, out)
-    missing = set(PANELS) - set(out)
+    _greeble("overhead_mid", _frame((0, 0.645, 1.72), (31, 0, 0)), 0.34, 0.2, rnd, out, want=want)
+    missing = set(want) - set(out)
     if missing:
         raise SystemExit(f"no such readout or button leaf: {sorted(missing)}")
     return out
