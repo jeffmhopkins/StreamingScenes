@@ -1,0 +1,343 @@
+{
+  "rev": 1457,
+  "channels": [
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_pitch_neg",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS pitch - (nose down)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_pitch_pos",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS pitch + (nose up)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_roll_neg",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS roll - (port wing down)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_roll_pos",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS roll + (starboard wing down)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_yaw_neg",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS yaw - (nose to starboard)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "rcs_yaw_pos",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "RCS yaw + (nose to port)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ship_thrusters",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 1.0,
+      "fall_ms": 0,
+      "name": "Thruster amount",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ship_warp_pods",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp pod glow",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "thr_ion",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 1.0,
+      "fall_ms": 0,
+      "inputs": [
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": -9.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 1.0
+        }
+      ],
+      "name": "Ion bank gate (auto: 0 at <=90% thrust, 1 at 100%)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "thr_tier1",
+      "combine": "min",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "inputs": [
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": 0.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 4.0
+        },
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": 2.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": -2.0
+        }
+      ],
+      "name": "Plume tier 25% length (auto from Thruster amount)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "thr_tier2",
+      "combine": "min",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "inputs": [
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": -1.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 3.0
+        },
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": 3.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": -1.0
+        }
+      ],
+      "name": "Plume tier 50% length (auto from Thruster amount)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "thr_tier3",
+      "combine": "min",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "inputs": [
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": -2.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 2.0
+        },
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": 4.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 0.0
+        }
+      ],
+      "name": "Plume tier 75% length (auto from Thruster amount)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "thr_tier4",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 1.0,
+      "fall_ms": 0,
+      "inputs": [
+        {
+          "channel_id": "ship_thrusters",
+          "curve": "linear",
+          "from": -3.0,
+          "kind": "channel",
+          "smoothing_ms": 0,
+          "to": 1.0
+        }
+      ],
+      "name": "Plume tier 100% length (auto from Thruster amount)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_cpx",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.5,
+      "fall_ms": 0,
+      "name": "Warp show: camera x",
+      "off_value": 0.5,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_cpz",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.5,
+      "fall_ms": 0,
+      "name": "Warp show: camera z",
+      "off_value": 0.5,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_ctx",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.5,
+      "fall_ms": 0,
+      "name": "Warp show: look x",
+      "off_value": 0.5,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_ctz",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.5,
+      "fall_ms": 0,
+      "name": "Warp show: look z",
+      "off_value": 0.5,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_intro",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp show: intro move",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_orbit",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp show: orbit",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_shake",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp show: shudder",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_skyturn",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp heading (sky turn)",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_sunfade",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Sun off in warp",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_warp",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Warp show: warp",
+      "off_value": 0.0,
+      "rise_ms": 0
+    },
+    {
+      "average_ms": 0,
+      "channel_id": "ws_yaw",
+      "combine": "latest",
+      "curve": "linear",
+      "default": 0.0,
+      "fall_ms": 0,
+      "name": "Ship heading turn",
+      "off_value": 0.0,
+      "rise_ms": 0
+    }
+  ]
+}
