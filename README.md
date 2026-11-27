@@ -10,6 +10,7 @@ set it up in JStream, and demo videos and stills.
 | [cockpit-3d](cockpit-3d/) | A weathered starship flight deck as a glTF 3D model for JStream's model source: a wide panoramic windshield, three hooded monitors wrapped around the pilot, an overhead console, dense amber-lit consoles, tiling CC0 PBR textures that stay sharp up close, seven 16:9 screens and a desk instrument that take live sources. |
 | [feature-tour](feature-tour/) | A show that tours what JStream does: screenshots of the app with camera moves and callouts, a live broadcast scene built from Tears of Steel stills, keyframes, motion modifiers and the 3D cockpit, with a readable script on every bookmark. |
 | [camera-demos](camera-demos/) | Three clips of JStream's 3D scene camera: a depth-of-field focus pull, a gliding close-up of the JStream UI, and the follow camera chasing the pointer over it. |
+| [kr417-ship](kr417-ship/) | The KR-417 exterior starship: a 2K glTF model with engine plumes, warp pods and RCS jets, and a 68.6 s looping warp show. |
 
 ## The demo project
 

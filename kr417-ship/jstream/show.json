@@ -1,0 +1,40 @@
+{
+  "bookmarks": [
+    {
+      "at_ms": 0,
+      "bookmark_id": "b_start",
+      "name": "Start",
+      "pausing": false
+    }
+  ],
+  "end": {
+    "type": "loop"
+  },
+  "name": "KR-417 warp show",
+  "next_monitor": "still",
+  "preset_id": "cut",
+  "program": [
+    {
+      "clip_id": "c_ship",
+      "length_ms": 68600,
+      "scene_id": "ship_warp_show"
+    }
+  ],
+  "sequences": [
+    {
+      "cues": [
+        {
+          "action": {
+            "timeline_id": "ws_show",
+            "type": "timeline.play"
+          },
+          "at_ms": 0,
+          "cue_id": "q_play"
+        }
+      ],
+      "name": "Show timeline",
+      "track_id": "s1"
+    }
+  ],
+  "show_id": "kr417_warp_show"
+}
