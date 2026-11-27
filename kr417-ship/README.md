@@ -4,7 +4,7 @@ The KR-417 exterior starship for [JStream](https://github.com/jeffmhopkins/JStre
 
 This folder is only the exterior ship and its warp show. It does not change the DAW cockpit, `s_3d`, or the cockpit sky source `l_env` and its `warp` channel.
 
-The JSON under `jstream/` is a read-only export of the live collection at state `rev` 1457, taken on Thursday 26 Nov 2026 at about 9:34 PM (America/New_York), while the show was playing. Runtime channel values and the show clock are not included. This rev includes the plume/RCS occlusion workaround described below.
+The JSON under `jstream/` is a read-only export of the live collection originally taken at state `rev` 1457 on Thursday 26 Nov 2026 at about 9:34 PM (America/New_York). Model paths and files were updated to the plain `*_nodiamond.glb` plumes and RCS jets that the live collection uses at `rev` 1491 (Friday 27 Nov 2026). Runtime channel values and the show clock are not included. The `_occ` hull-copy workaround described below has been retired.
 
 ![Cruise after the drop-out: thrusters at 100%, ion banks on](stills/jstream_engines_cruise.png)
 
@@ -41,7 +41,7 @@ To load the show in JStream:
 
 `jstream/export_meta.json` records the original paths, the rev, and the source and channel IDs that were exported. `jstream/show_rebuild/` holds the Python generators (`gen.py`, `gen2.py`, `gen3.py`, `gen_engines.py`), the latest generated timeline (`timeline9.json`, the 68.6 s loop with engine lanes), and the batches that built it (`batch_2stage`, `batch_sunoff`, `batch_turn30` + `batch_turn30_motion`, `batch_engines` + `batch_engines_motion2`, `batch_rcs`, `batch_throttle` + `batch_throttle2`, `batch_occlusion`). Older timelines, cam-motions and `test_*` files were left out. The live `jstream/timeline.json` is the source of truth if it and `timeline9.json` ever differ.
 
-`blender/work15/` and `blender/work16/` are the scripts that split and retint the r15 ship, build the plume length tiers, split the RCS jet groups, and merge a colorless hull copy into each plume/RCS glb (`occl_build.py`, `merge_occ.py` and friends). `blender/build_ship.py` and `build_ship_r*.py` are the earlier model-build scripts. Scratch renders, API schema dumps and `r15_report.json` (raw nozzle/pod coordinates) are not included.
+`blender/work15/` and `blender/work16/` are the scripts that split and retint the r15 ship, build the plume length tiers, split the RCS jet groups, and (historically) merge a colorless hull copy into each plume/RCS glb (`occl_build.py`, `merge_occ.py` and friends). Those hull-copy `_occ` files are retired; the live show uses the plain `*_nodiamond.glb` models. `blender/build_ship.py` and `build_ship_r*.py` are the earlier model-build scripts. Scratch renders, API schema dumps and `r15_report.json` (raw nozzle/pod coordinates) are not included.
 
 ## Channels
 
@@ -54,7 +54,7 @@ All channels are 0–1. Collection-wide (no `scene_id`), so they can also be set
 | `thr_tier1` | Plume tier 25% length (auto from Thruster amount) | 0–1 | 0 | Auto. Crossfade weight for the 25% plume item. Peaks at 25% throttle, 0 at 0% and at 50% and above. |
 | `thr_tier2` | Plume tier 50% length (auto from Thruster amount) | 0–1 | 0 | Auto. Peaks at 50% throttle. |
 | `thr_tier3` | Plume tier 75% length (auto from Thruster amount) | 0–1 | 0 | Auto. Peaks at 75% throttle. |
-| `thr_tier4` | Plume tier 100% length (auto from Thruster amount) | 0–1 | 1 | Auto. 0 until 75%, ramps to 1 at 100%. Source `ws_plumes` uses `plume_t100_occ.glb`. |
+| `thr_tier4` | Plume tier 100% length (auto from Thruster amount) | 0–1 | 1 | Auto. 0 until 75%, ramps to 1 at 100%. Source `ws_plumes` uses `plume_t100_nodiamond.glb`. |
 | `thr_ion` | Ion bank gate (auto: 0 at ≤90% thrust, 1 at 100%) | 0–1 | 1 | Auto. The two six-nozzle ion banks on the back of the wings: 0 at 90% throttle or less, full at 100%. |
 | `rcs_pitch_pos` | RCS pitch + (nose up) | 0–1 | 0 | Fires only the pitch-up jets. Off by default; not driven by the show timeline. |
 | `rcs_pitch_neg` | RCS pitch − (nose down) | 0–1 | 0 | Pitch-down jets. |
@@ -108,7 +108,7 @@ The arrival / point-of-interest pictures on this show's sky (`ws_sky_env`) are o
 | `rcs_roll_pos` (starboard wing down) | RCS_07, 08, 15, 16, 25, 26 |
 | `rcs_roll_neg` (port wing down) | RCS_06, 09, 14, 17, 24, 27 |
 
-Plus and minus sets mirror each other. The six groups are separate glbs: `rcs_pitch_pos_occ.glb` and so on. A Blender check sheet is [`stills/rcs_channels.png`](stills/rcs_channels.png); a live check of each channel is [`stills/jstream_rcs_live.png`](stills/jstream_rcs_live.png). The optional yaw puffs during the 30° pre-warp turn were left out, so the yaw channels stay off the timeline.
+Plus and minus sets mirror each other. The six groups are separate glbs: `rcs_pitch_pos_nodiamond.glb` and so on. A Blender check sheet is [`stills/rcs_channels.png`](stills/rcs_channels.png); a live check of each channel is [`stills/jstream_rcs_live.png`](stills/jstream_rcs_live.png). The optional yaw puffs during the 30° pre-warp turn were left out, so the yaw channels stay off the timeline.
 
 ![RCS nozzles grouped by channel](stills/rcs_channels.png)
 
@@ -122,16 +122,16 @@ Length is a four-tier crossfade, each tier its own item and glb, all fitted to t
 
 | Throttle | Visible plume item | Source / file |
 |---|---|---|
-| ~25% | `sw_plume_t025` | `ws_plume_t025` → `plume_t025_occ.glb` |
-| ~50% | `sw_plume_t050` | `ws_plume_t050` → `plume_t050_occ.glb` |
-| ~75% | `sw_plume_t075` | `ws_plume_t075` → `plume_t075_occ.glb` |
-| 100% | `sw_plumes` | `ws_plumes` → `plume_t100_occ.glb` |
+| ~25% | `sw_plume_t025` | `ws_plume_t025` → `plume_t025_nodiamond.glb` |
+| ~50% | `sw_plume_t050` | `ws_plume_t050` → `plume_t050_nodiamond.glb` |
+| ~75% | `sw_plume_t075` | `ws_plume_t075` → `plume_t075_nodiamond.glb` |
+| 100% | `sw_plumes` | `ws_plumes` → `plume_t100_nodiamond.glb` |
 
 The auto channels `thr_tier1`–`thr_tier4` are a `min` (or, for tier 4, a single remap) of `ship_thrusters` so neighbouring tiers crossfade and only one length is fully on at a time. Item opacity on each tier follows its auto channel (a single opacity modifier per item; see bugs below). Emissive strength on the plume materials uses add mode from a rest value of 1: −1 is off, 0 is the file strength.
 
-The ion bank (12 nozzles, six on the back of each wing) is a separate item `sw_plume_ion` / `plume_ion_occ.glb`, gated by `thr_ion`. That channel remaps `ship_thrusters` so it is 0 at 90% or less and 1 at 100%. The banks are therefore on in the show's cruise (throttle stays at 100% outside warp) and off below that.
+The ion bank (12 nozzles, six on the back of each wing) is a separate item `sw_plume_ion` / `plume_ion_nodiamond.glb`, gated by `thr_ion`. That channel remaps `ship_thrusters` so it is 0 at 90% or less and 1 at 100%. The banks are therefore on in the show's cruise (throttle stays at 100% outside warp) and off below that.
 
-Checked live at 30%, 60%, 89% and 100%: [`stills/jstream_throttle.png`](stills/jstream_throttle.png). The four plume-tier items, the ion bank and the six RCS items all use **additive** blend, together with a colorless hull copy inside each glb, so the plumes no longer show through the ship (see [Occlusion workaround](#occlusion-workaround)).
+Checked live at 30%, 60%, 89% and 100%: [`stills/jstream_throttle.png`](stills/jstream_throttle.png). The four plume-tier items, the ion bank and the six RCS items all use **additive** blend. On a JStream build with shared scene depth ([#1836](https://github.com/jeffmhopkins/JStream/pull/1836)), the hull is in the same depth buffer, so the exhaust is hidden where the ship is in front. See [Plain plumes and the retired occlusion workaround](#plain-plumes-and-the-retired-occlusion-workaround).
 
 ![Throttle at 30%, 60%, 89% and 100%](stills/jstream_throttle.png)
 
@@ -142,19 +142,23 @@ Only the assets the live show still references. Filenames match the sources.
 | File | Used by |
 |---|---|
 | [`spaceship_r15_ship_2k_d.glb`](models/spaceship_r15_ship_2k_d.glb) | `ws_ship_r15` (item `sw_ship`) |
-| [`plume_t025_occ.glb`](models/plume_t025_occ.glb) / [`t050_occ`](models/plume_t050_occ.glb) / [`t075_occ`](models/plume_t075_occ.glb) / [`t100_occ.glb`](models/plume_t100_occ.glb) | the four length tiers; `ws_plumes` is the 100% file |
-| [`plume_ion_occ.glb`](models/plume_ion_occ.glb) | `ws_plume_ion` |
-| [`rcs_pitch_pos_occ.glb`](models/rcs_pitch_pos_occ.glb) and the other five `rcs_*_occ.glb` | the six RCS source / item pairs |
+| [`plume_t025_nodiamond.glb`](models/plume_t025_nodiamond.glb) / [`t050_nodiamond`](models/plume_t050_nodiamond.glb) / [`t075_nodiamond`](models/plume_t075_nodiamond.glb) / [`t100_nodiamond.glb`](models/plume_t100_nodiamond.glb) | the four length tiers; `ws_plumes` is the 100% file |
+| [`plume_ion_nodiamond.glb`](models/plume_ion_nodiamond.glb) | `ws_plume_ion` |
+| [`rcs_pitch_pos_nodiamond.glb`](models/rcs_pitch_pos_nodiamond.glb) and the other five `rcs_*_nodiamond.glb` | the six RCS source / item pairs |
 
-The earlier non-occluded plume/RCS glbs (`plume_t025.glb`, `plume_ion.glb`, `rcs_pitch_pos.glb` and so on), and the combined files `ship_plumes.glb` and `ship_plumes_main.glb`, are **not** referenced any more and are not in `models/`. The 39.7 MB full-resolution `spaceship_r15.glb` and the Blender `.blend` are also omitted. Every file is under 20 MB. The eleven `*_occ.glb` files are larger than the old plume/RCS glbs because each one embeds a hull copy (about 56 MB for `models/` as a whole, above the earlier ~40 MB target).
+The combined files `ship_plumes.glb` and `ship_plumes_main.glb`, the 39.7 MB full-resolution `spaceship_r15.glb` and the Blender `.blend` are not referenced and are not in `models/`. The eleven `*_occ.glb` hull-copy files are also omitted: they z-fight when models share one depth. Every file is under 20 MB. `models/` is about 21 MB. On the live machine the same glbs live under `spaceship/`, and the collection references `spaceship/*_nodiamond.glb`. The unsuffixed copies there (`plume_ion.glb` and so on) are byte-identical to the nodiamond files.
 
-## Occlusion workaround
+## Plain plumes and the retired occlusion workaround
 
-JStream draws each model item as its own layer, with its own depth buffer, and composites those layers in centre-depth order. A plume or RCS jet in a separate glb is therefore not hidden by the ship's hull: the exhaust can show through the body. This is by design in ADR-0107 decisions 6 and 7 (a model's layer is not depth-tested against other models). Putting the ship and the plumes in a `share_space` group does not change that.
+JStream used to draw each model item as its own layer, with its own depth buffer, and composite those layers in centre-depth order. A plume or RCS jet in a separate glb was therefore not hidden by the ship's hull: the exhaust could show through the body. That followed ADR-0107 decisions 6 and 7 (a model's layer is not depth-tested against other models). Putting the ship and the plumes in a `share_space` group did not change that.
 
-The workaround is inside each of the eleven plume, ion and RCS glbs: an exact copy of the hull (about 36k triangles), black, unlit and opaque (`kr_occluder`). Inside that one model, ordinary mesh depth hides the exhaust where the hull is in front. Those eleven items (`sw_plume_t025` / `t050` / `t075`, `sw_plumes`, `sw_plume_ion`, and the six `sw_rcs_*`) use **additive** blend, so the black hull copy adds nothing and stays invisible against the real ship. The ship item itself stays on normal blend.
+The workaround was a colorless hull copy inside each of the eleven plume, ion and RCS glbs: an exact copy of the hull (about 36k triangles), black, unlit and opaque (`kr_occluder`). Inside that one model, ordinary mesh depth hid the exhaust where the hull was in front. Those eleven items used **additive** blend, so the black hull copy added nothing and stayed invisible against the real ship.
 
-Live before-and-after, at four angles, with throttle at 100%, the ion bank on and RCS yaw+ on: [`stills/jstream_occlusion.png`](stills/jstream_occlusion.png).
+[JStream #1836](https://github.com/jeffmhopkins/JStream/pull/1836) draws every model that can share a 3D scene into one colour target and one depth. The hull then hides the exhaust by ordinary depth, so the plain plumes are enough. The `_occ` hull copies z-fight on that path and must not be used with it.
+
+The current glbs also fix two artefacts in the plain plume and RCS models. Tip UVs are clamped so the plume texture does not wrap around into a small detached nozzle-coloured diamond just past the fade. The BoundsMarker mesh is fully transparent so it cannot sparkle near the wingtips.
+
+The still of the old hull-copy workaround, at four angles, with throttle at 100%, the ion bank on and RCS yaw+ on, is kept for history: [`stills/jstream_occlusion.png`](stills/jstream_occlusion.png).
 
 ![Plumes hidden by the hull copy, before and after](stills/jstream_occlusion.png)
 
@@ -166,7 +170,7 @@ Live before-and-after, at four angles, with throttle at 100%, the ion bank on an
 
 - **[JStream #1834](https://github.com/jeffmhopkins/JStream/issues/1834) — the model can drop out of the live program render when it is small on screen or at certain angles.** Snapshots and `video.frames` still show it; only the live canvas misbehaves. **Workaround:** keep fov at 36° and a viewing distance around 1700 px. Wider fov (45°) at ~1950 px was enough to make this ship vanish from dead behind.
 
-- **Shared depth between model items (issue to be filed).** Each model item has its own depth buffer, so objects in the same 3D scene do not occlude one another. The hull-copy workaround above is what this show uses until the engine can share depth across model items.
+- **Shared depth between model items ([JStream #1836](https://github.com/jeffmhopkins/JStream/pull/1836), not yet merged as of 27 Nov 2026).** On a build with that change, models in one 3D scene share a depth buffer, and this show uses the plain `*_nodiamond.glb` plumes. The `_occ` hull-copy files z-fight there. On an older build that still composites each model into its own layer, the exhaust can show through the hull unless those `_occ` files are restored.
 
 - **Pod light follow is approximate.** The two pod point-lights (`sw_pod_L`, `sw_pod_R`) are not parented to the pod nodes. They follow the 30° heading turn with `x` and `depth` modifiers on `ws_yaw`, which is close but not a true orbit around the ship's centre. Fine for this show's turn; it will drift if you add a much larger heading change.
 

@@ -228,7 +228,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/plume_t100_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/plume_t100_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -328,7 +328,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_pitch_pos_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_pitch_pos_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -390,7 +390,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_pitch_neg_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_pitch_neg_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -452,7 +452,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_yaw_pos_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_yaw_pos_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -514,7 +514,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_yaw_neg_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_yaw_neg_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -576,7 +576,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_roll_pos_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_roll_pos_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -638,7 +638,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/rcs_roll_neg_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/rcs_roll_neg_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -700,7 +700,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/plume_t025_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/plume_t025_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -762,7 +762,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/plume_t050_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/plume_t050_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -824,7 +824,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/plume_t075_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/plume_t075_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
@@ -886,7 +886,7 @@
         "color": "#ffffffff",
         "double_sided": false,
         "file": {
-          "path": "{SCENES}/kr417-ship/models/plume_ion_occ.glb",
+          "path": "{SCENES}/kr417-ship/models/plume_ion_nodiamond.glb",
           "root": "collection",
           "type": "asset"
         },
