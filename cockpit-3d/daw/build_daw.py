@@ -528,12 +528,9 @@ if not GLOW:
     motion["l_desk"] = [data("level", "opacity", "meters", "master.0", -0.85, 0.0, smoothing=90)]
     # The screens' glow pulses on every beat: brightest on it, fading through it.
     motion["l_glow"] = [data("beat", "opacity", "clock", "beatPhase", 0.0, -0.6, smoothing=0)]
-# The cabin lights come up while the transport plays and go down through the break,
-# when only the echo track's clip plays.
-motion["l_cabin"] = [data("play", "opacity", "transport", "playing", -0.6, 0.0, smoothing=1200),
-                     data("break", "opacity", "track/5", "stopped", -0.85, 0.0, smoothing=1500)]
-motion["l_sun"] = [data("break", "opacity", "track/5", "stopped", -0.9, 0.0, smoothing=1500)]
-motion["l_ambient"] = [data("break", "opacity", "track/5", "stopped", -0.6, 0.0, smoothing=1500)]
+# The cabin lights (the cabin's, the ambient fill and the starlight) follow nothing in the
+# band: only the Cabin and Master switches dim them, so the cabin stays lit with the song
+# stopped or no DAW sending.
 # The sky brightens while either chorus's clip plays on the drums track.
 motion["l_env"] = [data(f"chorus{s}", "source", "track/0", f"slots.{s}.state", 0.0, 0.9,
                         smoothing=1800, states={"playing": 1.0}, source={"param": "intensity"}) for s in (2, 5)]
