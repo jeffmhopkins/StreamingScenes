@@ -39,9 +39,23 @@ To load the show in JStream:
    - `jstream/show.json` — show `kr417_warp_show`: one 68.6 s clip of `ship_warp_show`, cut, looping, bookmark `b_start` at 0 s (non-pausing) which plays `ws_show`
 4. Canvas size for this show is 1920×1080. Keep the scene camera at **fov 36°** and a viewing distance around **1700 px** (see [Known engine bugs](#known-engine-bugs-and-workarounds)).
 
-`jstream/export_meta.json` records the original paths, the rev, and the source and channel IDs that were exported. `jstream/show_rebuild/` holds the Python generators (`gen.py`, `gen2.py`, `gen3.py`, `gen_engines.py`), the latest generated timeline (`timeline9.json`, the 68.6 s loop with engine lanes), and the batches that built it (`batch_2stage`, `batch_sunoff`, `batch_turn30` + `batch_turn30_motion`, `batch_engines` + `batch_engines_motion2`, `batch_rcs`, `batch_throttle` + `batch_throttle2`, `batch_occlusion`). Older timelines, cam-motions and `test_*` files were left out. The live `jstream/timeline.json` is the source of truth if it and `timeline9.json` ever differ.
+`jstream/export_meta.json` records the original paths, the rev, and the source and channel IDs that were exported. The five JSON files above are the whole show; nothing else is needed to load it. The Python generators and edit batches that built the timeline step by step are not kept here: they read intermediate timelines that were never committed, and the live collection was edited after the last of them, so they could not rebuild `timeline.json`. Git history has them (PR #54).
 
-`blender/work15/` and `blender/work16/` are the scripts that split and retint the r15 ship, build the plume length tiers, split the RCS jet groups, and (historically) merge a colorless hull copy into each plume/RCS glb (`occl_build.py`, `merge_occ.py` and friends). Those hull-copy `_occ` files are retired; the live show uses the plain `*_nodiamond.glb` models. `blender/build_ship.py` and `build_ship_r*.py` are the earlier model-build scripts. Scratch renders, API schema dumps and `r15_report.json` (raw nozzle/pod coordinates) are not included.
+### Model build scripts
+
+`blender/` keeps one chain of scripts, the one that built the models in `models/`. They were written for a Blender 4.2 workspace with everything under `/workspace/3d-output` (`OUT`), and run in this order:
+
+| Step | Script | Reads | Writes |
+|---|---|---|---|
+| 1 | [`blender/build_ship.py`](blender/build_ship.py) | nothing (procedural) | `spaceship.glb`, `spaceship.blend` (round 13 of the base model) |
+| 2 | [`blender/work15/build_r15.py`](blender/work15/build_r15.py) | `spaceship_r14b.glb` | `spaceship_r15.blend` / `.glb`, `spaceship_r15_2k.glb`, `r15_report.json` (nozzle and pod coordinates) |
+| 3 | [`blender/work16/split2.py`](blender/work16/split2.py) | `spaceship_r15.blend` | `bounds.json` (ship and plume boxes, shared by every split glb), `ship_plumes.glb` |
+| 4 | [`blender/work16/rcs_split2.py`](blender/work16/rcs_split2.py) | `spaceship_r15.blend`, `r15_report.json`, `bounds.json` | `rcs_groups.json` (the RCS channel groups below), `rcs_<group>.glb` × 6 |
+| 5 | [`blender/work16/throttle_build.py`](blender/work16/throttle_build.py) | `spaceship_r15.blend`, `r15_report.json`, `bounds.json` | `spaceship_r15_ship_2k_d.glb` (the ship), `plume_t025`/`t050`/`t075`/`t100.glb`, `plume_ion.glb` |
+| 6 | [`blender/work16/retint_d.py`](blender/work16/retint_d.py), then [`podtex_d.py`](blender/work16/podtex_d.py) | `spaceship_r15_ship_2k_d.glb` | the same file, patched in place: a grey engine-glow texture with a cool tint, then a white pod-glow texture |
+| 7 | [`blender/work15/patch_glb.py`](blender/work15/patch_glb.py) `<glb>…` | the plume and RCS glbs | the same files: plume materials black base colour, unlit, double-sided |
+
+Two steps are not in the repo. The round-14 pass that turned `spaceship.glb` into `spaceship_r14b.glb` and made the 2k textures (`work14/tex2k`) was not kept. The final pass that made the `*_nodiamond.glb` files (tip UVs clamped, BoundsMarker made fully transparent, see [below](#plain-plumes-and-the-retired-occlusion-workaround)) was done by hand on the live machine. Earlier model rounds, the `_b`/`_c` ship variants, diagnostic and render scripts, and the `_occ` hull-copy scripts build nothing the show uses; git history has them (PR #54). Scratch renders, API schema dumps and `r15_report.json` are not included.
 
 ## Channels
 
@@ -170,7 +184,7 @@ The still of the old hull-copy workaround, at four angles, with throttle at 100%
 
 - **[JStream #1834](https://github.com/jeffmhopkins/JStream/issues/1834) — the model can drop out of the live program render when it is small on screen or at certain angles.** Snapshots and `video.frames` still show it; only the live canvas misbehaves. **Workaround:** keep fov at 36° and a viewing distance around 1700 px. Wider fov (45°) at ~1950 px was enough to make this ship vanish from dead behind.
 
-- **Shared depth between model items ([JStream #1836](https://github.com/jeffmhopkins/JStream/pull/1836), not yet merged as of 27 Nov 2026).** On a build with that change, models in one 3D scene share a depth buffer, and this show uses the plain `*_nodiamond.glb` plumes. The `_occ` hull-copy files z-fight there. On an older build that still composites each model into its own layer, the exhaust can show through the hull unless those `_occ` files are restored.
+- **Shared depth between model items.** The show needs a JStream build with [JStream #1836](https://github.com/jeffmhopkins/JStream/pull/1836), which has merged: models in one 3D scene share a depth buffer, and this show uses the plain `*_nodiamond.glb` plumes. The `_occ` hull-copy files z-fight there. On an older build that still composites each model into its own layer, the exhaust can show through the hull. The follow-up fixes in [JStream #1838](https://github.com/jeffmhopkins/JStream/pull/1838) also matter here: without them, an additive or faded model's opaque parts (the RCS glow discs in the `rcs_*` glbs) write full depth in the shared pass and can hide the ship behind them.
 
 - **Pod light follow is approximate.** The two pod point-lights (`sw_pod_L`, `sw_pod_R`) are not parented to the pod nodes. They follow the 30° heading turn with `x` and `depth` modifiers on `ws_yaw`, which is close but not a true orbit around the ship's centre. Fine for this show's turn; it will drift if you add a much larger heading change.
 
