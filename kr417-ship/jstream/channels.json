@@ -8,7 +8,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS pitch - (nose down)",
+      "name": "RCS.Pitch.Nose down",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -19,7 +19,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS pitch + (nose up)",
+      "name": "RCS.Pitch.Nose up",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -30,7 +30,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS roll - (port wing down)",
+      "name": "RCS.Roll.Port wing down",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -41,7 +41,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS roll + (starboard wing down)",
+      "name": "RCS.Roll.Starboard wing down",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -52,7 +52,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS yaw - (nose to starboard)",
+      "name": "RCS.Yaw.Nose to starboard",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -63,7 +63,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "RCS yaw + (nose to port)",
+      "name": "RCS.Yaw.Nose to port",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -74,7 +74,7 @@
       "curve": "linear",
       "default": 1.0,
       "fall_ms": 0,
-      "name": "Thruster amount",
+      "name": "Thrusters.Amount",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -85,7 +85,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp pod glow",
+      "name": "Warp pods.Glow",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -106,7 +106,7 @@
           "to": 1.0
         }
       ],
-      "name": "Ion bank gate (auto: 0 at <=90% thrust, 1 at 100%)",
+      "name": "Thrusters.Ion bank gate",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -135,7 +135,7 @@
           "to": -2.0
         }
       ],
-      "name": "Plume tier 25% length (auto from Thruster amount)",
+      "name": "Thrusters.Plume 25%",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -164,7 +164,7 @@
           "to": -1.0
         }
       ],
-      "name": "Plume tier 50% length (auto from Thruster amount)",
+      "name": "Thrusters.Plume 50%",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -193,7 +193,7 @@
           "to": 0.0
         }
       ],
-      "name": "Plume tier 75% length (auto from Thruster amount)",
+      "name": "Thrusters.Plume 75%",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -214,7 +214,7 @@
           "to": 1.0
         }
       ],
-      "name": "Plume tier 100% length (auto from Thruster amount)",
+      "name": "Thrusters.Plume 100%",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -225,7 +225,7 @@
       "curve": "linear",
       "default": 0.5,
       "fall_ms": 0,
-      "name": "Warp show: camera x",
+      "name": "Warp show.Camera x",
       "off_value": 0.5,
       "rise_ms": 0
     },
@@ -236,7 +236,7 @@
       "curve": "linear",
       "default": 0.5,
       "fall_ms": 0,
-      "name": "Warp show: camera z",
+      "name": "Warp show.Camera z",
       "off_value": 0.5,
       "rise_ms": 0
     },
@@ -247,7 +247,7 @@
       "curve": "linear",
       "default": 0.5,
       "fall_ms": 0,
-      "name": "Warp show: look x",
+      "name": "Warp show.Look x",
       "off_value": 0.5,
       "rise_ms": 0
     },
@@ -258,7 +258,7 @@
       "curve": "linear",
       "default": 0.5,
       "fall_ms": 0,
-      "name": "Warp show: look z",
+      "name": "Warp show.Look z",
       "off_value": 0.5,
       "rise_ms": 0
     },
@@ -269,7 +269,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp show: intro move",
+      "name": "Warp show.Intro move",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -280,7 +280,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp show: orbit",
+      "name": "Warp show.Orbit",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -291,7 +291,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp show: shudder",
+      "name": "Warp show.Shudder",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -302,7 +302,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp heading (sky turn)",
+      "name": "Warp show.Sky turn",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -313,7 +313,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Sun off in warp",
+      "name": "Warp show.Sun fade",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -324,7 +324,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Warp show: warp",
+      "name": "Warp show.Warp",
       "off_value": 0.0,
       "rise_ms": 0
     },
@@ -335,7 +335,7 @@
       "curve": "linear",
       "default": 0.0,
       "fall_ms": 0,
-      "name": "Ship heading turn",
+      "name": "Warp show.Heading turn",
       "off_value": 0.0,
       "rise_ms": 0
     }

@@ -61,32 +61,32 @@ Some inputs are not in the repo. The `work11/` scripts that `build_ship.py` exec
 
 All channels are 0–1. Collection-wide (no `scene_id`), so they can also be set by hand when the show is stopped. `thr_tier1`–`thr_tier4` and `thr_ion` are automatic followers of `ship_thrusters`; do not drive them from the timeline.
 
-| ID | Label | Range | Default | What it does |
+| ID | Name | Range | Default | What it does |
 |---|---|---|---|---|
-| `ship_thrusters` | Thruster amount | 0–1 | 1 | True throttle. Scales main-engine / impulse / wing-root / pod-end glow and which plume-length tier is visible. 1 in cruise; the show ramps it to 0 for warp and back to 1 on drop-out. |
-| `ship_warp_pods` | Warp pod glow | 0–1 | 0 | Wingtip pod ring glow and pod point-lights, plus a 1 s pulse. The show goes 0 → 0.5 with the first warp ramp, then → 1 with the second, and back to 0 on drop-out. |
-| `thr_tier1` | Plume tier 25% length (auto from Thruster amount) | 0–1 | 0 | Auto. Crossfade weight for the 25% plume item. Peaks at 25% throttle, 0 at 0% and at 50% and above. |
-| `thr_tier2` | Plume tier 50% length (auto from Thruster amount) | 0–1 | 0 | Auto. Peaks at 50% throttle. |
-| `thr_tier3` | Plume tier 75% length (auto from Thruster amount) | 0–1 | 0 | Auto. Peaks at 75% throttle. |
-| `thr_tier4` | Plume tier 100% length (auto from Thruster amount) | 0–1 | 1 | Auto. 0 until 75%, ramps to 1 at 100%. Source `ws_plumes` uses `plume_t100_nodiamond.glb`. |
-| `thr_ion` | Ion bank gate (auto: 0 at ≤90% thrust, 1 at 100%) | 0–1 | 1 | Auto. The two six-nozzle ion banks on the back of the wings: 0 at 90% throttle or less, full at 100%. |
-| `rcs_pitch_pos` | RCS pitch + (nose up) | 0–1 | 0 | Fires only the pitch-up jets. Off by default; not driven by the show timeline. |
-| `rcs_pitch_neg` | RCS pitch − (nose down) | 0–1 | 0 | Pitch-down jets. |
-| `rcs_yaw_pos` | RCS yaw + (nose to port) | 0–1 | 0 | Yaw-to-port jets. |
-| `rcs_yaw_neg` | RCS yaw − (nose to starboard) | 0–1 | 0 | Yaw-to-starboard jets. |
-| `rcs_roll_pos` | RCS roll + (starboard wing down) | 0–1 | 0 | Roll jets in diagonal pairs (pitch cancels). |
-| `rcs_roll_neg` | RCS roll − (port wing down) | 0–1 | 0 | Opposite diagonal roll pair. |
-| `ws_warp` | Warp show: warp | 0–1 | 0 | Sky warp streaks and the ship's interior warp-spool glow. 0 → 0.5, then → 1, then drop out. |
-| `ws_sunfade` | Sun off in warp | 0–1 | 0 | 0 = warm sun on, 1 = fully off. The sun item's base intensity is 0; a modifier adds the on level when this channel is 0. |
-| `ws_yaw` | Ship heading turn | 0–1 | 0 | Turns the ship (and the plume / RCS / pod items) +30°, and the camera path follows. Also drives the approximate pod-light follow. |
-| `ws_skyturn` | Warp heading (sky turn) | 0–1 | 0 | Turns the sky so the warp vanishing point matches the new heading. |
-| `ws_intro` | Warp show: intro move | 0–1 | 0 | Swing-in / dolly-in, and the matching pull-back at the end of the loop. |
-| `ws_orbit` | Warp show: orbit | 0–1 | 0 | Each 360° orbit segment (two at warp, one in normal space). |
-| `ws_shake` | Warp show: shudder | 0–1 | 0 | Entry / steady / drop-out camera shudder. |
-| `ws_cpx` | Warp show: camera x | 0–1 | 0.5 | Camera path position X (dense keyed lane). |
-| `ws_cpz` | Warp show: camera z | 0–1 | 0.5 | Camera path position Z. |
-| `ws_ctx` | Warp show: look x | 0–1 | 0.5 | Camera look-at X. |
-| `ws_ctz` | Warp show: look z | 0–1 | 0.5 | Camera look-at Z. |
+| `ship_thrusters` | Thrusters.Amount | 0–1 | 1 | True throttle. Scales main-engine / impulse / wing-root / pod-end glow and which plume-length tier is visible. 1 in cruise; the show ramps it to 0 for warp and back to 1 on drop-out. |
+| `ship_warp_pods` | Warp pods.Glow | 0–1 | 0 | Wingtip pod ring glow and pod point-lights, plus a 1 s pulse. The show goes 0 → 0.5 with the first warp ramp, then → 1 with the second, and back to 0 on drop-out. |
+| `thr_tier1` | Thrusters.Plume 25% | 0–1 | 0 | Auto. Crossfade weight for the 25% plume item. Peaks at 25% throttle, 0 at 0% and at 50% and above. |
+| `thr_tier2` | Thrusters.Plume 50% | 0–1 | 0 | Auto. Peaks at 50% throttle. |
+| `thr_tier3` | Thrusters.Plume 75% | 0–1 | 0 | Auto. Peaks at 75% throttle. |
+| `thr_tier4` | Thrusters.Plume 100% | 0–1 | 1 | Auto. 0 until 75%, ramps to 1 at 100%. Source `ws_plumes` uses `plume_t100_nodiamond.glb`. |
+| `thr_ion` | Thrusters.Ion bank gate | 0–1 | 1 | Auto. The two six-nozzle ion banks on the back of the wings: 0 at 90% throttle or less, full at 100%. |
+| `rcs_pitch_pos` | RCS.Pitch.Nose up | 0–1 | 0 | Fires only the pitch-up jets. Off by default; not driven by the show timeline. |
+| `rcs_pitch_neg` | RCS.Pitch.Nose down | 0–1 | 0 | Pitch-down jets. |
+| `rcs_yaw_pos` | RCS.Yaw.Nose to port | 0–1 | 0 | Yaw-to-port jets. |
+| `rcs_yaw_neg` | RCS.Yaw.Nose to starboard | 0–1 | 0 | Yaw-to-starboard jets. |
+| `rcs_roll_pos` | RCS.Roll.Starboard wing down | 0–1 | 0 | Roll jets in diagonal pairs (pitch cancels). |
+| `rcs_roll_neg` | RCS.Roll.Port wing down | 0–1 | 0 | Opposite diagonal roll pair. |
+| `ws_warp` | Warp show.Warp | 0–1 | 0 | Sky warp streaks and the ship's interior warp-spool glow. 0 → 0.5, then → 1, then drop out. |
+| `ws_sunfade` | Warp show.Sun fade | 0–1 | 0 | 0 = warm sun on, 1 = fully off. The sun item's base intensity is 0; a modifier adds the on level when this channel is 0. |
+| `ws_yaw` | Warp show.Heading turn | 0–1 | 0 | Turns the ship (and the plume / RCS / pod items) +30°, and the camera path follows. Also drives the approximate pod-light follow. |
+| `ws_skyturn` | Warp show.Sky turn | 0–1 | 0 | Turns the sky so the warp vanishing point matches the new heading. |
+| `ws_intro` | Warp show.Intro move | 0–1 | 0 | Swing-in / dolly-in, and the matching pull-back at the end of the loop. |
+| `ws_orbit` | Warp show.Orbit | 0–1 | 0 | Each 360° orbit segment (two at warp, one in normal space). |
+| `ws_shake` | Warp show.Shudder | 0–1 | 0 | Entry / steady / drop-out camera shudder. |
+| `ws_cpx` | Warp show.Camera x | 0–1 | 0.5 | Camera path position X (dense keyed lane). |
+| `ws_cpz` | Warp show.Camera z | 0–1 | 0.5 | Camera path position Z. |
+| `ws_ctx` | Warp show.Look x | 0–1 | 0.5 | Camera look-at X. |
+| `ws_ctz` | Warp show.Look z | 0–1 | 0.5 | Camera look-at Z. |
 
 ## Show beat list (68.6 s loop)
 

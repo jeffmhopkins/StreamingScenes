@@ -1,13 +1,13 @@
-"""The cockpit's small LEDs in four groups, each one channel, `Desk lights 1` to `4`, that a
+"""The cockpit's small LEDs in four groups, each one channel, `Desk.Lights 1` to `4`, that a
 JTunnel Mod drives, gated by the cockpit's Glow and Master switches. The desk itself is
 switched off, as the model has it: no note grid, meter bridge or lights following the band.
 
 | Channel | Mod | LEDs (the model's material) |
 |---|---|---|
-| `desk_lights_1` "Desk lights 1" | 21 | the red ones (`led_red`) |
-| `desk_lights_2` "Desk lights 2" | 22 | the green ones (`led_green`) |
-| `desk_lights_3` "Desk lights 3" | 23 | the blue ones (`led_blue`) |
-| `desk_lights_4` "Desk lights 4" | 24 | the amber ones (`led_amber`) |
+| `desk_lights_1` "Desk.Lights 1" | 21 | the red ones (`led_red`) |
+| `desk_lights_2` "Desk.Lights 2" | 22 | the green ones (`led_green`) |
+| `desk_lights_3` "Desk.Lights 3" | 23 | the blue ones (`led_blue`) |
+| `desk_lights_4` "Desk.Lights 4" | 24 | the amber ones (`led_amber`) |
 
 Each channel is 0 (dark) to 1 (the model's own glow), 1 until its Mod first moves. The
 Glow and Master switches still put every LED out, whatever its channel reads. The cabin
@@ -41,10 +41,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # file's own. The amber LEDs stop at a little over half, as they did under the meters,
 # so the many of them don't flare under the bloom's low threshold.
 GROUPS = [
-    ("desk_lights_1", "Desk lights 1", 21, "led_red", -1.0, 0.0),
-    ("desk_lights_2", "Desk lights 2", 22, "led_green", -1.0, 0.0),
-    ("desk_lights_3", "Desk lights 3", 23, "led_blue", -1.0, 0.0),
-    ("desk_lights_4", "Desk lights 4", 24, "led_amber", -1.0, -0.45),
+    ("desk_lights_1", "Desk.Lights 1", 21, "led_red", -1.0, 0.0),
+    ("desk_lights_2", "Desk.Lights 2", 22, "led_green", -1.0, 0.0),
+    ("desk_lights_3", "Desk.Lights 3", 23, "led_blue", -1.0, 0.0),
+    ("desk_lights_4", "Desk.Lights 4", 24, "led_amber", -1.0, -0.45),
 ]
 # The strips that glow steadily: (material, drive), the light strips at 0.35 of the file's
 # 2.5 and the orange accents at 0.6 of its 1.6, both under the bloom's low threshold.
@@ -159,7 +159,7 @@ def _main():
 
     init()
     model = os.environ.get("MODEL_ITEM", "model")
-    step(channels(mods), "Desk lights 1 to 4 channels, on JTunnel Mods 21 to 24")
+    step(channels(mods), "Desk.Lights 1 to 4 channels, on JTunnel Mods 21 to 24")
     step([{"type": "item.set_motion", "scene_id": "cockpit", "item_id": model,
            "motion": model_motion([glow_gate("glow"), glow_gate("master")])}],
          f"the LEDs on the channels (item `{model}`)")
@@ -182,7 +182,7 @@ def _main():
               "motion": [follow("cabin", -0.5), follow("desk", -1.0), follow("master", -1.0)]}]
     members = {"grid": [item], "feed": [feed]}
     desk.append({"type": "channel.set", "channel": {
-        "channel_id": channel("desk", "grid"), "name": "Desk: " + sources.DESK_SLOTS[0][1], "default": 1.0}})
+        "channel_id": channel("desk", "grid"), "name": "Desk." + sources.DESK_SLOTS[0][1], "default": 1.0}})
     for slot, name, _ in sources.DESK_SLOTS:
         lanes = [{"target": {"channel": channel("desk", o)},
                   "points": [{"at_ms": sources.FADE_MS, "value": 1.0 if o == slot else 0.0, "curve": "linear"}]}

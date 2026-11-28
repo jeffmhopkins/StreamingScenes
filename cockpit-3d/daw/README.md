@@ -21,7 +21,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `views.py` | The camera views, in model metres: the ones `render_daw.py` glides along the song and `import_show.py` turns into keyframes of the cockpit (`keyframes()`), filed in a folder (`filing()`). |
 | `title.py`, `title/` | The Sound Journal title over the cockpit, and its card (`title/make_title.py` draws `title.png`). See [The Sound Journal title](#the-sound-journal-title). |
 | `ship_sequences.py` | The cockpit's sequences: the lights and the monitors powering on and off, the jump to warp and back, and the ship's drift, with their keys. See [Cockpit sequences](#cockpit-sequences). |
-| `desk_lights.py`, `desk/` | The desk switched off (`desk/pads-off.png`, the model's own dark pads), and the cockpit's small LEDs in four groups, the channels `Desk lights 1` to `4` on JTunnel Mods 21 to 24, with a twinkle to try them. Run on its own, it changes a cockpit already in a running JStream. See [Desk lights](#desk-lights). |
+| `desk_lights.py`, `desk/` | The desk switched off (`desk/pads-off.png`, the model's own dark pads), and the cockpit's small LEDs in four groups, the channels `Desk.Lights 1` to `4` on JTunnel Mods 21 to 24, with a twinkle to try them. Run on its own, it changes a cockpit already in a running JStream. See [Desk lights](#desk-lights). |
 | `transport_lights.py` | The transport's four beat lights and play light in front of the left monitor, its position and tempo on a seven-segment display there, a stopwatch under the right monitor, with its reset (Ctrl+Alt+R, or Mod 25), and the local time up top between the overhead monitors. Run on its own, it adds them to a cockpit already in a running JStream. See [Transport lights and stopwatch](#transport-lights-and-stopwatch). |
 | `sources.py` | What the three main monitors, the hologram and the desk show: a subscene each, with sources to switch between and, on the monitors and the hologram, the selected one's soft key lit. See [Switching what the screens show](#switching-what-the-screens-show). |
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
@@ -52,10 +52,10 @@ a person or Bitwig drives (`desk_lights.py`). Nothing in the band moves them.
 
 | Channel | Name | Mod | LEDs | 0 | 1 |
 |---|---|---|---|---|---|
-| `desk_lights_1` | Desk lights 1 | 21 | the red ones (`led_red`) | dark | the model's own glow |
-| `desk_lights_2` | Desk lights 2 | 22 | the green ones (`led_green`) | dark | the model's own glow |
-| `desk_lights_3` | Desk lights 3 | 23 | the blue ones (`led_blue`) | dark | the model's own glow |
-| `desk_lights_4` | Desk lights 4 | 24 | the amber ones (`led_amber`) | dark | 0.55 of the model's glow, so the many of them don't flare under the bloom |
+| `desk_lights_1` | Desk.Lights 1 | 21 | the red ones (`led_red`) | dark | the model's own glow |
+| `desk_lights_2` | Desk.Lights 2 | 22 | the green ones (`led_green`) | dark | the model's own glow |
+| `desk_lights_3` | Desk.Lights 3 | 23 | the blue ones (`led_blue`) | dark | the model's own glow |
+| `desk_lights_4` | Desk.Lights 4 | 24 | the amber ones (`led_amber`) | dark | 0.55 of the model's glow, so the many of them don't flare under the bloom |
 
 Each starts at 1, so the LEDs are lit until its [Mod](#jtunnel-mods) first moves. Each is
 a `channel` modifier on its material's `emissive_strength`, and the Glow and Master
@@ -82,7 +82,7 @@ display show the transport (`transport_lights.py`; the model's parts come from
 | Light | Channel | Lit |
 |---|---|---|
 | Four amber beat lights (`led_beat_1` to `4`) | `beat_1` to `beat_4`, "Beat 1" to "Beat 4" | the bar's current beat, while the transport plays; all dark while it is stopped |
-| The play light (`led_play`, `led_stop`) | `transport_playing`, "Transport playing" | green while the transport plays, red while it is stopped |
+| The play light (`led_play`, `led_stop`) | `transport_playing`, "Transport.Playing" | green while the transport plays, red while it is stopped |
 
 The channels read JTunnel's `clock` key (`beat`, `playing`), and the Glow and Master
 switches put the lights out as they do every LED. A channel counts an input only once it
@@ -167,7 +167,7 @@ builds the CCs straight onto the lights, as a JStream without channels gets.
 With channels, every control a person plays is also a JTunnel modulation param: a channel
 reads its Mod (the sender's `params` key, `values.N` for Mod N+1) as one more input, and
 JStream names the Mod after the channel (ADR-0181), so the JTunnel plugin in Bitwig lists
-"Master power", "Warp" and so on. Map a knob, a fader or automation to the Mod in Bitwig.
+"Power.Master", "Ship.Warp" and so on. Map a knob, a fader or automation to the Mod in Bitwig.
 They read from `MOD_INPUT` (default `DAW_INPUT`; unset, any sender), the JTunnel sender to accept
 with "Use this sender's state" on, and `MODS=0` leaves them out. Each Mod only takes over
 once it first moves, and whichever input moved last wins, so the CCs, the keys and the

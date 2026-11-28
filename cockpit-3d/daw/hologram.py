@@ -159,9 +159,9 @@ PANEL_DOWN, BEAM_DOWN = 450, 750
 def _sequences(scene, holo_inputs=()):
     """The show and hide sequences with lanes, the `holo` switch that starts them (with
     `holo_inputs`, its inputs), and the keys that set it."""
-    chans = [{"channel_id": "holo", "name": "Hologram", "default": 0.0, "inputs": list(holo_inputs)},
-             {"channel_id": "holo_beam", "name": "Hologram beam"},
-             {"channel_id": "holo_panel", "name": "Hologram panel"}]
+    chans = [{"channel_id": "holo", "name": "Hologram.On", "default": 0.0, "inputs": list(holo_inputs)},
+             {"channel_id": "holo_beam", "name": "Hologram.Beam"},
+             {"channel_id": "holo_panel", "name": "Hologram.Panel"}]
     show = _timeline(SHOW, "Hologram on", [(0, "item.show", FLARE), (0, "item.show", BEAM),
                                            (PANEL_FROM, "item.show", CARD),
                                            (PANEL_FROM, "item.show", HAZE)] + _lit(0, "show"))

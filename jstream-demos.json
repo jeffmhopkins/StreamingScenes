@@ -33231,7 +33231,7 @@
   "channels": [
     {
       "channel_id": "beat_1",
-      "name": "Beat 1",
+      "name": "Transport.Beat 1",
       "default": 0.0,
       "inputs": [
         {
@@ -33283,7 +33283,7 @@
     },
     {
       "channel_id": "beat_2",
-      "name": "Beat 2",
+      "name": "Transport.Beat 2",
       "default": 0.0,
       "inputs": [
         {
@@ -33335,7 +33335,7 @@
     },
     {
       "channel_id": "beat_3",
-      "name": "Beat 3",
+      "name": "Transport.Beat 3",
       "default": 0.0,
       "inputs": [
         {
@@ -33387,7 +33387,7 @@
     },
     {
       "channel_id": "beat_4",
-      "name": "Beat 4",
+      "name": "Transport.Beat 4",
       "default": 0.0,
       "inputs": [
         {
@@ -33439,7 +33439,7 @@
     },
     {
       "channel_id": "desk_lights_1",
-      "name": "Desk lights 1",
+      "name": "Desk.Lights 1",
       "default": 1.0,
       "inputs": [
         {
@@ -33465,7 +33465,7 @@
     },
     {
       "channel_id": "desk_lights_2",
-      "name": "Desk lights 2",
+      "name": "Desk.Lights 2",
       "default": 1.0,
       "inputs": [
         {
@@ -33491,7 +33491,7 @@
     },
     {
       "channel_id": "desk_lights_3",
-      "name": "Desk lights 3",
+      "name": "Desk.Lights 3",
       "default": 1.0,
       "inputs": [
         {
@@ -33517,7 +33517,7 @@
     },
     {
       "channel_id": "desk_lights_4",
-      "name": "Desk lights 4",
+      "name": "Desk.Lights 4",
       "default": 1.0,
       "inputs": [
         {
@@ -33543,7 +33543,7 @@
     },
     {
       "channel_id": "drift_pitch",
-      "name": "Drift pitch",
+      "name": "Ship.Drift.Pitch",
       "default": 0.5,
       "combine": "latest",
       "average_ms": 0,
@@ -33554,7 +33554,7 @@
     },
     {
       "channel_id": "drift_roll",
-      "name": "Drift roll",
+      "name": "Ship.Drift.Roll",
       "default": 0.5,
       "combine": "latest",
       "average_ms": 0,
@@ -33565,7 +33565,7 @@
     },
     {
       "channel_id": "drift_yaw",
-      "name": "Drift yaw",
+      "name": "Ship.Drift.Yaw",
       "default": 0.5,
       "combine": "latest",
       "average_ms": 0,
@@ -33587,7 +33587,7 @@
     },
     {
       "channel_id": "holo",
-      "name": "Hologram",
+      "name": "Hologram.On",
       "default": 0.0,
       "inputs": [
         {
@@ -33613,7 +33613,7 @@
     },
     {
       "channel_id": "holo_beam",
-      "name": "Hologram beam",
+      "name": "Hologram.Beam",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -33624,7 +33624,7 @@
     },
     {
       "channel_id": "holo_panel",
-      "name": "Hologram panel",
+      "name": "Hologram.Panel",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -33635,7 +33635,7 @@
     },
     {
       "channel_id": "power_cabin",
-      "name": "Cabin power",
+      "name": "Power.Cabin",
       "default": 1.0,
       "inputs": [
         {
@@ -33671,7 +33671,7 @@
     },
     {
       "channel_id": "power_desk",
-      "name": "Desk power",
+      "name": "Power.Desk",
       "default": 1.0,
       "inputs": [
         {
@@ -33707,7 +33707,7 @@
     },
     {
       "channel_id": "power_glow",
-      "name": "Glow power",
+      "name": "Power.Glow",
       "default": 1.0,
       "inputs": [
         {
@@ -33743,7 +33743,7 @@
     },
     {
       "channel_id": "power_master",
-      "name": "Master power",
+      "name": "Power.Master",
       "default": 1.0,
       "inputs": [
         {
@@ -33779,7 +33779,7 @@
     },
     {
       "channel_id": "power_screens",
-      "name": "Screens power",
+      "name": "Power.Screens",
       "default": 1.0,
       "inputs": [
         {
@@ -33815,7 +33815,7 @@
     },
     {
       "channel_id": "screen_center",
-      "name": "Screen center",
+      "name": "Screens.Center",
       "default": 1.0,
       "inputs": [
         {
@@ -33849,7 +33849,7 @@
     },
     {
       "channel_id": "screen_clocks",
-      "name": "Screen clocks",
+      "name": "Screens.Clocks",
       "default": 1.0,
       "inputs": [
         {
@@ -33870,7 +33870,7 @@
     },
     {
       "channel_id": "screen_desk",
-      "name": "Screen desk",
+      "name": "Screens.Desk",
       "default": 1.0,
       "inputs": [
         {
@@ -33904,7 +33904,7 @@
     },
     {
       "channel_id": "screen_left",
-      "name": "Screen left",
+      "name": "Screens.Left",
       "default": 1.0,
       "inputs": [
         {
@@ -33938,7 +33938,7 @@
     },
     {
       "channel_id": "screen_ovl",
-      "name": "Screen ovl",
+      "name": "Screens.Ovl",
       "default": 1.0,
       "inputs": [
         {
@@ -33972,7 +33972,7 @@
     },
     {
       "channel_id": "screen_ovr",
-      "name": "Screen ovr",
+      "name": "Screens.Ovr",
       "default": 1.0,
       "inputs": [
         {
@@ -34006,7 +34006,7 @@
     },
     {
       "channel_id": "screen_panels",
-      "name": "Screen panels",
+      "name": "Screens.Panels",
       "default": 1.0,
       "inputs": [
         {
@@ -34040,7 +34040,7 @@
     },
     {
       "channel_id": "screen_right",
-      "name": "Screen right",
+      "name": "Screens.Right",
       "default": 1.0,
       "inputs": [
         {
@@ -34074,7 +34074,7 @@
     },
     {
       "channel_id": "screen_side_l",
-      "name": "Screen side l",
+      "name": "Screens.Side l",
       "default": 1.0,
       "inputs": [
         {
@@ -34108,7 +34108,7 @@
     },
     {
       "channel_id": "screen_side_r",
-      "name": "Screen side r",
+      "name": "Screens.Side r",
       "default": 1.0,
       "inputs": [
         {
@@ -34142,7 +34142,7 @@
     },
     {
       "channel_id": "ship_pitch",
-      "name": "Ship pitch",
+      "name": "Ship.Pitch",
       "default": 0.0,
       "inputs": [
         {
@@ -34178,7 +34178,7 @@
     },
     {
       "channel_id": "ship_roll",
-      "name": "Ship roll",
+      "name": "Ship.Roll",
       "default": 0.0,
       "inputs": [
         {
@@ -34214,7 +34214,7 @@
     },
     {
       "channel_id": "ship_yaw",
-      "name": "Ship heading",
+      "name": "Ship.Heading",
       "default": 0.0,
       "inputs": [
         {
@@ -34250,7 +34250,7 @@
     },
     {
       "channel_id": "src_center_arrange",
-      "name": "Centre monitor: Arrangement",
+      "name": "Centre monitor.Arrangement",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34261,7 +34261,7 @@
     },
     {
       "channel_id": "src_center_device",
-      "name": "Centre monitor: Device",
+      "name": "Centre monitor.Device",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34272,7 +34272,7 @@
     },
     {
       "channel_id": "src_center_feed",
-      "name": "Centre monitor: Camera feed",
+      "name": "Centre monitor.Camera feed",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34283,7 +34283,7 @@
     },
     {
       "channel_id": "src_center_mixer",
-      "name": "Centre monitor: Mixer",
+      "name": "Centre monitor.Mixer",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34294,7 +34294,7 @@
     },
     {
       "channel_id": "src_center_transport",
-      "name": "Centre monitor: Transport",
+      "name": "Centre monitor.Transport",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34305,7 +34305,7 @@
     },
     {
       "channel_id": "src_desk_feed",
-      "name": "Desk: Camera feed",
+      "name": "Desk.Camera feed",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34316,7 +34316,7 @@
     },
     {
       "channel_id": "src_desk_grid",
-      "name": "Desk: Pads",
+      "name": "Desk.Pads",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34327,7 +34327,7 @@
     },
     {
       "channel_id": "src_holo_arrange",
-      "name": "Hologram: Arrangement",
+      "name": "Hologram.Arrangement",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34338,7 +34338,7 @@
     },
     {
       "channel_id": "src_holo_device",
-      "name": "Hologram: Device",
+      "name": "Hologram.Device",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34349,7 +34349,7 @@
     },
     {
       "channel_id": "src_holo_feed",
-      "name": "Hologram: Camera feed",
+      "name": "Hologram.Camera feed",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34360,7 +34360,7 @@
     },
     {
       "channel_id": "src_holo_mixer",
-      "name": "Hologram: Mixer",
+      "name": "Hologram.Mixer",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34371,7 +34371,7 @@
     },
     {
       "channel_id": "src_holo_transport",
-      "name": "Hologram: Transport",
+      "name": "Hologram.Transport",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34382,7 +34382,7 @@
     },
     {
       "channel_id": "src_left_arrange",
-      "name": "Left monitor: Arrangement",
+      "name": "Left monitor.Arrangement",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34393,7 +34393,7 @@
     },
     {
       "channel_id": "src_left_device",
-      "name": "Left monitor: Device",
+      "name": "Left monitor.Device",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34404,7 +34404,7 @@
     },
     {
       "channel_id": "src_left_feed",
-      "name": "Left monitor: Camera feed",
+      "name": "Left monitor.Camera feed",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34415,7 +34415,7 @@
     },
     {
       "channel_id": "src_left_mixer",
-      "name": "Left monitor: Mixer",
+      "name": "Left monitor.Mixer",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34426,7 +34426,7 @@
     },
     {
       "channel_id": "src_left_notes",
-      "name": "Left monitor: Notes",
+      "name": "Left monitor.Notes",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34437,7 +34437,7 @@
     },
     {
       "channel_id": "src_right_arrange",
-      "name": "Right monitor: Arrangement",
+      "name": "Right monitor.Arrangement",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34448,7 +34448,7 @@
     },
     {
       "channel_id": "src_right_device",
-      "name": "Right monitor: Device",
+      "name": "Right monitor.Device",
       "default": 1.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34459,7 +34459,7 @@
     },
     {
       "channel_id": "src_right_feed",
-      "name": "Right monitor: Camera feed",
+      "name": "Right monitor.Camera feed",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34470,7 +34470,7 @@
     },
     {
       "channel_id": "src_right_mixer",
-      "name": "Right monitor: Mixer",
+      "name": "Right monitor.Mixer",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34481,7 +34481,7 @@
     },
     {
       "channel_id": "src_right_transport",
-      "name": "Right monitor: Transport",
+      "name": "Right monitor.Transport",
       "default": 0.0,
       "combine": "latest",
       "average_ms": 0,
@@ -34492,7 +34492,7 @@
     },
     {
       "channel_id": "stopwatch_reset",
-      "name": "Stopwatch reset",
+      "name": "Transport.Stopwatch reset",
       "default": 0.0,
       "inputs": [
         {
@@ -34518,7 +34518,7 @@
     },
     {
       "channel_id": "transport_playing",
-      "name": "Transport playing",
+      "name": "Transport.Playing",
       "default": 0.0,
       "inputs": [
         {
@@ -34557,7 +34557,7 @@
     },
     {
       "channel_id": "warp",
-      "name": "Warp",
+      "name": "Ship.Warp",
       "default": 0.0,
       "inputs": [
         {

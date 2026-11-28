@@ -36,7 +36,7 @@ channel 16, from whichever JTunnel sender is live:
 - the light switches (CCs 40 to 44) and the ship (CCs 30 to 33)
 - the camera CCs 20 to 29, which also give each view its depth of field and autofocus
 - notes from 36 up that switch the views and play the cockpit's sequences
-- the JTunnel Mods, among them Desk lights 1 to 4 (Mods 21 to 24), the cockpit's LEDs in four groups
+- the JTunnel Mods, among them `Desk.Lights 1` to `4` (Mods 21 to 24), the cockpit's LEDs in four groups
 
 See [its README](cockpit-3d/daw/README.md#what-follows-the-data). The tour's MIDI pads
 (notes 36 to 39) listen on channel 1, so they don't answer those notes.
