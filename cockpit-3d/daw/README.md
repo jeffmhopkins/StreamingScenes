@@ -27,6 +27,7 @@ scene follows a real Bitwig with the JTunnel plugin.
 | `build_daw.py` | Builds the scene over MCP: the screens atlas, the cockpit, its lights, the channels the switches and the warp are, the data modifiers, reflections and filters. The screens' pages go in inline, so nothing serves them. |
 | `glow.py` | Places a card over any rectangle of the screens atlas, from the screens' corners in the model's README. `build_daw.py` lays a glowing card over each page and grid with it. |
 | `serve_pages.py` | Serves `pages/` with threads and a deep accept queue, for `PAGES=…` while editing a page: `python -m http.server` queues only 5 connections, and the seven screens load at once. |
+| `stress.py` | A heavy, fast-changing Bitwig session over JTunnel, to load-test JStream and the pages: it stands in for the JTunnel plugin on its port and sends a 32 × 32 grid with every slot changing, every meter and note, Mods 1 to 25 moving every tick, tempo sweeps, stops and loop jumps, and an audio stream with dense MIDI. See [Stress test](#stress-test). |
 | `render_daw.py` | Renders on the held clock: each frame sends the session's state, steps the clock, sets the camera by the song's section and snapshots. |
 
 ## What follows the data
@@ -507,6 +508,42 @@ then sinks the beam by 750 ms, and its cues hide the cards when each is gone.
 python3 hologram.py add          # into an existing `cockpit` scene (build_daw.py's)
 python3 hologram.py show         # or hide, source <id>, standin
 ```
+
+## Stress test
+
+`stress.py` checks that JStream and the pages keep up with far more JTunnel data than a
+normal session sends. It stands in for the JTunnel plugin (and the Bitwig extension behind it) on
+127.0.0.1:47251, so JStream receives it with no change. Close Bitwig first, or take
+JTunnel off its track, since only one program can hold the port. Then run:
+
+    python stress.py              # a very heavy session at the extension's 30 ticks a second
+    python stress.py --level 2    # twice that
+    python stress.py --level 4    # far past anything Bitwig sends
+
+What it sends:
+- a 32 × 32 clip grid, every slot changing state every 0.5 to 2 s
+- 8 tracks (`--automated`) whose volume and pan move every tick, so their whole `track/N` key goes each tick
+- every meter, and up to 6 notes held on each track
+- the device's controls, the mixer, the markers, scene launches and track selections
+- tempo sweeps from 90 to 150 BPM, a transport stop every 45 s, and a loop jump back every 20 s
+- the 32 modulation params, with Mods 1 to 25 moving every tick (`--mods 0` holds them, so the cockpit's warp and ship stay still)
+- a 24-bit PCM stream carrying about 200 notes a second (`--audio midi` sends MIDI only, `--audio none` sends no audio stream)
+
+It follows the plugin's state wire: what changed goes at once, and the whole state goes
+again about once a second, a slice at a time, with each message's ID repeated. Every 5 s
+it prints what it sent and how far it fell behind its own schedule. That way a slow
+sender isn't mistaken for a slow receiver.
+
+What to watch while it runs:
+- JStream's `profile.get`: each page's paints a second, the program's fps, p95 and
+  over-budget frames, and under `network` the input's `concealed` and `late` frames and
+  `state_dropped`
+- the CPU of the CEF processes (`jstream-browser-helper`)
+
+A page's `?debug=1` prints its frames, draws and updates a second.
+
+JStream before #1839 lost packets under this load, even at level 1. The OS drops a datagram
+when the receive socket's buffer is full, and nothing counts it.
 
 ## Running it
 
