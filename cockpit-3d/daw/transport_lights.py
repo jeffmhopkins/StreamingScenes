@@ -5,7 +5,7 @@ stopwatch under the right monitor (the model's parts from ../tools/add_transport
   beat lit while the transport plays, each on its channel `beat_1` to `beat_4` ("Beat 1"
   to "Beat 4"), which read JTunnel's `clock` key;
 - the play light, green while the transport plays and red while it is stopped, on the
-  channel `transport_playing` ("Transport playing");
+  channel `transport_playing` ("Transport.Playing");
 - a seven-segment display on the left wing's readout: the position as bar.beat.sixteenth
   over the tempo (the DAW page's `clocks` view, left half);
 - a seven-segment stopwatch on the right wing's readout, under the right monitor: the
@@ -63,7 +63,7 @@ def channels(src=None, mod_inputs=lambda n: []):
     # before its beat, a step down just after it, and whether the transport plays.
     for n in range(1, 5):
         out.append({"type": "channel.set", "channel": {
-            "channel_id": f"beat_{n}", "name": f"Beat {n}", "default": 0.0, "combine": "product",
+            "channel_id": f"beat_{n}", "name": f"Transport.Beat {n}", "default": 0.0, "combine": "product",
             "inputs": [clock("beat", (n - 0.5, n), 0.0, 1.0), clock("beat", (n, n + 0.5), 1.0, 0.0),
                        dict(playing)]}})
     # The play light: `playing`, and the beat's phase moving. An input takes part once its
@@ -73,10 +73,10 @@ def channels(src=None, mod_inputs=lambda n: []):
     # green while the transport runs even if it was already running when the channel
     # began, before `playing` first moved; a stop moves `playing` to 0, and it wins.
     out.append({"type": "channel.set", "channel": {
-        "channel_id": "transport_playing", "name": "Transport playing", "default": 0.0,
+        "channel_id": "transport_playing", "name": "Transport.Playing", "default": 0.0,
         "inputs": [playing, clock("beatPhase", (0.0, 1.0), 1.0, 1.0)]}})
     out.append({"type": "channel.set", "channel": {
-        "channel_id": "stopwatch_reset", "name": "Stopwatch reset", "default": 0.0,
+        "channel_id": "stopwatch_reset", "name": "Transport.Stopwatch reset", "default": 0.0,
         "inputs": mod_inputs(STOPWATCH_MOD)}})
     return out
 
@@ -111,7 +111,7 @@ def reset_sequence(scene="cockpit"):
     hotkey, Ctrl+Alt+R. The page resets as the value turns true."""
     cue = lambda at, v: {"at_ms": at, "action": {"type": "values.set", "name": STOPWATCH_VALUE, "value": v}}
     return [{"type": "timeline.set", "scene_id": scene, "timeline": {
-        "timeline_id": "stopwatch_reset", "name": "Stopwatch reset", "duration_ms": RESET_MS,
+        "timeline_id": "stopwatch_reset", "name": "Transport.Stopwatch reset", "duration_ms": RESET_MS,
         "lanes": [], "cues": [cue(0, True), cue(RESET_MS, False)]}},
             {"type": "hotkey.set", "chord": "Ctrl+Alt+" + RESET_KEY,
              "action": {"type": "timeline.play", "timeline_id": "stopwatch_reset"}}]
@@ -167,7 +167,7 @@ def _main():
                  "curve": "linear", "from": 0.0, "to": 1.0}]
 
     step(channels(src or None, mods) + [{"type": "channel.set", "channel": {
-        "channel_id": "screen_clocks", "name": "Screen clocks", "default": 1.0,
+        "channel_id": "screen_clocks", "name": "Screens.Clocks", "default": 1.0,
         "inputs": [{"kind": "channel", "channel_id": "power_screens", "smoothing_ms": 0,
                     "curve": "linear", "from": 0.0, "to": 1.0}]}}],
          "the beat, play, stopwatch and clocks-screen channels")

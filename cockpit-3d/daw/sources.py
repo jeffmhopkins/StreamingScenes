@@ -141,7 +141,7 @@ def edits(hologram=True, gates=(), unlit_gates=()):
         for slot, sname, source in slots(screen):
             ch = channel(screen, slot)
             e += [{"type": "channel.set", "channel": {
-                      "channel_id": ch, "name": f"{name}: {sname}",
+                      "channel_id": ch, "name": f"{name}.{sname}",
                       "default": 1.0 if slot == start else 0.0}},
                   {"type": "item.add", "scene_id": sid, "item_id": ch,
                    "source_id": source or FEED[screen],
@@ -238,7 +238,7 @@ def desk_edits(layers):
     for slot, name, _ in DESK_SLOTS:
         ch = channel("desk", slot)
         e.append({"type": "channel.set", "channel": {
-            "channel_id": ch, "name": f"Desk: {name}", "default": 1.0 if slot == "grid" else 0.0}})
+            "channel_id": ch, "name": f"Desk.{name}", "default": 1.0 if slot == "grid" else 0.0}})
         if slot == "feed":
             placed = [(ch, "desk_feed", dx, dy, dw, dh, [], "fill")]
         else:

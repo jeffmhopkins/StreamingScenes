@@ -12,7 +12,7 @@ screen and many of its lights following a Bitwig session that arrives as JTunnel
   transport plays and down through the break, and the sky brighter while a chorus clip
   plays (and, with GLOW=0, a light a track over its meter and the screens' glow on the
   beat).
-- The model's small LEDs are four groups by colour, each a channel, `Desk lights 1` to
+- The model's small LEDs are four groups by colour, each a channel, `Desk.Lights 1` to
   `4`, that a JTunnel Mod drives, under the Glow and Master switches (desk_lights.py).
 - Reflection probes make the cabin's surfaces reflect the screens and lights.
 
@@ -217,7 +217,7 @@ if CHANNELS:
     # The CC's travel as the channel's value: up is off with SWITCH_UP=off. The input only
     # counts once the CC first moves, so the lights start on.
     up, down = (0.0, 1.0) if SWITCH_UP == "off" else (1.0, 0.0)
-    chans = [{"channel_id": "power_" + g, "name": f"{g.title()} power", "default": 1.0,
+    chans = [{"channel_id": "power_" + g, "name": f"Power.{g.title()}", "default": 1.0,
               "inputs": ([cc_input(SWITCH_CC[g], down, up, SWITCH_FADE_MS)] if SWITCHES else [])
               + mod_inputs("power_" + g, SWITCH_FADE_MS)}
              for g in GROUPS + ["master"]]
@@ -329,7 +329,7 @@ if CHANNELS or SWITCHES:
 must(batch(ed, "atlas"), "atlas")
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
-        "channel_id": "screen_" + cell, "name": f"Screen {cell.replace('_', ' ')}", "default": 1.0,
+        "channel_id": "screen_" + cell, "name": f"Screens.{cell.replace('_', ' ').capitalize()}", "default": 1.0,
         "inputs": [{"kind": "channel", "channel_id": "power_screens", "smoothing_ms": 0,
                     "curve": "linear", "from": 0.0, "to": 1.0}] + mod_inputs("screen_" + cell)}}
         for cell, *_ in SCREEN_CELLS]
@@ -419,9 +419,9 @@ def light(lid, name, settings, at, aim=None, size=60, scene="cockpit"):
 # The sky follows its item's tilt and rotation with a JStream from ADR-0182 on; an older
 # one turns it on the heading only.
 RIG_AT = p(0, 1.2, 0)
-RIG = [("ship_roll", "Ship roll", {"rotation_deg": -SHIP_ROLL}),
-       ("ship_pitch", "Ship pitch", {"tilt_deg": SHIP_PITCH}),
-       ("ship_yaw", "Ship heading", {"turn_deg": SHIP_YAW})]
+RIG = [("ship_roll", "Ship.Roll", {"rotation_deg": -SHIP_ROLL}),
+       ("ship_pitch", "Ship.Pitch", {"tilt_deg": SHIP_PITCH}),
+       ("ship_yaw", "Ship.Heading", {"turn_deg": SHIP_YAW})]
 SHIP = RIG[-1][0]
 
 
@@ -549,7 +549,7 @@ def cc(mid, prop, controller, frm, to, **kw):
 if CHANNELS:
     # The warp is a channel the CC is one input of, so a sequence can jump to warp too.
     must(op({"type": "channel.set", "channel": {
-        "channel_id": "warp", "name": "Warp", "default": 0.0,
+        "channel_id": "warp", "name": "Ship.Warp", "default": 0.0,
         "inputs": [cc_input(SHIP_CC_WARP, 0.0, 1.0, SHIP_CC_SMOOTHING_MS,
                             channel=SHIP_CC_CHANNEL, sender=SHIP_CC_INPUT)]
         + mod_inputs("warp", SHIP_CC_SMOOTHING_MS)}}), "warp channel")
@@ -558,9 +558,9 @@ if CHANNELS:
         # Dark at rest, full at full warp: it swells as the warp builds.
         motion["l_warp"] = [follow("warp", "opacity", "warp", -1.0, 0.0)]
     # The heading, pitch and roll too: a whole turn over the channel's 0 to 1, from rest.
-    ship = [("ship_yaw", "Ship heading", SHIP_CC_YAW, "turn", -360.0),
-            ("ship_pitch", "Ship pitch", SHIP_CC_PITCH, "tilt", 360.0),
-            ("ship_roll", "Ship roll", SHIP_CC_ROLL, "rotation", -360.0)]
+    ship = [("ship_yaw", "Ship.Heading", SHIP_CC_YAW, "turn", -360.0),
+            ("ship_pitch", "Ship.Pitch", SHIP_CC_PITCH, "tilt", 360.0),
+            ("ship_roll", "Ship.Roll", SHIP_CC_ROLL, "rotation", -360.0)]
     must(batch([{"type": "channel.set", "channel": {
         "channel_id": cid, "name": name, "default": 0.0,
         "inputs": [cc_input(ccn, 0.0, 1.0, SHIP_CC_SMOOTHING_MS, channel=SHIP_CC_CHANNEL,
@@ -573,7 +573,7 @@ if CHANNELS:
     # at 1, none at the channel's default of a half. So the ship drifts around wherever it
     # points, and the CCs still turn it while it does.
     must(batch([{"type": "channel.set", "channel": {
-        "channel_id": f"drift_{a}", "name": f"Drift {a}", "default": 0.5}} for a in DRIFT_DEG],
+        "channel_id": f"drift_{a}", "name": f"Ship.Drift.{a.capitalize()}", "default": 0.5}} for a in DRIFT_DEG],
         "drift channels"), "drift channels")
     for cid, _, _, prop, turn in ship:
         a = cid[5:]
@@ -588,7 +588,7 @@ if not CHANNELS:
     motion["ship_pitch"] = [cc("pitch", "tilt", SHIP_CC_PITCH, 0.0, 360.0)]
     motion["ship_roll"] = [cc("roll", "rotation", SHIP_CC_ROLL, 0.0, -360.0)]
 # The model's small LEDs are four groups by colour, red, green, blue and amber, each on a
-# channel, `Desk lights 1` to `4`, that JTunnel Mods 21 to 24 drive (desk_lights.py); the
+# channel, `Desk.Lights 1` to `4`, that JTunnel Mods 21 to 24 drive (desk_lights.py); the
 # light strips and the orange accents glow steadily. They follow nothing in the band.
 if CHANNELS:
     must(batch(desk_lights.channels(lambda n: mod_inputs(f"desk_lights_{n - 20}")), "desk lights"),
