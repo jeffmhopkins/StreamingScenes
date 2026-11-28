@@ -1,14 +1,14 @@
 {
-  "exported": "2026-11-26T21:34:00-05:00",
+  "exported": "2026-11-27T08:04:24-05:00",
   "zone": "America/New_York",
   "collection_file": "C:\\ai\\scenes\\cockpit\\jstream-demos.json",
   "collection_asset_root": "C:\\ai\\scenes\\cockpit",
   "original_model_folder": "C:\\ai\\scenes\\cockpit\\spaceship",
-  "rev": 1457,
+  "rev": 1491,
   "show_id": "kr417_warp_show",
   "scene_id": "ship_warp_show",
   "timeline_id": "ws_show",
-  "note": "Read-only live export. Absolute Windows asset paths were rewritten to {SCENES}/kr417-ship/models/<file>. Replace {SCENES} with the StreamingScenes checkout (or copy models into the collection asset root and restore collection-relative paths). Runtime channel values and show clock were not included. Temporary diagnostic scenes and sources were not present in the live collection and were not exported.",
+  "note": "Read-only live export originally taken at rev 1457 on 2026-11-26. Model paths and files were updated to the plain *_nodiamond.glb plumes and RCS jets that the live collection uses at rev 1491 (Friday 27 Nov 2026, America/New_York). The object graph (sources, channels, scene, show, timeline) is still the rev 1457 export; only the glb filenames changed. The _occ hull-copy workaround has been retired: those files z-fight under shared scene depth (JStream #1836). The nodiamond glbs clamp tip UVs so the plume texture does not wrap into a detached nozzle-coloured diamond, and the BoundsMarker mesh is fully transparent. Absolute Windows asset paths remain rewritten to {SCENES}/kr417-ship/models/<file>. Replace {SCENES} with the StreamingScenes checkout (or copy models into the collection asset root and restore collection-relative paths). Runtime channel values and show clock were not included. No device token or other secret is in this folder.",
   "sources": [
     "ws_sky_env",
     "ws_sun",
@@ -55,17 +55,18 @@
     "ws_yaw"
   ],
   "model_files": [
-    "plume_ion_occ.glb",
-    "plume_t025_occ.glb",
-    "plume_t050_occ.glb",
-    "plume_t075_occ.glb",
-    "plume_t100_occ.glb",
-    "rcs_pitch_neg_occ.glb",
-    "rcs_pitch_pos_occ.glb",
-    "rcs_roll_neg_occ.glb",
-    "rcs_roll_pos_occ.glb",
-    "rcs_yaw_neg_occ.glb",
-    "rcs_yaw_pos_occ.glb",
+    "plume_ion_nodiamond.glb",
+    "plume_t025_nodiamond.glb",
+    "plume_t050_nodiamond.glb",
+    "plume_t075_nodiamond.glb",
+    "plume_t100_nodiamond.glb",
+    "rcs_pitch_neg_nodiamond.glb",
+    "rcs_pitch_pos_nodiamond.glb",
+    "rcs_roll_neg_nodiamond.glb",
+    "rcs_roll_pos_nodiamond.glb",
+    "rcs_yaw_neg_nodiamond.glb",
+    "rcs_yaw_pos_nodiamond.glb",
     "spaceship_r15_ship_2k_d.glb"
-  ]
+  ],
+  "rev_exported": 1457
 }
