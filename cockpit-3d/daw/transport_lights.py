@@ -111,7 +111,7 @@ def reset_sequence(scene="cockpit"):
     hotkey, Ctrl+Alt+R. The page resets as the value turns true."""
     cue = lambda at, v: {"at_ms": at, "action": {"type": "values.set", "name": STOPWATCH_VALUE, "value": v}}
     return [{"type": "timeline.set", "scene_id": scene, "timeline": {
-        "timeline_id": "stopwatch_reset", "name": "Transport.Stopwatch reset", "duration_ms": RESET_MS,
+        "timeline_id": "stopwatch_reset", "name": "Stopwatch reset", "duration_ms": RESET_MS,
         "lanes": [], "cues": [cue(0, True), cue(RESET_MS, False)]}},
             {"type": "hotkey.set", "chord": "Ctrl+Alt+" + RESET_KEY,
              "action": {"type": "timeline.play", "timeline_id": "stopwatch_reset"}}]

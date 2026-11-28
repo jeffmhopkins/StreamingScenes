@@ -327,9 +327,14 @@ if CHANNELS or SWITCHES:
         ed += [cover("a_off", 0, 0, 1920, 1080)]
     ed += [cover("off_master", 0, 0, 1920, 1080)]
 must(batch(ed, "atlas"), "atlas")
+# Each monitor's channel by its place in the cockpit, grouped by JStream's Sequence panel.
+SCREEN_NAMES = {"center": "Screens.Center", "left": "Screens.Left", "right": "Screens.Right",
+                "ovl": "Screens.Overhead.Left", "ovr": "Screens.Overhead.Right",
+                "side_l": "Screens.Side.Left", "side_r": "Screens.Side.Right",
+                "desk": "Screens.Desk", "panels": "Screens.Console panels"}
 if CHANNELS:
     ch = [{"type": "channel.set", "channel": {
-        "channel_id": "screen_" + cell, "name": f"Screens.{cell.replace('_', ' ').capitalize()}", "default": 1.0,
+        "channel_id": "screen_" + cell, "name": SCREEN_NAMES.get(cell, f"Screens.{cell.capitalize()}"), "default": 1.0,
         "inputs": [{"kind": "channel", "channel_id": "power_screens", "smoothing_ms": 0,
                     "curve": "linear", "from": 0.0, "to": 1.0}] + mod_inputs("screen_" + cell)}}
         for cell, *_ in SCREEN_CELLS]
