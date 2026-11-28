@@ -38,7 +38,6 @@ scene follows a real Bitwig with the JTunnel plugin.
 | The seven screens | every key | browser sources with `page_api_data` |
 | The screens glowing | every key, through the atlas | the depth bloom at a low threshold (0.4); `GLOW_CARDS=1` also lays a lit, emissive card over each page (`glow.py`), which shows only once cards sort after the model (ADR-0107 decision 7 composites items by their centres' depth) |
 | The warp's glow: a blue-white light pouring in through the windshield as the warp builds, so a jump to warp lights the cabin even with every switch off | the `warp` channel (CC 30, Mod 6, the warp sequences) | a `channel` modifier on a directional light's opacity, dark at rest and full (`WARP_LIGHT`, 3.0) at full warp; no switch dims it. `WARP_LIGHT=0` leaves it out |
-| The cabin lights: up while the transport plays, down through the break | `transport.playing`, `track/5.stopped` | `data` modifiers, smoothed over 1.2 to 1.5 s |
 | The ship's warp drive and orientation: the sky streams past as the warp comes up, and the sky and the starlight turn around the cabin as the ship yaws, pitches and rolls | MIDI CCs from Bitwig on channel `SHIP_CC_CHANNEL` (16) from any input (`SHIP_CC_INPUT` names one): `SHIP_CC_WARP` (30) takes the warp from rest to full, and `SHIP_CC_YAW` (31), `SHIP_CC_PITCH` (32) and `SHIP_CC_ROLL` (33) each turn the ship a whole turn over the CC's travel (right, nose up, right wing down), all smoothed over `SHIP_CC_SMOOTHING_MS` (250). `WARP`, `SHIP_YAW`, `SHIP_PITCH` and `SHIP_ROLL` set where they rest. With a JStream that has ADR-0187, each jump to warp travels where the ship points: straight ahead from wherever the heading, pitch and roll have turned the sky, which swings at most `WARP_LOOK_DEG` (10) at warp; out of warp the sky stays where the jump left it and the controls turn it from there (`WARP_AIM=sky` keeps the older behaviour). On an older one, turning moves where the warp streams from, so hold the heading while at warp. The sky follows pitch and roll with a JStream that has ADR-0182; an older one turns it on the heading only | a `channel` modifier on the environment light's `warp` following the channel `warp`, which CC 30, [Mod](#jtunnel-mods) 6 and the [warp sequences](#cockpit-sequences) drive (a `midi` modifier on a JStream without channels), and `channel` modifiers on the `turn`, `tilt` and `rotation` of three nested 3D groups (the ship's rig, ADR-0164) that hold the sky and the starlight, following `ship_yaw`, `ship_pitch` and `ship_roll`, which CCs 31 to 33 and [Mods](#jtunnel-mods) 8 to 10 drive (`midi` modifiers without channels) |
 | The sky's light, brighter while a chorus plays | `track/0.slots.2.state`, `slots.5.state` | `data` modifier on the environment light's `intensity` |
 
@@ -113,6 +112,11 @@ names the model's item if it isn't `model`; `PAGES` and `DAW_INPUT` as for `buil
 Run again, it replaces what it added before.
 
 ## Light switches
+
+The cabin lights (the overhead cabin light, the ambient fill and the starlight) follow
+nothing in the band, so the cabin stays lit with the song stopped or no DAW sending. Only
+the Cabin and Master switches dim them: with channels, the `power_cabin` and
+`power_master` channels, which [JTunnel Mods](#jtunnel-mods) 2 and 1 drive.
 
 Five MIDI CCs switch the cockpit's lights in groups, each fading over `SWITCH_FADE_MS`
 (2000 ms, a one-pole fade: about two thirds of the way in that time). They come on
