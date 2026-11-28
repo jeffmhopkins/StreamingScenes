@@ -33938,7 +33938,7 @@
     },
     {
       "channel_id": "screen_ovl",
-      "name": "Screens.Ovl",
+      "name": "Screens.Overhead.Left",
       "default": 1.0,
       "inputs": [
         {
@@ -33972,7 +33972,7 @@
     },
     {
       "channel_id": "screen_ovr",
-      "name": "Screens.Ovr",
+      "name": "Screens.Overhead.Right",
       "default": 1.0,
       "inputs": [
         {
@@ -34006,7 +34006,7 @@
     },
     {
       "channel_id": "screen_panels",
-      "name": "Screens.Panels",
+      "name": "Screens.Console panels",
       "default": 1.0,
       "inputs": [
         {
@@ -34074,7 +34074,7 @@
     },
     {
       "channel_id": "screen_side_l",
-      "name": "Screens.Side l",
+      "name": "Screens.Side.Left",
       "default": 1.0,
       "inputs": [
         {
@@ -34108,7 +34108,7 @@
     },
     {
       "channel_id": "screen_side_r",
-      "name": "Screens.Side r",
+      "name": "Screens.Side.Right",
       "default": 1.0,
       "inputs": [
         {
