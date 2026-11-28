@@ -115,7 +115,8 @@ Run again, it replaces what it added before.
 
 The cabin lights (the overhead cabin light, the ambient fill and the starlight) follow
 nothing in the band, so the cabin stays lit with the song stopped or no DAW sending. Only
-the Cabin and Master switches dim them.
+the Cabin and Master switches dim them: with channels, the `power_cabin` and
+`power_master` channels, which [JTunnel Mods](#jtunnel-mods) 2 and 1 drive.
 
 Five MIDI CCs switch the cockpit's lights in groups, each fading over `SWITCH_FADE_MS`
 (2000 ms, a one-pole fade: about two thirds of the way in that time). They come on
