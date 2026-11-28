@@ -23,6 +23,9 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.join(HERE, "arrivals")
 SCENE = "arrivals"
+# The engine sizes a picture by its item's width over the program canvas's width, which
+# build_daw.py sets to 1920 x 1080. A project given another canvas width scales every
+# arrival by 1920 over it: change these to match.
 CANVAS_W, CANVAS_H = 1920, 1080
 SKY_DEG = 100.0
 # Each picture's width across the sky, in degrees (its item's width is this / SKY_DEG of
@@ -63,6 +66,7 @@ def _png_size(path):
 
 
 def _image(sid, name, path):
+    # mcp.asset() builds the same; importing mcp needs a token, and this stays importable without one.
     return {"type": "source.create", "source_id": sid, "name": name,
             "kind": {"type": "builtin", "kind": "image"},
             "settings": {"file": {"type": "asset", "root": "absolute", "path": path}}}
